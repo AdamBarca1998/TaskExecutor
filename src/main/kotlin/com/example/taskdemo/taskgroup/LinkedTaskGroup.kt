@@ -1,6 +1,7 @@
-package com.example.taskdemo.model
+package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.interfaces.TaskGroup
+import com.example.taskdemo.model.Task
 import java.time.ZonedDateTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

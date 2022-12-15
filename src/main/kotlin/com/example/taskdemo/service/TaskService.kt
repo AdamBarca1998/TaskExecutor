@@ -1,9 +1,9 @@
 package com.example.taskdemo.service
 
-import com.example.taskdemo.model.BasicTaskGroup
-import com.example.taskdemo.model.LinkedTaskGroup
-import com.example.taskdemo.model.PriorityTaskGroup
 import com.example.taskdemo.model.Task
+import com.example.taskdemo.taskgroup.BasicTaskGroup
+import com.example.taskdemo.taskgroup.LinkedTaskGroup
+import com.example.taskdemo.taskgroup.PriorityTaskGroup
 import org.springframework.stereotype.Service
 
 
