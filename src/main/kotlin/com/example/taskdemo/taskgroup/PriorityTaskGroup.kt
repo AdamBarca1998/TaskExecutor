@@ -1,7 +1,7 @@
 package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.interfaces.TaskGroup
-import com.example.taskdemo.model.Task
+import com.example.taskdemo.model.TaskImpl
 import java.time.ZonedDateTime
 import java.util.concurrent.PriorityBlockingQueue
 import kotlinx.coroutines.CoroutineScope
@@ -12,17 +12,17 @@ import kotlinx.coroutines.launch
 class PriorityTaskGroup : TaskGroup {
 
     private val scope = CoroutineScope(Dispatchers.Default)
-    private val priorityQueue = PriorityBlockingQueue<Task>()
+    private val priorityQueue = PriorityBlockingQueue<TaskImpl>()
 
     init {
         addAllAndRun(
             listOf(
-                Task("Task priority 5", ZonedDateTime.now(), priority = 5),
-                Task("Task priority 6", ZonedDateTime.now(), priority = 6),
-                Task("Task priority 3", ZonedDateTime.now(), priority = 3),
-                Task("Task priority -5", ZonedDateTime.now(), priority = -5),
-                Task("Task priority 2", ZonedDateTime.now(), priority = 2),
-                Task("Task priority 1", ZonedDateTime.now(), priority = 1),
+                TaskImpl("Task priority 5", ZonedDateTime.now(), priority = 5),
+                TaskImpl("Task priority 6", ZonedDateTime.now(), priority = 6),
+                TaskImpl("Task priority 3", ZonedDateTime.now(), priority = 3),
+                TaskImpl("Task priority -5", ZonedDateTime.now(), priority = -5),
+                TaskImpl("Task priority 2", ZonedDateTime.now(), priority = 2),
+                TaskImpl("Task priority 1", ZonedDateTime.now(), priority = 1),
             )
         )
     }
@@ -39,7 +39,7 @@ class PriorityTaskGroup : TaskGroup {
         }
     }
 
-    override fun addAllAndRun(tasks: List<Task>) {
+    override fun addAllAndRun(tasks: List<TaskImpl>) {
         priorityQueue.addAll(tasks)
     }
 }

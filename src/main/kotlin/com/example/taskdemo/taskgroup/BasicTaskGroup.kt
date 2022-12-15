@@ -5,7 +5,7 @@ import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
 import com.cronutils.model.field.expression.FieldExpressionFactory.every
 import com.example.taskdemo.interfaces.TaskGroup
-import com.example.taskdemo.model.Task
+import com.example.taskdemo.model.TaskImpl
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.CoroutineScope
@@ -26,17 +26,17 @@ class BasicTaskGroup : TaskGroup {
 
     init {
         addAllAndRun(listOf(
-            Task("Task 10 seconds", ZonedDateTime.now().plusSeconds(10)),
-            Task("Task 20 seconds Cron: 5s, 7s", ZonedDateTime.now().plusSeconds(20), cronList = listOf(cronEvery5s, cronEvery7s)),
-            Task("Task 30 seconds", ZonedDateTime.now().plusSeconds(30)),
+            TaskImpl("Task 10 seconds", ZonedDateTime.now().plusSeconds(10)),
+            TaskImpl("Task 20 seconds Cron: 5s, 7s", ZonedDateTime.now().plusSeconds(20), cronList = listOf(cronEvery5s, cronEvery7s)),
+            TaskImpl("Task 30 seconds", ZonedDateTime.now().plusSeconds(30)),
         ))
     }
 
-    override fun addAllAndRun(tasks: List<Task>) {
+    override fun addAllAndRun(tasks: List<TaskImpl>) {
         tasks.forEach { asyncRun(it) }
     }
 
-    private fun asyncRun(task: Task) {
+    private fun asyncRun(task: TaskImpl) {
         scope.launch {
             delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), task.startTime)) // start
 
