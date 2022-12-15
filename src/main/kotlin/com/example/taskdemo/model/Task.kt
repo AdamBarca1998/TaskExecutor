@@ -8,11 +8,10 @@ import java.time.ZonedDateTime
 data class Task(
     val name: String,
     val startTime: ZonedDateTime,
-    val taskGroup: TaskGroup,
     val priority: Int? = null,
     val cron: Cron? = null
 ) : Comparable<Task> {
-    fun doIt() {
+    fun run() {
         println("$name \t $priority \t ${ZonedDateTime.now()} \t ${getNextTime()}")
     }
 

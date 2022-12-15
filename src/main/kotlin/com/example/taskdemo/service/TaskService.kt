@@ -1,53 +1,28 @@
 package com.example.taskdemo.service
 
-import com.cronutils.builder.CronBuilder
-import com.cronutils.model.CronType
-import com.cronutils.model.definition.CronDefinitionBuilder
-import com.cronutils.model.field.expression.FieldExpressionFactory.every
-import com.example.taskdemo.executor.TaskExecutor
+import com.example.taskdemo.model.BasicTaskGroup
+import com.example.taskdemo.model.LinkedTaskGroup
+import com.example.taskdemo.model.PriorityTaskGroup
 import com.example.taskdemo.model.Task
-import com.example.taskdemo.model.TaskGroup
-import jakarta.annotation.PostConstruct
-import java.time.ZonedDateTime
-import java.util.*
 import org.springframework.stereotype.Service
 
 
 @Service
 class TaskService {
 
-    private val cronEvery15s = CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
-        .withSecond(every(15))
-        .instance()
+    private val basicTaskGroup = BasicTaskGroup()
+    private val priorityTaskGroup = PriorityTaskGroup()
+    private val linkedTaskGroup = LinkedTaskGroup()
 
-    private val tasks = listOf(
-        Task("Task 10 seconds", ZonedDateTime.now().plusSeconds(10), TaskGroup("TaskGroup1")),
-        Task("Task 20 seconds", ZonedDateTime.now().plusSeconds(20), TaskGroup("TaskGroup2"), cron = cronEvery15s),
-        Task("Task 30 seconds", ZonedDateTime.now().plusSeconds(30), TaskGroup("TaskGroup1")),
+    fun addToBasicGroup(tasks: List<Task>) {
+        basicTaskGroup.addAllAndRun(tasks)
+    }
 
-        // priority
-        Task("Task priority 5", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = 5),
-        Task("Task priority 6", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = 6),
-        Task("Task priority 3", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = 3),
-        Task("Task priority -5", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = -5),
-        Task("Task priority 2", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = 2),
-        Task("Task priority 1", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = 1),
-    )
+    fun addToPriorityGroup(tasks: List<Task>) {
+        priorityTaskGroup.addAllAndRun(tasks)
+    }
 
-    private val linkedTasks = LinkedList(
-        listOf(
-            Task("Task linked 1", ZonedDateTime.now(), TaskGroup("TaskGroup1")),
-            Task("Task linked 2", ZonedDateTime.now(), TaskGroup("TaskGroup1")),
-            Task("Task linked 3", ZonedDateTime.now(), TaskGroup("TaskGroup1")),
-            Task("Task linked 4", ZonedDateTime.now(), TaskGroup("TaskGroup1"))
-        )
-    )
-
-    private val taskExecutor = TaskExecutor()
-
-    @PostConstruct
-    private fun initTasks() {
-        taskExecutor.runTasks(tasks)
-        taskExecutor.runFlowTasks(linkedTasks)
+    fun addToLinkedGroup(tasks: List<Task>) {
+        linkedTaskGroup.addAllAndRun(tasks)
     }
 }
