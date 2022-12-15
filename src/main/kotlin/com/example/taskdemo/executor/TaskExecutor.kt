@@ -1,10 +1,15 @@
 package com.example.taskdemo.executor
 
 import com.example.taskdemo.model.Task
-import kotlinx.coroutines.*
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import java.util.*
 import java.util.concurrent.PriorityBlockingQueue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 
 class TaskExecutor {
 
@@ -15,7 +20,7 @@ class TaskExecutor {
         scope.launch(Dispatchers.IO) {
             while (true) {
                 startTask(priorityQueue.take())
-                yield()
+                delay(10_000)
             }
         }
     }
@@ -35,6 +40,14 @@ class TaskExecutor {
                     }
                 }
             }
+        }
+    }
+
+    fun runFlowTasks(tasks: LinkedList<Task>) {
+        val flow = flow { tasks.forEach { emit(it) } }
+
+        scope.launch {
+            flow.collect { startTask(it) }
         }
     }
 

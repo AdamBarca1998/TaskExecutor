@@ -8,8 +8,9 @@ import com.example.taskdemo.executor.TaskExecutor
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskGroup
 import jakarta.annotation.PostConstruct
-import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
+import java.util.*
+import org.springframework.stereotype.Service
 
 
 @Service
@@ -31,7 +32,15 @@ class TaskService {
         Task("Task priority -5", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = -5),
         Task("Task priority 2", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = 2),
         Task("Task priority 1", ZonedDateTime.now(), TaskGroup("TaskGroup1"), priority = 1),
-        Task("Task priority null", ZonedDateTime.now(), TaskGroup("TaskGroup1"))
+    )
+
+    private val linkedTasks = LinkedList(
+        listOf(
+            Task("Task linked 1", ZonedDateTime.now(), TaskGroup("TaskGroup1")),
+            Task("Task linked 2", ZonedDateTime.now(), TaskGroup("TaskGroup1")),
+            Task("Task linked 3", ZonedDateTime.now(), TaskGroup("TaskGroup1")),
+            Task("Task linked 4", ZonedDateTime.now(), TaskGroup("TaskGroup1"))
+        )
     )
 
     private val taskExecutor = TaskExecutor()
@@ -39,5 +48,6 @@ class TaskService {
     @PostConstruct
     private fun initTasks() {
         taskExecutor.runTasks(tasks)
+        taskExecutor.runFlowTasks(linkedTasks)
     }
 }
