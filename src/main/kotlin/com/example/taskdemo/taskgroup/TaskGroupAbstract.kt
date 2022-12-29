@@ -5,6 +5,7 @@ import com.example.taskdemo.model.TaskExecutor
 import java.util.concurrent.ArrayBlockingQueue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 
 abstract class TaskGroupAbstract {
 
@@ -15,5 +16,9 @@ abstract class TaskGroupAbstract {
         plannedTasks.add(task as TaskExecutor)
     }
 
-    abstract fun run()
+    protected suspend fun sleepLaunch() {
+        if (plannedTasks.isEmpty()) {
+            delay(10_000)
+        }
+    }
 }

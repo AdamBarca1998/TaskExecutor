@@ -6,26 +6,31 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class BasicTaskGroup : TaskGroupAbstract() {
 
-    fun scheduleRun() {
+    init {
+        scope.launch(Dispatchers.IO) {
+            while (true) {
+                while (plannedTasks.isNotEmpty()) {
+                    launch {
+                        plannedTasks.poll()?.let {
+                            delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), it.startTime)) // start
 
-    }
+                            do {
+                                it.run(TaskContext())
+                                delay(
+                                    ChronoUnit.MILLIS.between(
+                                        ZonedDateTime.now(),
+                                        it.getNextTime() ?: ZonedDateTime.now())
+                                ) // period
+                            } while (it.cronList != null)
+                        }
+                    }
+                }
 
-    override fun run() {
-        scope.launch {
-            val task = withContext(Dispatchers.IO) {
-                plannedTasks.take()
+                sleepLaunch()
             }
-
-            delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), task.startTime)) // start
-
-            do {
-                task.run(TaskContext())
-                delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), task.getNextTime() ?: ZonedDateTime.now())) // period
-            } while (task.cronList != null)
         }
     }
 }
