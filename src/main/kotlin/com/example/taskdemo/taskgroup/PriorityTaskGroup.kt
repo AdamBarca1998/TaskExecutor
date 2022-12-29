@@ -1,36 +1,33 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.interfaces.TaskGroup
-import com.example.taskdemo.model.TaskImpl
-import java.time.ZonedDateTime
-import java.util.concurrent.PriorityBlockingQueue
+import com.example.taskdemo.model.Task
+import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.model.TaskExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
+import java.util.concurrent.PriorityBlockingQueue
 
-class PriorityTaskGroup : TaskGroup {
+class PriorityTaskGroup : TaskGroupAbstract() {
 
     private val scope = CoroutineScope(Dispatchers.Default)
-    private val priorityQueue = PriorityBlockingQueue<TaskImpl>()
+    private val priorityQueue = PriorityBlockingQueue<Task>()
 
     init {
-        addAllAndRun(
-            listOf(
-                TaskImpl("Task priority 5", ZonedDateTime.now(), priority = 5),
-                TaskImpl("Task priority 6", ZonedDateTime.now(), priority = 6),
-                TaskImpl("Task priority 3", ZonedDateTime.now(), priority = 3),
-                TaskImpl("Task priority -5", ZonedDateTime.now(), priority = -5),
-                TaskImpl("Task priority 2", ZonedDateTime.now(), priority = 2),
-                TaskImpl("Task priority 1", ZonedDateTime.now(), priority = 1),
-            )
-        )
+        addAndRun(TaskExecutor("Task priority 5", ZonedDateTime.now(), priority = 5))
+        addAndRun(TaskExecutor("Task priority 6", ZonedDateTime.now(), priority = 6))
+        addAndRun(TaskExecutor("Task priority 3", ZonedDateTime.now(), priority = 3))
+        addAndRun(TaskExecutor("Task priority -5", ZonedDateTime.now(), priority = -5))
+        addAndRun(TaskExecutor("Task priority 2", ZonedDateTime.now(), priority = 2))
+        addAndRun(TaskExecutor("Task priority 1", ZonedDateTime.now()))
     }
 
     init {
         scope.launch(Dispatchers.IO) {
             while (true) {
-                priorityQueue.take().run()
+                priorityQueue.take().run(TaskContext())
 
                 if (priorityQueue.isEmpty()) {
                     delay(10_000)
@@ -39,7 +36,7 @@ class PriorityTaskGroup : TaskGroup {
         }
     }
 
-    override fun addAllAndRun(tasks: List<TaskImpl>) {
-        priorityQueue.addAll(tasks)
+    override fun run() {
+        priorityQueue.add(plannedTasks.take())
     }
 }

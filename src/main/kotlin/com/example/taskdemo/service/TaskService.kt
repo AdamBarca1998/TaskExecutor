@@ -1,6 +1,7 @@
 package com.example.taskdemo.service
 
-import com.example.taskdemo.model.TaskImpl
+import com.example.taskdemo.model.Task
+import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.taskgroup.BasicTaskGroup
 import com.example.taskdemo.taskgroup.LinkedTaskGroup
 import com.example.taskdemo.taskgroup.PriorityTaskGroup
@@ -14,15 +15,15 @@ class TaskService {
     private val priorityTaskGroup = PriorityTaskGroup()
     private val linkedTaskGroup = LinkedTaskGroup()
 
-    fun addToBasicGroup(tasks: List<TaskImpl>) {
-        basicTaskGroup.addAllAndRun(tasks)
+    fun queue(task: Task) {
+        basicTaskGroup.addAndRun(task)
     }
 
-    fun addToPriorityGroup(tasks: List<TaskImpl>) {
-        priorityTaskGroup.addAllAndRun(tasks)
+    fun schedule(task: Task, config: TaskConfig) {
+        basicTaskGroup.scheduleRun()
     }
 
-    fun addToLinkedGroup(tasks: List<TaskImpl>) {
-        linkedTaskGroup.addAllAndRun(tasks)
+    fun runDaemon(task: Task) {
+
     }
 }
