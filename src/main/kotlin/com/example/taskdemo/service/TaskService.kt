@@ -3,9 +3,9 @@ package com.example.taskdemo.service
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskExecutor
-import com.example.taskdemo.taskgroup.BasicTaskGroup
 import com.example.taskdemo.taskgroup.PriorityTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
+import com.example.taskdemo.taskgroup.ScheduledTaskGroup
 import java.time.ZonedDateTime
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
 @Service
 class TaskService {
 
-    private val basicTaskGroup = BasicTaskGroup()
+    private val scheduledTaskGroup = ScheduledTaskGroup()
     private val priorityTaskGroup = PriorityTaskGroup()
     private val queueTaskGroup = QueueTaskGroup()
 
@@ -55,8 +55,8 @@ class TaskService {
         demo(TaskExecutor("Task priority 9", ZonedDateTime.now(), priority = 9))
     }
 
-    fun runSchedule(task: Task, config: TaskConfig) {
-        basicTaskGroup.addTask(task)
+    fun runScheduled(task: Task, config: TaskConfig) {
+        scheduledTaskGroup.addTask(task)
     }
 
     fun runQueue(task: Task) {

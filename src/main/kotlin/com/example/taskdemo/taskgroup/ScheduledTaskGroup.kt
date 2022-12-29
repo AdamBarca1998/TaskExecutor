@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class BasicTaskGroup : TaskGroupAbstract() {
+class ScheduledTaskGroup : TaskGroupAbstract() {
 
     init {
         scope.launch(Dispatchers.IO) {
