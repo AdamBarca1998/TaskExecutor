@@ -25,7 +25,7 @@ data class TaskExecutor(
         return sortExecution.first()
     }
 
-    override fun run(taskContext: TaskContext) {
+    override fun run(taskContextAbstract: TaskContextAbstract) {
         println("$name \t $priority \t ${ZonedDateTime.now()} \t ${getNextTime()}")
     }
 

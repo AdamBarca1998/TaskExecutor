@@ -15,7 +15,7 @@ class QueueTaskGroup : TaskGroupAbstract() {
     override fun start() {
         scope.launch(Dispatchers.IO) {
             while (true) {
-                plannedTasks.poll()?.run(TaskContext())
+                plannedTasks.poll()?.run(TaskContext(null))
 
                 sleepLaunch()
             }

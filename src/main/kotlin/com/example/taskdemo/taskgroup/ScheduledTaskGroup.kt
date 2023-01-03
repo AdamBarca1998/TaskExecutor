@@ -24,7 +24,7 @@ class ScheduledTaskGroup() : TaskGroupAbstract() {
                             delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), it.startTime)) // start
 
                             do {
-                                it.run(TaskContext())
+                                it.run(TaskContext(null))
                                 delay(
                                     ChronoUnit.MILLIS.between(
                                         ZonedDateTime.now(),

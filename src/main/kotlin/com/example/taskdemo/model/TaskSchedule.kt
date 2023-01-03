@@ -6,19 +6,10 @@ import com.example.taskdemo.extensions.toNullable
 import java.time.ZonedDateTime
 
 data class TaskSchedule(
-    val cronList: List<Cron>? = null
+    val cron: Cron
 ) {
 
-    fun getNextTime(): ZonedDateTime? {
-        if (cronList == null) {
-            return null
-        }
-
-        val sortExecution = cronList.stream()
-            .map { ExecutionTime.forCron(it).nextExecution(ZonedDateTime.now()).toNullable() }
-            .sorted()
-            .toList()
-
-        return sortExecution.first()
+    fun nextExecution(taskScheduleContext: TaskScheduleContext): ZonedDateTime? {
+        return ExecutionTime.forCron(cron).nextExecution(ZonedDateTime.now()).toNullable()
     }
 }

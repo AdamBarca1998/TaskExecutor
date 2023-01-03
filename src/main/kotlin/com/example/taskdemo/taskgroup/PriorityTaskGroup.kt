@@ -26,7 +26,7 @@ class PriorityTaskGroup : TaskGroupAbstract() {
                 shiftTasks()
 
                 while (priorityQueue.isNotEmpty()) {
-                    priorityQueue.poll()?.run(TaskContext())
+                    priorityQueue.poll()?.run(TaskContext(null))
 
                     shiftTasks()
                 }
