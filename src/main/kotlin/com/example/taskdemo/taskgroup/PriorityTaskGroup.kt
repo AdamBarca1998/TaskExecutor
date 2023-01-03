@@ -9,8 +9,18 @@ import kotlinx.coroutines.launch
 class PriorityTaskGroup : TaskGroupAbstract() {
 
     private val priorityQueue = PriorityBlockingQueue<TaskExecutor>()
+    override val name: String = "PriorityTaskGroup"
 
     init {
+        start()
+    }
+
+    private fun shiftTasks() {
+        priorityQueue.addAll(plannedTasks)
+        plannedTasks.clear()
+    }
+
+    override fun start() {
         scope.launch(Dispatchers.IO) {
             while (true) {
                 shiftTasks()
@@ -26,8 +36,7 @@ class PriorityTaskGroup : TaskGroupAbstract() {
         }
     }
 
-    private fun shiftTasks() {
-        priorityQueue.addAll(plannedTasks)
-        plannedTasks.clear()
+    override fun stop() {
+        TODO("Not yet implemented")
     }
 }

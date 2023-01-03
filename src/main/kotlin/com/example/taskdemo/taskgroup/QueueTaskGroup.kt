@@ -6,7 +6,13 @@ import kotlinx.coroutines.launch
 
 class QueueTaskGroup : TaskGroupAbstract() {
 
+    override val name: String = "QueueTaskGroup"
+
     init {
+        start()
+    }
+
+    override fun start() {
         scope.launch(Dispatchers.IO) {
             while (true) {
                 plannedTasks.poll()?.run(TaskContext())
@@ -14,5 +20,9 @@ class QueueTaskGroup : TaskGroupAbstract() {
                 sleepLaunch()
             }
         }
+    }
+
+    override fun stop() {
+        TODO("Not yet implemented")
     }
 }

@@ -7,11 +7,6 @@ import com.example.taskdemo.taskgroup.PriorityTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
 import com.example.taskdemo.taskgroup.ScheduledTaskGroup
 import java.time.ZonedDateTime
-import kotlin.random.Random
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.springframework.stereotype.Service
 
 
@@ -22,7 +17,6 @@ class TaskService {
     private val priorityTaskGroup = PriorityTaskGroup()
     private val queueTaskGroup = QueueTaskGroup()
 
-    protected val scope = CoroutineScope(Dispatchers.Default)
     init {
 //        // basic
 //        val cronEvery7s = CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
@@ -46,13 +40,13 @@ class TaskService {
 //        runQueue(TaskExecutor("Task linked 6", ZonedDateTime.now()))
 
         // priority
-        demo(TaskExecutor("Task priority 5", ZonedDateTime.now(), priority = 5))
-        demo(TaskExecutor("Task priority 6", ZonedDateTime.now(), priority = 6))
-        demo(TaskExecutor("Task priority 3", ZonedDateTime.now(), priority = 3))
-        demo(TaskExecutor("Task priority -5", ZonedDateTime.now(), priority = -5))
-        demo(TaskExecutor("Task priority 2", ZonedDateTime.now(), priority = 2))
-        demo(TaskExecutor("Task priority null", ZonedDateTime.now()))
-        demo(TaskExecutor("Task priority 9", ZonedDateTime.now(), priority = 9))
+        TaskExecutor("Task priority 5", ZonedDateTime.now(), priority = 5)
+        TaskExecutor("Task priority 6", ZonedDateTime.now(), priority = 6)
+        TaskExecutor("Task priority 3", ZonedDateTime.now(), priority = 3)
+        TaskExecutor("Task priority -5", ZonedDateTime.now(), priority = -5)
+        TaskExecutor("Task priority 2", ZonedDateTime.now(), priority = 2)
+        TaskExecutor("Task priority null", ZonedDateTime.now())
+        TaskExecutor("Task priority 9", ZonedDateTime.now(), priority = 9)
     }
 
     fun runScheduled(task: Task, config: TaskConfig) {
@@ -71,11 +65,7 @@ class TaskService {
 
     }
 
-    private fun demo(task: Task) {
-        scope.launch {
-            delay(Random.nextLong(1000, 10000))
-            println("add Task $task")
-            runPriority(task)
-        }
+    fun removeTask(task: Task) {
+
     }
 }

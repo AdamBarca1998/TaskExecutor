@@ -7,9 +7,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ScheduledTaskGroup : TaskGroupAbstract() {
+class ScheduledTaskGroup() : TaskGroupAbstract() {
+
+    override val name: String = "ScheduledTaskGroup"
 
     init {
+        start()
+    }
+
+    override fun start() {
         scope.launch(Dispatchers.IO) {
             while (true) {
                 while (plannedTasks.isNotEmpty()) {
@@ -32,5 +38,9 @@ class ScheduledTaskGroup : TaskGroupAbstract() {
                 sleepLaunch()
             }
         }
+    }
+
+    override fun stop() {
+        TODO("Not yet implemented")
     }
 }
