@@ -19,8 +19,8 @@ abstract class TaskGroupAbstract {
         plannedTasks.add(TaskWithConfigAndContext(task, taskContext, taskConfig))
     }
 
-    fun removeTask(task: Task) {
-        // TODO:IMPL
+    open fun removeTask(task: Task) {
+        plannedTasks.removeIf { it.task == task }
     }
 
     abstract fun start()

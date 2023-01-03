@@ -1,40 +1,44 @@
 package com.example.taskdemo.taskgroup
 
+import com.example.taskdemo.extensions.toNullable
+import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskScheduleContext
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.LinkedTransferQueue
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ScheduledTaskGroup : TaskGroupAbstract() {
 
     override val name: String = "ScheduledTaskGroup"
-    private val runningTasks = LinkedTransferQueue<TaskWithConfigAndContext>()
+    private val runningTasks = LinkedTransferQueue<TaskWithJob>()
 
     init {
         start()
     }
 
     override fun start() {
-        if (isLocked) {
+//        if (isLocked) {
             isLocked = false
-
-            runningTasks.forEach {
-                scope.launch {
-                    runTask(it)
-                }
-            }
-        }
+//
+//            runningTasks.forEach {
+//                scope.launch {
+//                    runTask(it)
+//                }
+//            }
+//        }
 
         scope.launch(Dispatchers.IO) {
             while (!isLocked) {
                 while (plannedTasks.isNotEmpty()) {
                     launch {
                         plannedTasks.poll()?.let {
-                            runningTasks.add(it)
-                            runTask(it)
+                            val job = launch { runTask(it) }
+
+                            runningTasks.add(TaskWithJob(it, job))
                         }
                     }
                 }
@@ -42,6 +46,12 @@ class ScheduledTaskGroup : TaskGroupAbstract() {
                 sleepLaunch()
             }
         }
+    }
+
+    override fun removeTask(task: Task) {
+        super.removeTask(task)
+        val foundTask = runningTasks.stream().filter{it.taskWithConfigAndContext.task == task}.findFirst().toNullable()
+        foundTask?.job?.cancel()
     }
 
     private suspend fun runTask(taskWithConfigAndContext: TaskWithConfigAndContext) {
@@ -70,4 +80,6 @@ class ScheduledTaskGroup : TaskGroupAbstract() {
             )
         } while (taskWithConfigAndContext.taskConfig?.taskSchedules?.isNotEmpty() == true && !isLocked)
     }
+
+    data class TaskWithJob(val taskWithConfigAndContext: TaskWithConfigAndContext, val job: Job)
 }

@@ -24,7 +24,7 @@ class TaskService {
 
     init {
         demoScheduled()
-//        demoQueue()
+        demoQueue()
     }
 
     fun runSchedule(task: Task, context: TaskContext, config: TaskConfig) {
@@ -40,26 +40,30 @@ class TaskService {
     }
 
     fun removeTask(task: Task) {
-
+        scheduledTaskGroup.removeTask(task)
+        queueTaskGroup.removeTask(task)
     }
 
     private fun demoQueue() {
         queueTaskGroup.stop()
 
+        val task4 = TaskImpl("Task linked 4")
+
         runQueue(TaskImpl("Task linked 1"))
         runQueue(TaskImpl("Task linked 2"))
         runQueue(TaskImpl("Task linked 3"))
-        runQueue(TaskImpl("Task linked 4"))
+        runQueue(task4)
         runQueue(TaskImpl("Task linked 5"))
         runQueue(TaskImpl("Task linked 6"))
+
+        Thread.sleep(5_000)
+        removeTask(task4)
 
         Thread.sleep(10_000)
         queueTaskGroup.start()
     }
 
     private fun demoScheduled() {
-        scheduledTaskGroup.stop()
-
         val taskScheduleEvery5s = TaskSchedule(CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
             .withSecond(FieldExpressionFactory.every(5))
             .instance()
@@ -75,13 +79,20 @@ class TaskService {
         val taskConfigEvery7s = TaskConfig.Builder()
             .taskSchedules(listOf(taskScheduleEvery7s))
             .build()
+        val taskConfigEvery5s7s = TaskConfig.Builder()
+            .taskSchedules(listOf(taskScheduleEvery5s, taskScheduleEvery7s))
+            .build()
         val taskContextNow = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
         val taskContextAfter20s = TaskContext(TaskScheduleContext(ZonedDateTime.now().plusSeconds(20), ZonedDateTime.now(), ZonedDateTime.now()))
 
-        runSchedule(TaskImpl("Task every 5 seconds + start after 20s"), taskContextAfter20s, taskConfigEvery5s)
-        runSchedule(TaskImpl("Task every 7 seconds"), taskContextNow, taskConfigEvery7s)
+        val task7s = TaskImpl("Task every 7 seconds")
 
-        Thread.sleep(10_000)
-        scheduledTaskGroup.start()
+        runSchedule(TaskImpl("Task every 5 seconds + start after 20s"), taskContextAfter20s, taskConfigEvery5s)
+        runSchedule(TaskImpl("Task every 5 seconds + every 7 seconds"), taskContextNow, taskConfigEvery5s7s)
+        runSchedule(task7s, taskContextNow, taskConfigEvery7s)
+
+        Thread.sleep(20_000)
+
+        removeTask(task7s)
     }
 }
