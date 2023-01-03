@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 
-abstract class TaskGroupAbstract {
+abstract class TaskGroup {
 
     abstract val name: String
     protected val scope = CoroutineScope(Dispatchers.Default)

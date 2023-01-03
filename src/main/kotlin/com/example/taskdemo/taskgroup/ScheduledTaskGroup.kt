@@ -11,7 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ScheduledTaskGroup : TaskGroupAbstract() {
+class ScheduledTaskGroup : TaskGroup() {
 
     override val name: String = "ScheduledTaskGroup"
     private val runningTasks = LinkedTransferQueue<TaskWithJob>()
@@ -59,7 +59,7 @@ class ScheduledTaskGroup : TaskGroupAbstract() {
         delay(
             ChronoUnit.MILLIS.between(
                 ZonedDateTime.now(),
-                taskWithConfigAndContext.taskContext?.taskScheduleContext?.startDateTime ?: ZonedDateTime.now()
+                taskWithConfigAndContext.taskContext?.taskScheduleContext?.startDateTime
             )
         )
 
@@ -75,7 +75,7 @@ class ScheduledTaskGroup : TaskGroupAbstract() {
                             ZonedDateTime.now(),
                             ZonedDateTime.now()
                         )
-                    ) ?: ZonedDateTime.now()
+                    )
                 )
             )
         } while (taskWithConfigAndContext.taskConfig?.taskSchedules?.isNotEmpty() == true && !isLocked)

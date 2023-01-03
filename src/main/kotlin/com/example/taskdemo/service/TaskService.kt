@@ -3,15 +3,15 @@ package com.example.taskdemo.service
 import com.cronutils.builder.CronBuilder
 import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
-import com.cronutils.model.field.expression.FieldExpressionFactory
+import com.cronutils.model.field.expression.FieldExpressionFactory.every
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.TaskImpl
-import com.example.taskdemo.model.TaskSchedule
 import com.example.taskdemo.model.TaskScheduleContext
 import com.example.taskdemo.taskgroup.QueueTaskGroup
 import com.example.taskdemo.taskgroup.ScheduledTaskGroup
+import com.example.taskdemo.taskschedule.TaskSchedule
 import java.time.ZonedDateTime
 import org.springframework.stereotype.Service
 
@@ -64,23 +64,23 @@ class TaskService {
     }
 
     private fun demoScheduled() {
-        val taskScheduleEvery5s = TaskSchedule(CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
-            .withSecond(FieldExpressionFactory.every(5))
-            .instance()
-        )
-        val taskScheduleEvery7s = TaskSchedule(CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
-            .withSecond(FieldExpressionFactory.every(7))
-            .instance()
-        )
+        val taskScheduleEvery5S = TaskSchedule.fromCron(CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
+            .withSecond(every(5))
+            .instance())
+        val taskScheduleEvery7S = TaskSchedule.fromCron(CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
+            .withSecond(every(5))
+            .instance())
+
+
         val taskConfigEvery5s = TaskConfig.Builder()
-            .taskSchedules(listOf(taskScheduleEvery5s))
+            .taskSchedules(listOf(taskScheduleEvery5S))
             .startDateTime(ZonedDateTime.now().plusSeconds(10))
             .build()
         val taskConfigEvery7s = TaskConfig.Builder()
-            .taskSchedules(listOf(taskScheduleEvery7s))
+            .taskSchedules(listOf(taskScheduleEvery7S))
             .build()
         val taskConfigEvery5s7s = TaskConfig.Builder()
-            .taskSchedules(listOf(taskScheduleEvery5s, taskScheduleEvery7s))
+            .taskSchedules(listOf(taskScheduleEvery5S, taskScheduleEvery7S))
             .build()
         val taskContextNow = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
         val taskContextAfter20s = TaskContext(TaskScheduleContext(ZonedDateTime.now().plusSeconds(20), ZonedDateTime.now(), ZonedDateTime.now()))

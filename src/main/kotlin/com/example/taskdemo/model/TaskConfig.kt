@@ -1,5 +1,6 @@
 package com.example.taskdemo.model
 
+import com.example.taskdemo.taskschedule.TaskSchedule
 import java.time.ZonedDateTime
 
 class TaskConfig private constructor(
