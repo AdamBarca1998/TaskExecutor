@@ -13,16 +13,16 @@ class QueueTaskGroup : TaskGroupAbstract() {
     }
 
     override fun start() {
+        isLocked = false
+
         scope.launch(Dispatchers.IO) {
-            while (true) {
-                plannedTasks.poll()?.run(TaskContext(null))
+            while (!isLocked) {
+                plannedTasks.poll()?.let {
+                    it.task.run(it.taskContext)
+                }
 
                 sleepLaunch()
             }
         }
-    }
-
-    override fun stop() {
-        TODO("Not yet implemented")
     }
 }

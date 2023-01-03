@@ -1,7 +1,8 @@
 package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.Task
-import com.example.taskdemo.model.TaskExecutor
+import com.example.taskdemo.model.TaskConfig
+import com.example.taskdemo.model.TaskContext
 import java.util.concurrent.LinkedTransferQueue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,10 +12,11 @@ abstract class TaskGroupAbstract {
 
     abstract val name: String
     protected val scope = CoroutineScope(Dispatchers.Default)
-    protected val plannedTasks = LinkedTransferQueue<TaskExecutor>();
+    protected val plannedTasks = LinkedTransferQueue<TaskWithConfigAndContext>()
+    protected var isLocked: Boolean = true
 
-    fun addTask(task: Task) {
-        plannedTasks.add(task as TaskExecutor)
+    fun addTask(task: Task, taskContext: TaskContext? = null, taskConfig: TaskConfig? = null) {
+        plannedTasks.add(TaskWithConfigAndContext(task, taskContext, taskConfig))
     }
 
     fun removeTask(task: Task) {
@@ -23,11 +25,15 @@ abstract class TaskGroupAbstract {
 
     abstract fun start()
 
-    abstract fun stop()
+    fun stop() {
+        isLocked = true
+    }
 
     protected suspend fun sleepLaunch() {
         if (plannedTasks.isEmpty()) {
             delay(10_000)
         }
     }
+
+    data class TaskWithConfigAndContext(val task: Task, val taskContext: TaskContext?, val taskConfig: TaskConfig?)
 }
