@@ -21,15 +21,7 @@ class ScheduledTaskGroup : TaskGroup() {
     }
 
     override fun start() {
-//        if (isLocked) {
-            isLocked = false
-//
-//            runningTasks.forEach {
-//                scope.launch {
-//                    runTask(it)
-//                }
-//            }
-//        }
+        isLocked = false
 
         scope.launch(Dispatchers.IO) {
             while (!isLocked) {
@@ -51,30 +43,36 @@ class ScheduledTaskGroup : TaskGroup() {
     override fun removeTask(task: Task) {
         super.removeTask(task)
         val foundTask = runningTasks.stream().filter{it.taskWithConfigAndContext.task == task}.findFirst().toNullable()
+        runningTasks.removeIf { it.taskWithConfigAndContext.task == task}
         foundTask?.job?.cancel()
     }
 
     private suspend fun runTask(taskWithConfigAndContext: TaskWithConfigAndContext) {
+        val scheduleContext = taskWithConfigAndContext.taskContext?.taskScheduleContext
+
         // start
         delay(
             ChronoUnit.MILLIS.between(
                 ZonedDateTime.now(),
-                taskWithConfigAndContext.taskContext?.taskScheduleContext?.startDateTime
+                scheduleContext?.startDateTime
             )
         )
 
         do {
+            scheduleContext?.lastExecution = ZonedDateTime.now()
+            logger.debug { "${taskWithConfigAndContext.task} started at ${scheduleContext?.lastExecution} actualTime: ${ZonedDateTime.now()}" }
+
             taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
+
+            scheduleContext?.lastCompletion = ZonedDateTime.now()
+            logger.debug { "${taskWithConfigAndContext.task} ended at ${scheduleContext?.lastCompletion} actualTime: ${ZonedDateTime.now()}" }
+
             // period
             delay(
                 ChronoUnit.MILLIS.between(
                     ZonedDateTime.now(),
                     taskWithConfigAndContext.taskConfig?.nextExecution(
-                        TaskScheduleContext(
-                            ZonedDateTime.now(),
-                            ZonedDateTime.now(),
-                            ZonedDateTime.now()
-                        )
+                        scheduleContext ?: TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now())
                     )
                 )
             )

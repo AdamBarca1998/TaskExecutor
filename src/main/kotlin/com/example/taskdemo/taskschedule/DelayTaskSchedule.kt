@@ -7,6 +7,6 @@ import java.time.ZonedDateTime
 class DelayTaskSchedule(private val fixedDelay: Duration) : TaskSchedule() {
 
     override fun nextExecution(taskScheduleContext: TaskScheduleContext): ZonedDateTime? {
-        TODO("Not yet implemented")
+        return taskScheduleContext.lastCompletion.plus(fixedDelay)
     }
 }

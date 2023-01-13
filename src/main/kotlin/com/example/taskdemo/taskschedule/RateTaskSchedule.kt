@@ -7,6 +7,6 @@ import java.time.ZonedDateTime
 class RateTaskSchedule(private val fixedRate: Duration) : TaskSchedule() {
 
     override fun nextExecution(taskScheduleContext: TaskScheduleContext): ZonedDateTime? {
-        TODO("Not yet implemented")
+        return taskScheduleContext.lastExecution.plus(fixedRate)
     }
 }

@@ -1,12 +1,13 @@
 package com.example.taskdemo.model
 
-import java.time.ZonedDateTime
+import java.time.Duration
 
 data class TaskImpl(
     val name: String,
 ) : Task {
 
     override fun run(taskContextAbstract: TaskContextAbstract?) {
-        println("$name                     \t                                   ${ZonedDateTime.now()}")
+        println("$name running...")
+        Thread.sleep(Duration.ofSeconds(10))
     }
 }

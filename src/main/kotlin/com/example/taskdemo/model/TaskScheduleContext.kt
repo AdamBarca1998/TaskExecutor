@@ -4,6 +4,6 @@ import java.time.ZonedDateTime
 
 data class TaskScheduleContext(
     val startDateTime: ZonedDateTime,
-    val lastExecution: ZonedDateTime,
-    val lastCompletion: ZonedDateTime
+    var lastExecution: ZonedDateTime,
+    var lastCompletion: ZonedDateTime
 )

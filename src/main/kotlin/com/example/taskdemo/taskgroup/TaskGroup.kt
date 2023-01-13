@@ -7,6 +7,7 @@ import java.util.concurrent.LinkedTransferQueue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import mu.KotlinLogging
 
 abstract class TaskGroup {
 
@@ -14,6 +15,7 @@ abstract class TaskGroup {
     protected val scope = CoroutineScope(Dispatchers.Default)
     protected val plannedTasks = LinkedTransferQueue<TaskWithConfigAndContext>()
     protected var isLocked: Boolean = true
+    protected val logger = KotlinLogging.logger {}
 
     fun addTask(task: Task, taskContext: TaskContext? = null, taskConfig: TaskConfig? = null) {
         plannedTasks.add(TaskWithConfigAndContext(task, taskContext, taskConfig))
