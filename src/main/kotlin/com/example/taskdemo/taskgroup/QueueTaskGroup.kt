@@ -9,22 +9,26 @@ class QueueTaskGroup : TaskGroup() {
     override val name: String = "QueueTaskGroup"
 
     init {
-        start()
-    }
-
-    override fun start() {
-        isLocked = false
-
         scope.launch(Dispatchers.IO) {
-            while (!isLocked) {
+            while (!isLocked.get()) {
                 plannedTasks.poll()?.let {
                     logger.debug { "${it.task} started at ${ZonedDateTime.now()}" }
-                    it.task.run(it.taskContext)
+
+                    try {
+                        it.task.run(it.taskContext)
+                    } catch (e: Exception) {
+                        logger.error { "${it.task} e" }
+                    }
+
                     logger.debug { "${it.task} ended at ${ZonedDateTime.now()}" }
                 }
 
                 sleepLaunch()
             }
         }
+    }
+
+    override fun start() {
+        isLocked.set(false)
     }
 }

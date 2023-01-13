@@ -8,6 +8,7 @@ data class TaskImpl(
 
     override fun run(taskContextAbstract: TaskContextAbstract?) {
         println("$name running...")
-        Thread.sleep(Duration.ofSeconds(10))
+        Thread.sleep(Duration.ofSeconds(5))
+        throw NullPointerException()
     }
 }

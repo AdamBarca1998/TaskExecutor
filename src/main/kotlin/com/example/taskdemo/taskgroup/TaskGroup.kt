@@ -4,6 +4,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
 import java.util.concurrent.LinkedTransferQueue
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -14,7 +15,7 @@ abstract class TaskGroup {
     abstract val name: String
     protected val scope = CoroutineScope(Dispatchers.Default)
     protected val plannedTasks = LinkedTransferQueue<TaskWithConfigAndContext>()
-    protected var isLocked: Boolean = true
+    protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     protected val logger = KotlinLogging.logger {}
 
     fun addTask(task: Task, taskContext: TaskContext? = null, taskConfig: TaskConfig? = null) {
@@ -28,7 +29,7 @@ abstract class TaskGroup {
     abstract fun start()
 
     fun stop() {
-        isLocked = true
+        isLocked.set(true)
     }
 
     protected suspend fun sleepLaunch() {

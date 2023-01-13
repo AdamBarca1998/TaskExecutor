@@ -21,10 +21,10 @@ class ScheduledTaskGroup : TaskGroup() {
     }
 
     override fun start() {
-        isLocked = false
+        isLocked.set(false)
 
         scope.launch(Dispatchers.IO) {
-            while (!isLocked) {
+            while (!isLocked.get()) {
                 while (plannedTasks.isNotEmpty()) {
                     launch {
                         plannedTasks.poll()?.let {
@@ -76,7 +76,7 @@ class ScheduledTaskGroup : TaskGroup() {
                     )
                 )
             )
-        } while (taskWithConfigAndContext.taskConfig?.taskSchedules?.isNotEmpty() == true && !isLocked)
+        } while (taskWithConfigAndContext.taskConfig?.taskSchedules?.isNotEmpty() == true && !isLocked.get())
     }
 
     data class TaskWithJob(val taskWithConfigAndContext: TaskWithConfigAndContext, val job: Job)
