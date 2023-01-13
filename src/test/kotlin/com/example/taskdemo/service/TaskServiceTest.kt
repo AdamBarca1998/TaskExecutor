@@ -23,7 +23,7 @@ internal class TaskServiceTest {
         val taskScheduleDelay5s = TaskSchedule.fromFixedDelay(Duration.ofSeconds(5))
         val taskContextNow = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
         val taskConfig = TaskConfig.Builder()
-            .taskSchedules(listOf(taskScheduleDelay5s))
+            .withTaskSchedules(listOf(taskScheduleDelay5s))
             .build()
 
         taskService.runSchedule(TaskImpl("Task 5s delay"), taskContextNow, taskConfig)
@@ -36,7 +36,7 @@ internal class TaskServiceTest {
         val taskScheduleRate5s = TaskSchedule.fromFixedRate(Duration.ofSeconds(5))
         val taskContextNow = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
         val taskConfig = TaskConfig.Builder()
-            .taskSchedules(listOf(taskScheduleRate5s))
+            .withTaskSchedules(listOf(taskScheduleRate5s))
             .build()
 
         taskService.runSchedule(TaskImpl("Task 5s rate"), taskContextNow, taskConfig)
@@ -52,10 +52,23 @@ internal class TaskServiceTest {
             .instance())
         val taskContextNow = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
         val taskConfig = TaskConfig.Builder()
-            .taskSchedules(listOf(taskScheduleEvery5S))
+            .withTaskSchedules(listOf(taskScheduleEvery5S))
             .build()
 
         taskService.runSchedule(TaskImpl("Task 5s cron"), taskContextNow, taskConfig)
+
+        Thread.sleep(hour1)
+    }
+
+    @Test
+    fun testTaskQueue() {
+        taskService.stopQueue()
+
+        taskService.runQueue(TaskImpl("Task linked 1"))
+        taskService.runQueue(TaskImpl("Task linked 2"))
+        taskService.runQueue(TaskImpl("Task linked 3"))
+
+        taskService.startQueue()
 
         Thread.sleep(hour1)
     }

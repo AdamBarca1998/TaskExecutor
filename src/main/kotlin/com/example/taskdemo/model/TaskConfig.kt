@@ -26,23 +26,23 @@ class TaskConfig private constructor(
         var startDateTime: ZonedDateTime = ZonedDateTime.now(),
         var description: String? = null
     ) {
-        fun taskSchedules(taskSchedules: List<TaskSchedule>) = apply {
+        fun withTaskSchedules(taskSchedules: List<TaskSchedule>) = apply {
             this.taskSchedules = taskSchedules
         }
 
-        fun priority(priority: Int) = apply {
+        fun withPriority(priority: Int) = apply {
             this.priority = priority
         }
 
-        fun isHeavy(isHeavy: Boolean) = apply {
+        fun withHeavy(isHeavy: Boolean) = apply {
             this.isHeavy = isHeavy
         }
 
-        fun startDateTime(startDateTime: ZonedDateTime) = apply {
+        fun withStartDateTime(startDateTime: ZonedDateTime) = apply {
             this.startDateTime = startDateTime
         }
 
-        fun description(description: String) = apply {
+        fun withDescription(description: String) = apply {
             this.description = description
         }
 
