@@ -60,23 +60,35 @@ class ScheduledTaskGroup : TaskGroup() {
 
         do {
             scheduleContext?.lastExecution = ZonedDateTime.now()
-            logger.debug { "${taskWithConfigAndContext.task} started at ${scheduleContext?.lastExecution} actualTime: ${ZonedDateTime.now()}" }
+            logger.debug { "${taskWithConfigAndContext.task} started." }
 
-            taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
+            try {
+                taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
 
-            scheduleContext?.lastCompletion = ZonedDateTime.now()
-            logger.debug { "${taskWithConfigAndContext.task} ended at ${scheduleContext?.lastCompletion} actualTime: ${ZonedDateTime.now()}" }
+                scheduleContext?.lastCompletion = ZonedDateTime.now()
+                logger.debug { "${taskWithConfigAndContext.task} ended." }
 
-            // period
-            delay(
-                ChronoUnit.MILLIS.between(
-                    ZonedDateTime.now(),
-                    taskWithConfigAndContext.taskConfig?.nextExecution(
-                        scheduleContext ?: TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now())
-                    )
+                delayPeriod(taskWithConfigAndContext)
+            } catch (e: Exception) {
+                logger.error { "${taskWithConfigAndContext.task} $e" }
+
+                if (taskWithConfigAndContext.taskContext?.isRollback == false) {
+                    delayPeriod(taskWithConfigAndContext)
+                }
+            }
+        } while (taskWithConfigAndContext.taskConfig?.taskSchedules?.isNotEmpty() == true && !isLocked.get())
+    }
+
+    private suspend fun delayPeriod(taskWithConfigAndContext: TaskWithConfigAndContext) {
+        delay(
+            ChronoUnit.MILLIS.between(
+                ZonedDateTime.now(),
+                taskWithConfigAndContext.taskConfig?.nextExecution(
+                    taskWithConfigAndContext.taskContext?.taskScheduleContext
+                        ?: TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now())
                 )
             )
-        } while (taskWithConfigAndContext.taskConfig?.taskSchedules?.isNotEmpty() == true && !isLocked.get())
+        )
     }
 
     data class TaskWithJob(val taskWithConfigAndContext: TaskWithConfigAndContext, val job: Job)
