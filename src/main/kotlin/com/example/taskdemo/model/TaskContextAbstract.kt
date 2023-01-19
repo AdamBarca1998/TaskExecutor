@@ -1,6 +1,6 @@
 package com.example.taskdemo.model
 
-abstract class TaskContextAbstract(open val isRollback: Boolean = false) {
+abstract class TaskContextAbstract {
 
     abstract val taskScheduleContext: TaskScheduleContext?
 }

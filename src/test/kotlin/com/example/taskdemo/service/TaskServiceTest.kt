@@ -100,8 +100,8 @@ internal class TaskServiceTest {
             .withHeavy(true)
             .build()
         val now = ZonedDateTime.now()
-        val context1 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()), true)
-        val context2 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()), true)
+        val context1 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()))
+        val context2 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()))
 
         taskService.runSchedule(TaskImpl("Task 5s cron heavy"), getTaskContextNow(), taskConfig5sHeavy)
         taskService.runSchedule(TaskImpl("Task 5s cron"), context1, taskConfig5s)
@@ -120,6 +120,6 @@ internal class TaskServiceTest {
     }
 
     private fun getTaskContextNow(): TaskContext {
-        return TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()), true)
+        return TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
     }
 }
