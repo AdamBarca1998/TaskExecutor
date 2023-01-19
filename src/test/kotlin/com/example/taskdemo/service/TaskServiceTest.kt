@@ -89,6 +89,11 @@ internal class TaskServiceTest {
         Thread.sleep(hour1)
     }
 
+    @Test
+    fun testTaskSchedulePriority() {
+
+    }
+
     private fun getTaskScheduleEvery(time: Int): TaskSchedule {
         return TaskSchedule.fromCron(
             CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
@@ -98,6 +103,6 @@ internal class TaskServiceTest {
     }
 
     private fun getTaskContextNow(): TaskContext {
-        return TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
+        return TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()), true)
     }
 }

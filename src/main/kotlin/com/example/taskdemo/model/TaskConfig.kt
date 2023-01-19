@@ -5,8 +5,8 @@ import java.time.ZonedDateTime
 
 class TaskConfig private constructor(
     val taskSchedules: List<TaskSchedule>,
-    val priority: Int, // TODO
-    val isHeavy: Boolean, // TODO
+    val priority: Int,
+    val isHeavy: Boolean,
     val description: String?
 ) {
 
