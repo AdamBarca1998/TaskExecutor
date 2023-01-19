@@ -30,7 +30,7 @@ class ScheduledTaskGroup : TaskGroup() {
                         sortedTask.add(plannedTasks.poll())
                     }
 
-                    if (runningTasks.isEmpty() || sortedTask.first().taskConfig.isHeavy) {
+                    if (runningTasks.isEmpty() || sortedTask.firstOrNull()?.taskConfig?.isHeavy == true) {
                         runTask()
                     }
                 }
