@@ -53,25 +53,18 @@ class ScheduledTaskGroup : TaskGroup() {
     }
 
     private suspend fun runTask() {
-        val taskWithConfigAndContext = sortedTask.poll()
-
-        if (taskWithConfigAndContext != null) {
-            val context = if (taskWithConfigAndContext.taskConfig.isHeavy) {
-                singleThreadDispatcher
-            } else {
-                Dispatchers.IO
-            }
-
-            val job = scope.launch(context) {
+        sortedTask.poll()?.let { taskWithConfigAndContext ->
+            val job = scope.launch(
+                if (taskWithConfigAndContext.taskConfig.isHeavy) {
+                    singleThreadDispatcher
+                } else {
+                    Dispatchers.IO
+                }
+            ) {
                 val scheduleContext = taskWithConfigAndContext.taskContext.taskScheduleContext
 
                 // start
-                delay(
-                    ChronoUnit.MILLIS.between(
-                        ZonedDateTime.now(),
-                        scheduleContext.startDateTime
-                    )
-                )
+                delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), scheduleContext.startDateTime))
 
                 scheduleContext.lastExecution = ZonedDateTime.now()
                 logger.debug { "${taskWithConfigAndContext.task} started." }
@@ -85,10 +78,11 @@ class ScheduledTaskGroup : TaskGroup() {
                     logger.error { "${taskWithConfigAndContext.task} $e" }
                 }
 
-                taskWithConfigAndContext.taskConfig.nextExecution(taskWithConfigAndContext.taskContext.taskScheduleContext)?.let {
-                    taskWithConfigAndContext.taskContext.taskScheduleContext.startDateTime = it
-                    sortedTask.add(taskWithConfigAndContext)
-                }
+                taskWithConfigAndContext.taskConfig.nextExecution(taskWithConfigAndContext.taskContext.taskScheduleContext)
+                    ?.let {
+                        taskWithConfigAndContext.taskContext.taskScheduleContext.startDateTime = it
+                        sortedTask.add(taskWithConfigAndContext)
+                    }
 
                 runningTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
                 runningHeavyTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
