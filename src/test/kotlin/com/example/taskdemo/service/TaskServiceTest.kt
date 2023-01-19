@@ -83,29 +83,32 @@ internal class TaskServiceTest {
     }
 
     @Test
-    fun testTaskScheduleHeavy() {
+    fun testTaskScheduleHeavyAndPriority() {
         val taskConfig5sHeavy = TaskConfig.Builder()
             .withTaskSchedules(listOf(getTaskScheduleEvery(5)))
             .withHeavy(true)
             .build()
-        val taskConfig = TaskConfig.Builder()
+        val taskConfig5sPriority = TaskConfig.Builder()
+            .withTaskSchedules(listOf(getTaskScheduleEvery(5)))
+            .withPriority(100)
+            .build()
+        val taskConfig5s = TaskConfig.Builder()
             .withTaskSchedules(listOf(getTaskScheduleEvery(5)))
             .build()
         val taskConfig7sHeavy = TaskConfig.Builder()
         .withTaskSchedules(listOf(getTaskScheduleEvery(7)))
             .withHeavy(true)
             .build()
+        val now = ZonedDateTime.now()
+        val context1 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()), true)
+        val context2 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()), true)
 
         taskService.runSchedule(TaskImpl("Task 5s cron heavy"), getTaskContextNow(), taskConfig5sHeavy)
-        taskService.runSchedule(TaskImpl("Task 5s cron"), getTaskContextNow(), taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s cron"), context1, taskConfig5s)
         taskService.runSchedule(TaskImpl("Task 7s cron heavy"), getTaskContextNow(), taskConfig7sHeavy)
+        taskService.runSchedule(TaskImpl("Task 5s cron priority"), context2, taskConfig5sPriority)
 
         Thread.sleep(hour1)
-    }
-
-    @Test
-    fun testTaskSchedulePriority() {
-
     }
 
     private fun getTaskScheduleEvery(time: Int): TaskSchedule {

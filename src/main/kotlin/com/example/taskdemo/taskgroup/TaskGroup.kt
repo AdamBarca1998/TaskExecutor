@@ -51,7 +51,17 @@ abstract class TaskGroup {
             val compareTime = taskContext.taskScheduleContext.startDateTime.compareTo(other.taskContext.taskScheduleContext.startDateTime)
 
             return if (compareTime == 0) {
-                taskConfig.priority.compareTo(other.taskConfig.priority)
+                val comparePriority = other.taskConfig.priority.compareTo(taskConfig.priority)
+
+                return if (comparePriority == 0) {
+                    return if (taskConfig.isHeavy) {
+                        -1
+                    } else {
+                        1
+                    }
+                } else {
+                    comparePriority
+                }
             } else {
                 compareTime
             }
