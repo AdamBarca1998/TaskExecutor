@@ -21,7 +21,7 @@ abstract class TaskGroup {
     protected val logger = KotlinLogging.logger {}
 
     fun addTask(task: Task,
-                taskContext: TaskContext = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()), false),
+                taskContext: TaskContext = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now())),
                 taskConfig: TaskConfig = TaskConfig.Builder().build()) {
 
         plannedTasks.add(TaskWithConfigAndContext(task, taskContext, taskConfig))
