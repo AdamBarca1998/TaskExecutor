@@ -3,6 +3,8 @@ package com.example.taskdemo.taskgroup
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.model.TaskScheduleContext
+import java.time.ZonedDateTime
 import java.util.concurrent.LinkedTransferQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +20,10 @@ abstract class TaskGroup {
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     protected val logger = KotlinLogging.logger {}
 
-    fun addTask(task: Task, taskContext: TaskContext? = null, taskConfig: TaskConfig? = null) {
+    fun addTask(task: Task,
+                taskContext: TaskContext = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()), false),
+                taskConfig: TaskConfig = TaskConfig.Builder().build()) {
+
         plannedTasks.add(TaskWithConfigAndContext(task, taskContext, taskConfig))
     }
 
@@ -40,5 +45,16 @@ abstract class TaskGroup {
         }
     }
 
-    data class TaskWithConfigAndContext(val task: Task, val taskContext: TaskContext?, val taskConfig: TaskConfig?)
+    data class TaskWithConfigAndContext(val task: Task, val taskContext: TaskContext, val taskConfig: TaskConfig): Comparable<TaskWithConfigAndContext> {
+
+        override fun compareTo(other: TaskWithConfigAndContext): Int {
+            val compareTime = taskContext.taskScheduleContext.startDateTime.compareTo(other.taskContext.taskScheduleContext.startDateTime)
+
+            return if (compareTime == 0) {
+                taskConfig.priority.compareTo(other.taskConfig.priority)
+            } else {
+                compareTime
+            }
+        }
+    }
 }

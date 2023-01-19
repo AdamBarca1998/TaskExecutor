@@ -44,11 +44,25 @@ internal class TaskServiceTest {
 
     @Test
     fun testTaskCron() {
-        val taskConfig = TaskConfig.Builder()
+        val taskConfig5s = TaskConfig.Builder()
             .withTaskSchedules(listOf(getTaskScheduleEvery(5)))
             .build()
+        val taskConfig7s = TaskConfig.Builder()
+            .withTaskSchedules(listOf(getTaskScheduleEvery(7)))
+            .build()
+        val taskConfig10sHeavy = TaskConfig.Builder()
+            .withTaskSchedules(listOf(getTaskScheduleEvery(10)))
+            .withHeavy(true)
+            .build()
+        val taskConfig8sHeavy = TaskConfig.Builder()
+            .withTaskSchedules(listOf(getTaskScheduleEvery(8)))
+            .withHeavy(true)
+            .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s cron"), getTaskContextNow(), taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s cron"), getTaskContextNow(), taskConfig5s)
+        taskService.runSchedule(TaskImpl("Task 7s cron"), getTaskContextNow(), taskConfig7s)
+        taskService.runSchedule(TaskImpl("Task 8s cron heavy"), getTaskContextNow(), taskConfig8sHeavy)
+        taskService.runSchedule(TaskImpl("Task 10s cron heavy"), getTaskContextNow(), taskConfig10sHeavy)
 
         Thread.sleep(hour1)
     }

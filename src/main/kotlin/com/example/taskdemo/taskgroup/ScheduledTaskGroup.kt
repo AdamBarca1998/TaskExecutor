@@ -2,11 +2,11 @@ package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.extensions.toNullable
 import com.example.taskdemo.model.Task
-import com.example.taskdemo.model.TaskScheduleContext
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedTransferQueue
+import java.util.concurrent.PriorityBlockingQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -17,26 +17,21 @@ class ScheduledTaskGroup : TaskGroup() {
 
     override val name: String = "ScheduledTaskGroup"
     private val runningTasks = LinkedTransferQueue<TaskWithJob>()
+    private val runningHeavyTasks = LinkedTransferQueue<TaskWithJob>()
+    private val sortedTask = PriorityBlockingQueue<TaskWithConfigAndContext>()
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     init {
         scope.launch(Dispatchers.IO) {
             while (true) {
                 if (!isLocked.get()) {
+                    // moveAll tasks from planned to sorted
                     while (plannedTasks.isNotEmpty()) {
-                        launch {
-                            plannedTasks.poll()?.let {
-                                val context = if (it.taskConfig?.isHeavy == true) {
-                                    singleThreadDispatcher
-                                } else {
-                                    Dispatchers.IO
-                                }
+                        sortedTask.add(plannedTasks.poll())
+                    }
 
-                                val job = launch(context) { runTask(it) }
-
-                                runningTasks.add(TaskWithJob(it, job))
-                            }
-                        }
+                    if (runningTasks.isEmpty() || sortedTask.first().taskConfig.isHeavy) {
+                        runTask()
                     }
                 }
 
@@ -47,55 +42,68 @@ class ScheduledTaskGroup : TaskGroup() {
 
     override fun removeTask(task: Task) {
         super.removeTask(task)
-        val foundTask = runningTasks.stream().filter{it.taskWithConfigAndContext.task == task}.findFirst().toNullable()
-        runningTasks.removeIf { it.taskWithConfigAndContext.task == task}
-        foundTask?.job?.cancel()
+        runningTasks.stream().filter { it.taskWithConfigAndContext.task == task }.findFirst().toNullable()?.let {
+            runningTasks.remove(it)
+            it.job.cancel()
+        }
+        runningHeavyTasks.stream().filter { it.taskWithConfigAndContext.task == task }.findFirst().toNullable()?.let {
+            runningHeavyTasks.remove(it)
+            it.job.cancel()
+        }
     }
 
-    private suspend fun runTask(taskWithConfigAndContext: TaskWithConfigAndContext) {
-        val scheduleContext = taskWithConfigAndContext.taskContext?.taskScheduleContext
+    private suspend fun runTask() {
+        val taskWithConfigAndContext = sortedTask.poll()
 
-        // start
-        delay(
-            ChronoUnit.MILLIS.between(
-                ZonedDateTime.now(),
-                scheduleContext?.startDateTime
-            )
-        )
+        if (taskWithConfigAndContext != null) {
+            val context = if (taskWithConfigAndContext.taskConfig.isHeavy) {
+                singleThreadDispatcher
+            } else {
+                Dispatchers.IO
+            }
 
-        do {
-            scheduleContext?.lastExecution = ZonedDateTime.now()
-            logger.debug { "${taskWithConfigAndContext.task} started." }
+            val job = scope.launch(context) {
+                val scheduleContext = taskWithConfigAndContext.taskContext.taskScheduleContext
 
-            try {
-                taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
+                // start
+                delay(
+                    ChronoUnit.MILLIS.between(
+                        ZonedDateTime.now(),
+                        scheduleContext.startDateTime
+                    )
+                )
 
-                scheduleContext?.lastCompletion = ZonedDateTime.now()
-                logger.debug { "${taskWithConfigAndContext.task} ended." }
+                scheduleContext.lastExecution = ZonedDateTime.now()
+                logger.debug { "${taskWithConfigAndContext.task} started." }
 
-                delayPeriod(taskWithConfigAndContext)
-            } catch (e: Exception) {
-                logger.error { "${taskWithConfigAndContext.task} $e" }
+                try {
+                    taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
 
-                if (taskWithConfigAndContext.taskContext?.isRollback == true) {
-                    delayPeriod(taskWithConfigAndContext)
-                } else {
-                    break
+                    scheduleContext.lastCompletion = ZonedDateTime.now()
+                    logger.debug { "${taskWithConfigAndContext.task} ended." }
+                } catch (e: Exception) {
+                    logger.error { "${taskWithConfigAndContext.task} $e" }
+                }
+
+                taskWithConfigAndContext.taskConfig.nextExecution(taskWithConfigAndContext.taskContext.taskScheduleContext)?.let {
+                    taskWithConfigAndContext.taskContext.taskScheduleContext.startDateTime = it
+                    sortedTask.add(taskWithConfigAndContext)
+                }
+
+                runningTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
+                runningHeavyTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
+
+                if (!taskWithConfigAndContext.taskConfig.isHeavy) {
+                    runTask()
                 }
             }
-        } while (taskWithConfigAndContext.taskConfig?.taskSchedules?.isNotEmpty() == true && !isLocked.get())
-    }
 
-    private suspend fun delayPeriod(taskWithConfigAndContext: TaskWithConfigAndContext) {
-        delay(
-            ChronoUnit.MILLIS.between(
-                ZonedDateTime.now(),
-                taskWithConfigAndContext.taskConfig?.nextExecution(
-                    taskWithConfigAndContext.taskContext?.taskScheduleContext
-                        ?: TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now())
-                )
-            )
-        )
+            if (taskWithConfigAndContext.taskConfig.isHeavy) {
+                runningHeavyTasks.add(TaskWithJob(taskWithConfigAndContext, job))
+            } else {
+                runningTasks.add(TaskWithJob(taskWithConfigAndContext, job))
+            }
+        }
     }
 
     data class TaskWithJob(val taskWithConfigAndContext: TaskWithConfigAndContext, val job: Job)
