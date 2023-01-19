@@ -26,14 +26,16 @@ abstract class TaskGroup {
         plannedTasks.removeIf { it.task == task }
     }
 
-    abstract fun start()
+    fun start() {
+        isLocked.set(false)
+    }
 
     fun stop() {
         isLocked.set(true)
     }
 
     protected suspend fun sleepLaunch() {
-        if (plannedTasks.isEmpty()) {
+        if (plannedTasks.isEmpty() || isLocked.get()) {
             delay(10_000)
         }
     }

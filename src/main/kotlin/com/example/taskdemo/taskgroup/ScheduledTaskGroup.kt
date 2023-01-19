@@ -5,9 +5,11 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskScheduleContext
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedTransferQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -15,22 +17,25 @@ class ScheduledTaskGroup : TaskGroup() {
 
     override val name: String = "ScheduledTaskGroup"
     private val runningTasks = LinkedTransferQueue<TaskWithJob>()
+    private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     init {
-        start()
-    }
-
-    override fun start() {
-        isLocked.set(false)
-
         scope.launch(Dispatchers.IO) {
-            while (!isLocked.get()) {
-                while (plannedTasks.isNotEmpty()) {
-                    launch {
-                        plannedTasks.poll()?.let {
-                            val job = launch { runTask(it) }
+            while (true) {
+                if (!isLocked.get()) {
+                    while (plannedTasks.isNotEmpty()) {
+                        launch {
+                            plannedTasks.poll()?.let {
+                                val context = if (it.taskConfig?.isHeavy == true) {
+                                    singleThreadDispatcher
+                                } else {
+                                    Dispatchers.IO
+                                }
 
-                            runningTasks.add(TaskWithJob(it, job))
+                                val job = launch(context) { runTask(it) }
+
+                                runningTasks.add(TaskWithJob(it, job))
+                            }
                         }
                     }
                 }

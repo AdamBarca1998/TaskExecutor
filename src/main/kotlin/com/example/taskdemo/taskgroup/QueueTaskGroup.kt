@@ -9,25 +9,23 @@ class QueueTaskGroup : TaskGroup() {
 
     init {
         scope.launch(Dispatchers.IO) {
-            while (!isLocked.get()) {
-                plannedTasks.poll()?.let {
-                    logger.debug { "${it.task} started." }
+            while (true) {
+                if (!isLocked.get()) {
+                    plannedTasks.poll()?.let {
+                        logger.debug { "${it.task} started." }
 
-                    try {
-                        it.task.run(it.taskContext)
-                    } catch (e: Exception) {
-                        logger.error { "${it.task} $e" }
+                        try {
+                            it.task.run(it.taskContext)
+                        } catch (e: Exception) {
+                            logger.error { "${it.task} $e" }
+                        }
+
+                        logger.debug { "${it.task} ended." }
                     }
-
-                    logger.debug { "${it.task} ended." }
                 }
 
                 sleepLaunch()
             }
         }
-    }
-
-    override fun start() {
-        isLocked.set(false)
     }
 }

@@ -21,12 +21,11 @@ internal class TaskServiceTest {
     @Test
     fun testTaskDelay() {
         val taskScheduleDelay5s = TaskSchedule.fromFixedDelay(Duration.ofSeconds(5))
-        val taskContextNow = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
         val taskConfig = TaskConfig.Builder()
             .withTaskSchedules(listOf(taskScheduleDelay5s))
             .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s delay"), taskContextNow, taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s delay"), getTaskContextNow(), taskConfig)
 
         Thread.sleep(hour1)
     }
@@ -34,28 +33,22 @@ internal class TaskServiceTest {
     @Test
     fun testTaskRate() {
         val taskScheduleRate5s = TaskSchedule.fromFixedRate(Duration.ofSeconds(5))
-        val taskContextNow = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
         val taskConfig = TaskConfig.Builder()
             .withTaskSchedules(listOf(taskScheduleRate5s))
             .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s rate"), taskContextNow, taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s rate"), getTaskContextNow(), taskConfig)
 
         Thread.sleep(hour1)
     }
 
     @Test
     fun testTaskCron() {
-        val taskScheduleEvery5S = TaskSchedule.fromCron(
-            CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
-            .withSecond(FieldExpressionFactory.every(5))
-            .instance())
-        val taskContextNow = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
         val taskConfig = TaskConfig.Builder()
-            .withTaskSchedules(listOf(taskScheduleEvery5S))
+            .withTaskSchedules(listOf(getTaskScheduleEvery(5)))
             .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s cron"), taskContextNow, taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s cron"), getTaskContextNow(), taskConfig)
 
         Thread.sleep(hour1)
     }
@@ -64,6 +57,8 @@ internal class TaskServiceTest {
     fun testTaskQueue() {
         taskService.stopQueue()
 
+        Thread.sleep(Duration.ofSeconds(5))
+
         taskService.runQueue(TaskImpl("Task linked 1"))
         taskService.runQueue(TaskImpl("Task linked 2"))
         taskService.runQueue(TaskImpl("Task linked 3"))
@@ -71,5 +66,38 @@ internal class TaskServiceTest {
         taskService.startQueue()
 
         Thread.sleep(hour1)
+    }
+
+    @Test
+    fun testTaskScheduleHeavy() {
+        val taskConfig5sHeavy = TaskConfig.Builder()
+            .withTaskSchedules(listOf(getTaskScheduleEvery(5)))
+            .withHeavy(true)
+            .build()
+        val taskConfig = TaskConfig.Builder()
+            .withTaskSchedules(listOf(getTaskScheduleEvery(5)))
+            .build()
+        val taskConfig7sHeavy = TaskConfig.Builder()
+        .withTaskSchedules(listOf(getTaskScheduleEvery(7)))
+            .withHeavy(true)
+            .build()
+
+        taskService.runSchedule(TaskImpl("Task 5s cron heavy"), getTaskContextNow(), taskConfig5sHeavy)
+        taskService.runSchedule(TaskImpl("Task 5s cron"), getTaskContextNow(), taskConfig)
+        taskService.runSchedule(TaskImpl("Task 7s cron heavy"), getTaskContextNow(), taskConfig7sHeavy)
+
+        Thread.sleep(hour1)
+    }
+
+    private fun getTaskScheduleEvery(time: Int): TaskSchedule {
+        return TaskSchedule.fromCron(
+            CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))
+                .withSecond(FieldExpressionFactory.every(time))
+                .instance()
+        )
+    }
+
+    private fun getTaskContextNow(): TaskContext {
+        return TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
     }
 }
