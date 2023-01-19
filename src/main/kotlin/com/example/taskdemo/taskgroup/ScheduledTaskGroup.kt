@@ -77,8 +77,10 @@ class ScheduledTaskGroup : TaskGroup() {
             } catch (e: Exception) {
                 logger.error { "${taskWithConfigAndContext.task} $e" }
 
-                if (taskWithConfigAndContext.taskContext?.isRollback == false) {
+                if (taskWithConfigAndContext.taskContext?.isRollback == true) {
                     delayPeriod(taskWithConfigAndContext)
+                } else {
+                    break
                 }
             }
         } while (taskWithConfigAndContext.taskConfig?.taskSchedules?.isNotEmpty() == true && !isLocked.get())
