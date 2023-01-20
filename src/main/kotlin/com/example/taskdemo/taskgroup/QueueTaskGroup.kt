@@ -10,17 +10,11 @@ class QueueTaskGroup : TaskGroup() {
     init {
         scope.launch(Dispatchers.IO) {
             while (true) {
-                if (!isLocked.get()) {
+                if (!isLocked.get() && runningTasks.isEmpty()) {
                     plannedTasks.poll()?.let {
-                        logger.debug { "${it.task} started." }
+                        val job = launch { runTask(it) }
 
-                        try {
-                            it.task.run(it.taskContext)
-                        } catch (e: Exception) {
-                            logger.error { "${it.task} $e" }
-                        }
-
-                        logger.debug { "${it.task} ended." }
+                        runningTasks.add(TaskWithJob(it, job))
                     }
                 }
 

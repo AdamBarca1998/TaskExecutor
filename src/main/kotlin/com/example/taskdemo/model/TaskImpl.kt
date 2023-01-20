@@ -6,7 +6,7 @@ data class TaskImpl(
     val name: String,
 ) : Task {
 
-    override fun run(taskContextAbstract: TaskContextAbstract?) {
+    override fun run(taskContext: TaskContext) {
         println("$name running...")
         Thread.sleep(Duration.ofSeconds(7))
     }

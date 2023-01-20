@@ -1,7 +1,7 @@
 package com.example.taskdemo.taskschedule
 
 import com.cronutils.model.Cron
-import com.example.taskdemo.model.TaskScheduleContext
+import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.ZonedDateTime
 
@@ -29,5 +29,5 @@ abstract class TaskSchedule {
         }
     }
 
-    abstract fun nextExecution(taskScheduleContext: TaskScheduleContext): ZonedDateTime?
+    abstract fun nextExecution(taskContext: TaskContext): ZonedDateTime?
 }

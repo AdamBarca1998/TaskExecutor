@@ -3,8 +3,9 @@ package com.example.taskdemo.taskgroup
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
-import com.example.taskdemo.model.TaskScheduleContext
 import java.time.Duration
+import java.time.Instant
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.LinkedTransferQueue
@@ -23,13 +24,19 @@ abstract class TaskGroup {
     protected val plannedTasks = PriorityBlockingQueue<TaskWithConfigAndContext>()
     protected val runningTasks = LinkedTransferQueue<TaskWithJob>()
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
-    protected val logger = KotlinLogging.logger {}
+    private val logger = KotlinLogging.logger {}
 
-    fun addTask(task: Task,
-                taskContext: TaskContext = TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now())),
-                taskConfig: TaskConfig = TaskConfig.Builder().build()) {
+    fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build()) {
 
-        plannedTasks.add(TaskWithConfigAndContext(task, taskContext, taskConfig))
+        plannedTasks.add(TaskWithConfigAndContext(
+            task,
+            taskConfig,
+            TaskContext(
+                ZonedDateTime.now(),
+                Instant.ofEpochMilli(Long.MAX_VALUE).atZone(ZoneOffset.UTC),
+                Instant.ofEpochMilli(Long.MAX_VALUE).atZone(ZoneOffset.UTC)
+            )
+        ))
     }
 
     open fun removeTask(task: Task) {
@@ -54,39 +61,52 @@ abstract class TaskGroup {
         }
     }
 
-    protected suspend fun startTask(taskWithConfigAndContext: TaskWithConfigAndContext) {
-        val scheduleContext = taskWithConfigAndContext.taskContext.taskScheduleContext
-
-        delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), scheduleContext.startDateTime))
-
-        scheduleContext.lastExecution = ZonedDateTime.now()
+    protected suspend fun runTask(taskWithConfigAndContext: TaskWithConfigAndContext) {
+        // begin
+        delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskWithConfigAndContext.taskContext.startDateTime))
+        val lastExecution = ZonedDateTime.now()
         logger.debug { "${taskWithConfigAndContext.task} started." }
 
-        try {
-            taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
+        // run
+        if (!isLocked.get()) {
+            try {
+                taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
+                logger.debug { "${taskWithConfigAndContext.task} ended." }
+            } catch (e: Exception) {
+                logger.error { "${taskWithConfigAndContext.task} $e" }
+            }
+        }
 
-            scheduleContext.lastCompletion = ZonedDateTime.now()
-            logger.debug { "${taskWithConfigAndContext.task} ended." }
-        } catch (e: Exception) {
-            logger.error { "${taskWithConfigAndContext.task} $e" }
+        // finish
+        val lastCompletion = ZonedDateTime.now()
+        runningTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
+
+        // next execution
+        taskWithConfigAndContext.taskConfig.nextExecution(taskWithConfigAndContext.taskContext)?.let {
+            val newContext = TaskContext(it, lastExecution, lastCompletion)
+
+            plannedTasks.add(TaskWithConfigAndContext(
+                taskWithConfigAndContext.task,
+                taskWithConfigAndContext.taskConfig,
+                newContext
+            ))
         }
     }
 
-    protected data class TaskWithConfigAndContext(val task: Task, val taskContext: TaskContext, val taskConfig: TaskConfig): Comparable<TaskWithConfigAndContext> {
+    protected data class TaskWithConfigAndContext(val task: Task,
+                                                  val taskConfig: TaskConfig,
+                                                  val taskContext: TaskContext,
+                                                  ) : Comparable<TaskWithConfigAndContext> {
 
-        // 1. startDateTime -> 2. priority -> 3. isHeavy
+        // 1. startDateTime -> 2. priority
         override fun compareTo(other: TaskWithConfigAndContext): Int {
-            val compareTime = taskContext.taskScheduleContext.startDateTime.compareTo(other.taskContext.taskScheduleContext.startDateTime)
+            val compareTime = taskContext.startDateTime.compareTo(other.taskContext.startDateTime)
 
             return if (compareTime == 0) {
                 val comparePriority = other.taskConfig.priority.compareTo(taskConfig.priority)
 
-                return if (comparePriority == 0) {
-                    return if (taskConfig.isHeavy) {
-                        -1
-                    } else {
-                        1
-                    }
+                if (comparePriority == 0) {
+                    1
                 } else {
                     comparePriority
                 }

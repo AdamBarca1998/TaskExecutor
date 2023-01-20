@@ -2,7 +2,6 @@ package com.example.taskdemo.service
 
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
-import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.taskgroup.DaemonTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
 import com.example.taskdemo.taskgroup.ScheduledTaskGroup
@@ -16,8 +15,8 @@ class TaskService {
     private val queueTaskGroup = QueueTaskGroup()
     private val daemonTaskGroup = DaemonTaskGroup()
 
-    fun runSchedule(task: Task, context: TaskContext, config: TaskConfig) {
-        scheduledTaskGroup.addTask(task, context, config)
+    fun runSchedule(task: Task, config: TaskConfig) {
+        scheduledTaskGroup.addTask(task, config)
     }
 
     fun runQueue(task: Task) {
@@ -25,7 +24,7 @@ class TaskService {
     }
 
     fun runDaemon(task: Task, config: TaskConfig) {
-        daemonTaskGroup.addTask(task, taskConfig = config)
+        daemonTaskGroup.addTask(task, config)
     }
 
     fun removeTask(task: Task) {

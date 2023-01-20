@@ -1,6 +1,6 @@
 package com.example.taskdemo.taskschedule
 
-import com.example.taskdemo.model.TaskScheduleContext
+import com.example.taskdemo.model.TaskContext
 import java.time.ZonedDateTime
 
 class DaemonTaskSchedule : TaskSchedule() {
@@ -11,7 +11,7 @@ class DaemonTaskSchedule : TaskSchedule() {
         ZonedDateTime.now().plusMinutes(5)
     )
 
-    override fun nextExecution(taskScheduleContext: TaskScheduleContext): ZonedDateTime? {
+    override fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
         return events.find { ZonedDateTime.now().isBefore(it) }
     }
 }

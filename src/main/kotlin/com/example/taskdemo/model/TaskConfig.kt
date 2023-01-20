@@ -10,9 +10,9 @@ class TaskConfig private constructor(
     val description: String?
 ) {
 
-    fun nextExecution(taskScheduleContext: TaskScheduleContext): ZonedDateTime? {
+    fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
         val sortExecution = taskSchedules.stream()
-            .map { it.nextExecution(taskScheduleContext) }
+            .map { it.nextExecution(taskContext) }
             .sorted()
             .toList()
 

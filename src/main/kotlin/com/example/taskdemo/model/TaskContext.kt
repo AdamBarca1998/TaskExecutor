@@ -1,5 +1,9 @@
 package com.example.taskdemo.model
 
-class TaskContext(
-    override val taskScheduleContext: TaskScheduleContext) : TaskContextAbstract() {
-}
+import java.time.ZonedDateTime
+
+data class TaskContext(
+    val startDateTime: ZonedDateTime,
+    val lastExecution: ZonedDateTime,
+    val lastCompletion: ZonedDateTime
+)

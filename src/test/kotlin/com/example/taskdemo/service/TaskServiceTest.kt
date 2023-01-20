@@ -5,9 +5,7 @@ import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
 import com.cronutils.model.field.expression.FieldExpressionFactory
 import com.example.taskdemo.model.TaskConfig
-import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.TaskImpl
-import com.example.taskdemo.model.TaskScheduleContext
 import com.example.taskdemo.taskschedule.TaskSchedule
 import java.time.Duration
 import java.time.ZonedDateTime
@@ -25,7 +23,7 @@ internal class TaskServiceTest {
             .withTaskSchedules(listOf(taskScheduleDelay5s))
             .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s delay"), getTaskContextNow(), taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s delay"), taskConfig)
 
         Thread.sleep(hour1)
     }
@@ -37,7 +35,7 @@ internal class TaskServiceTest {
             .withTaskSchedules(listOf(taskScheduleRate5s))
             .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s rate"), getTaskContextNow(), taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s rate"), taskConfig)
 
         Thread.sleep(hour1)
     }
@@ -59,10 +57,10 @@ internal class TaskServiceTest {
             .withHeavy(true)
             .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s cron"), getTaskContextNow(), taskConfig5s)
-        taskService.runSchedule(TaskImpl("Task 7s cron"), getTaskContextNow(), taskConfig7s)
-        taskService.runSchedule(TaskImpl("Task 8s cron heavy"), getTaskContextNow(), taskConfig8sHeavy)
-        taskService.runSchedule(TaskImpl("Task 10s cron heavy"), getTaskContextNow(), taskConfig10sHeavy)
+        taskService.runSchedule(TaskImpl("Task 5s cron"), taskConfig5s)
+        taskService.runSchedule(TaskImpl("Task 7s cron"), taskConfig7s)
+        taskService.runSchedule(TaskImpl("Task 8s cron heavy"), taskConfig8sHeavy)
+        taskService.runSchedule(TaskImpl("Task 10s cron heavy"), taskConfig10sHeavy)
 
         Thread.sleep(hour1)
     }
@@ -100,15 +98,13 @@ internal class TaskServiceTest {
             .withHeavy(true)
             .build()
         val now = ZonedDateTime.now()
-        val context1 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()))
-        val context2 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()))
 
         taskService.stopSchedule()
 
-        taskService.runSchedule(TaskImpl("Task 5s cron heavy"), getTaskContextNow(), taskConfig5sHeavy)
-        taskService.runSchedule(TaskImpl("Task 5s cron"), context1, taskConfig5s)
-        taskService.runSchedule(TaskImpl("Task 7s cron heavy"), getTaskContextNow(), taskConfig7sHeavy)
-        taskService.runSchedule(TaskImpl("Task 5s cron priority"), context2, taskConfig5sPriority)
+        taskService.runSchedule(TaskImpl("Task 5s cron heavy"), taskConfig5sHeavy)
+        taskService.runSchedule(TaskImpl("Task 5s cron"), taskConfig5s)
+        taskService.runSchedule(TaskImpl("Task 7s cron heavy"), taskConfig7sHeavy)
+        taskService.runSchedule(TaskImpl("Task 5s cron priority"), taskConfig5sPriority)
 
         Thread.sleep(Duration.ofSeconds(30))
         taskService.startSchedule()
@@ -141,9 +137,5 @@ internal class TaskServiceTest {
                 .withSecond(FieldExpressionFactory.every(time))
                 .instance()
         )
-    }
-
-    private fun getTaskContextNow(): TaskContext {
-        return TaskContext(TaskScheduleContext(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()))
     }
 }
