@@ -116,6 +116,25 @@ internal class TaskServiceTest {
         Thread.sleep(hour1)
     }
 
+    @Test
+    fun testDaemonTask() {
+        taskService.stopDaemon()
+
+        val taskConfig = TaskConfig.Builder()
+            .withTaskSchedules(listOf(TaskSchedule.fromDaemon()))
+            .build()
+
+        taskService.runDaemon(TaskImpl("Task Daemon 1"), taskConfig)
+        taskService.runDaemon(TaskImpl("Task Daemon 2"), taskConfig)
+        taskService.runDaemon(TaskImpl("Task Daemon 3"), taskConfig)
+
+        Thread.sleep(Duration.ofSeconds(5))
+
+        taskService.startDaemon()
+
+        Thread.sleep(hour1)
+    }
+
     private fun getTaskScheduleEvery(time: Int): TaskSchedule {
         return TaskSchedule.fromCron(
             CronBuilder.cron(CronDefinitionBuilder.instanceDefinitionFor(CronType.SPRING))

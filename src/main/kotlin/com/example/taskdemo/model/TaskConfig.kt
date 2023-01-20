@@ -16,7 +16,7 @@ class TaskConfig private constructor(
             .sorted()
             .toList()
 
-        return sortExecution.first()
+        return sortExecution.firstOrNull()
     }
 
     data class Builder(

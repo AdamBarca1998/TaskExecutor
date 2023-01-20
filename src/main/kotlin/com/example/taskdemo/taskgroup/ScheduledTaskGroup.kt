@@ -1,14 +1,10 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.extensions.toNullable
 import com.example.taskdemo.model.Task
 import java.time.Duration
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedTransferQueue
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -16,7 +12,6 @@ import kotlinx.coroutines.launch
 class ScheduledTaskGroup : TaskGroup() {
 
     override val name: String = "ScheduledTaskGroup"
-    private val runningTasks = LinkedTransferQueue<TaskWithJob>()
     private val runningHeavyTasks = LinkedTransferQueue<TaskWithJob>()
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
@@ -36,11 +31,7 @@ class ScheduledTaskGroup : TaskGroup() {
 
     override fun removeTask(task: Task) {
         super.removeTask(task)
-        runningTasks.stream().filter { it.taskWithConfigAndContext.task == task }.findFirst().toNullable()?.let {
-            runningTasks.remove(it)
-            it.job.cancel()
-        }
-        runningHeavyTasks.stream().filter { it.taskWithConfigAndContext.task == task }.findFirst().toNullable()?.let {
+        runningHeavyTasks.find { it.taskWithConfigAndContext.task == task }?.let {
             runningHeavyTasks.remove(it)
             it.job.cancel()
         }
@@ -56,22 +47,7 @@ class ScheduledTaskGroup : TaskGroup() {
                         Dispatchers.IO
                     }
                 ) {
-                    val scheduleContext = taskWithConfigAndContext.taskContext.taskScheduleContext
-
-                    // start
-                    delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), scheduleContext.startDateTime))
-
-                    scheduleContext.lastExecution = ZonedDateTime.now()
-                    logger.debug { "${taskWithConfigAndContext.task} started." }
-
-                    try {
-                        taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
-
-                        scheduleContext.lastCompletion = ZonedDateTime.now()
-                        logger.debug { "${taskWithConfigAndContext.task} ended." }
-                    } catch (e: Exception) {
-                        logger.error { "${taskWithConfigAndContext.task} $e" }
-                    }
+                    startTask(taskWithConfigAndContext)
 
                     taskWithConfigAndContext.taskConfig.nextExecution(taskWithConfigAndContext.taskContext.taskScheduleContext)
                         ?.let {
@@ -93,6 +69,4 @@ class ScheduledTaskGroup : TaskGroup() {
             }
         }
     }
-
-    data class TaskWithJob(val taskWithConfigAndContext: TaskWithConfigAndContext, val job: Job)
 }
