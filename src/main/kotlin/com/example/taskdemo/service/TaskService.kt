@@ -38,4 +38,12 @@ class TaskService {
     fun startQueue() {
         queueTaskGroup.start()
     }
+
+    fun stopSchedule() {
+        scheduledTaskGroup.stop()
+    }
+
+    fun startSchedule() {
+        scheduledTaskGroup.start()
+    }
 }

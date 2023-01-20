@@ -103,10 +103,15 @@ internal class TaskServiceTest {
         val context1 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()))
         val context2 = TaskContext(TaskScheduleContext(now, ZonedDateTime.now(), ZonedDateTime.now()))
 
+        taskService.stopSchedule()
+
         taskService.runSchedule(TaskImpl("Task 5s cron heavy"), getTaskContextNow(), taskConfig5sHeavy)
         taskService.runSchedule(TaskImpl("Task 5s cron"), context1, taskConfig5s)
         taskService.runSchedule(TaskImpl("Task 7s cron heavy"), getTaskContextNow(), taskConfig7sHeavy)
         taskService.runSchedule(TaskImpl("Task 5s cron priority"), context2, taskConfig5sPriority)
+
+        Thread.sleep(Duration.ofSeconds(30))
+        taskService.startSchedule()
 
         Thread.sleep(hour1)
     }
