@@ -17,6 +17,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 
+private const val LAUNCH_DELAY_S = 1L
+
 abstract class TaskGroup {
 
     abstract val name: String
@@ -57,7 +59,7 @@ abstract class TaskGroup {
 
     protected suspend fun sleepLaunch() {
         if (plannedTasks.isEmpty() || isLocked.get()) {
-            delay(Duration.ofSeconds(1).toMillis())
+            delay(Duration.ofSeconds(LAUNCH_DELAY_S).toMillis())
         }
     }
 
