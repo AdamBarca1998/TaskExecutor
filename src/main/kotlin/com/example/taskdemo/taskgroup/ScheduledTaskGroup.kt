@@ -2,6 +2,7 @@ package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.extensions.toNullable
 import com.example.taskdemo.model.Task
+import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.Executors
@@ -22,13 +23,13 @@ class ScheduledTaskGroup : TaskGroup() {
     init {
         scope.launch(Dispatchers.IO) {
             while (true) {
-                if (!isLocked.get()) {
-                    if (runningTasks.isEmpty() || plannedTasks.firstOrNull()?.taskConfig?.isHeavy == true) {
-                        runTask()
-                    }
-                }
+                runTask()
 
                 sleepLaunch()
+
+                if (runningTasks.isNotEmpty()) {
+                    delay(Duration.ofSeconds(10).toMillis())
+                }
             }
         }
     }
@@ -46,7 +47,7 @@ class ScheduledTaskGroup : TaskGroup() {
     }
 
     private suspend fun runTask() {
-        if (!isLocked.get()) {
+        if (!isLocked.get() && (runningTasks.isEmpty() || plannedTasks.firstOrNull()?.taskConfig?.isHeavy == true) ) {
             plannedTasks.poll()?.let { taskWithConfigAndContext ->
                 val job = scope.launch(
                     if (taskWithConfigAndContext.taskConfig.isHeavy) {
@@ -80,6 +81,8 @@ class ScheduledTaskGroup : TaskGroup() {
 
                     runningTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
                     runningHeavyTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
+
+                    runTask()
                 }
 
                 if (taskWithConfigAndContext.taskConfig.isHeavy) {
