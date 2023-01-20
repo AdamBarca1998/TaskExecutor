@@ -57,7 +57,7 @@ abstract class TaskGroup {
 
     protected suspend fun sleepLaunch() {
         if (plannedTasks.isEmpty() || isLocked.get()) {
-            delay(Duration.ofSeconds(10).toMillis())
+            delay(Duration.ofSeconds(1).toMillis())
         }
     }
 
@@ -82,7 +82,9 @@ abstract class TaskGroup {
         runningTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
 
         // next execution
-        taskWithConfigAndContext.taskConfig.nextExecution(taskWithConfigAndContext.taskContext)?.let {
+        taskWithConfigAndContext.taskConfig.nextExecution(
+            TaskContext(ZonedDateTime.now(), lastExecution, lastCompletion)
+        )?.let {
             val newContext = TaskContext(it, lastExecution, lastCompletion)
 
             plannedTasks.add(TaskWithConfigAndContext(

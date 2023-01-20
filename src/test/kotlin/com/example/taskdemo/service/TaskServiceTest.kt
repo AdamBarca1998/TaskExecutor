@@ -8,7 +8,6 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskImpl
 import com.example.taskdemo.taskschedule.TaskSchedule
 import java.time.Duration
-import java.time.ZonedDateTime
 import org.junit.jupiter.api.Test
 
 internal class TaskServiceTest {
@@ -18,24 +17,38 @@ internal class TaskServiceTest {
 
     @Test
     fun testTaskDelay() {
-        val taskScheduleDelay5s = TaskSchedule.fromFixedDelay(Duration.ofSeconds(5))
-        val taskConfig = TaskConfig.Builder()
-            .withTaskSchedules(listOf(taskScheduleDelay5s))
+        val taskConfig5Delay = TaskConfig.Builder()
+            .withTaskSchedules(listOf(TaskSchedule.fromFixedDelay(Duration.ofSeconds(5))))
+            .build()
+        val taskConfig7Delay = TaskConfig.Builder()
+            .withTaskSchedules(listOf(TaskSchedule.fromFixedDelay(Duration.ofSeconds(7))))
+            .build()
+        val taskConfig10Delay = TaskConfig.Builder()
+            .withTaskSchedules(listOf(TaskSchedule.fromFixedDelay(Duration.ofSeconds(10))))
             .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s delay"), taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s delay"), taskConfig5Delay)
+        taskService.runSchedule(TaskImpl("Task 7s delay"), taskConfig7Delay)
+        taskService.runSchedule(TaskImpl("Task 10s delay"), taskConfig10Delay)
 
         Thread.sleep(hour1)
     }
 
     @Test
     fun testTaskRate() {
-        val taskScheduleRate5s = TaskSchedule.fromFixedRate(Duration.ofSeconds(5))
-        val taskConfig = TaskConfig.Builder()
-            .withTaskSchedules(listOf(taskScheduleRate5s))
+        val taskConfig5Rate = TaskConfig.Builder()
+            .withTaskSchedules(listOf(TaskSchedule.fromFixedRate(Duration.ofSeconds(5))))
+            .build()
+        val taskConfig7Rate = TaskConfig.Builder()
+            .withTaskSchedules(listOf(TaskSchedule.fromFixedRate(Duration.ofSeconds(7))))
+            .build()
+        val taskConfig10Rate = TaskConfig.Builder()
+            .withTaskSchedules(listOf(TaskSchedule.fromFixedRate(Duration.ofSeconds(10))))
             .build()
 
-        taskService.runSchedule(TaskImpl("Task 5s rate"), taskConfig)
+        taskService.runSchedule(TaskImpl("Task 5s rate"), taskConfig5Rate)
+        taskService.runSchedule(TaskImpl("Task 7s rate"), taskConfig7Rate)
+        taskService.runSchedule(TaskImpl("Task 10s rate"), taskConfig10Rate)
 
         Thread.sleep(hour1)
     }
@@ -69,12 +82,11 @@ internal class TaskServiceTest {
     fun testTaskQueue() {
         taskService.stopQueue()
 
-        Thread.sleep(Duration.ofSeconds(5))
-
         taskService.runQueue(TaskImpl("Task linked 1"))
         taskService.runQueue(TaskImpl("Task linked 2"))
         taskService.runQueue(TaskImpl("Task linked 3"))
 
+        Thread.sleep(Duration.ofSeconds(5))
         taskService.startQueue()
 
         Thread.sleep(hour1)
@@ -97,7 +109,6 @@ internal class TaskServiceTest {
         .withTaskSchedules(listOf(getTaskScheduleEvery(7)))
             .withHeavy(true)
             .build()
-        val now = ZonedDateTime.now()
 
         taskService.stopSchedule()
 
@@ -114,18 +125,17 @@ internal class TaskServiceTest {
 
     @Test
     fun testDaemonTask() {
-        taskService.stopDaemon()
-
         val taskConfig = TaskConfig.Builder()
             .withTaskSchedules(listOf(TaskSchedule.fromDaemon()))
             .build()
+
+        taskService.stopDaemon()
 
         taskService.runDaemon(TaskImpl("Task Daemon 1"), taskConfig)
         taskService.runDaemon(TaskImpl("Task Daemon 2"), taskConfig)
         taskService.runDaemon(TaskImpl("Task Daemon 3"), taskConfig)
 
         Thread.sleep(Duration.ofSeconds(5))
-
         taskService.startDaemon()
 
         Thread.sleep(hour1)

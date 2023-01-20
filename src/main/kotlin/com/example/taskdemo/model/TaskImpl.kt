@@ -8,6 +8,6 @@ data class TaskImpl(
 
     override fun run(taskContext: TaskContext) {
         println("$name running...")
-        Thread.sleep(Duration.ofSeconds(7))
+        Thread.sleep(Duration.ofSeconds(1))
     }
 }

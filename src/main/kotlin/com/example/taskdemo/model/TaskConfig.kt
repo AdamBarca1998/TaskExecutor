@@ -4,7 +4,7 @@ import com.example.taskdemo.taskschedule.TaskSchedule
 import java.time.ZonedDateTime
 
 class TaskConfig private constructor(
-    val taskSchedules: List<TaskSchedule>,
+    private val taskSchedules: List<TaskSchedule>,
     val priority: Int,
     val isHeavy: Boolean,
     val description: String?
