@@ -109,6 +109,7 @@ abstract class TaskGroup {
             return if (compareTime == 0) {
                 val comparePriority = other.taskConfig.priority.compareTo(taskConfig.priority)
 
+                // due to original order
                 if (comparePriority == 0) {
                     1
                 } else {
