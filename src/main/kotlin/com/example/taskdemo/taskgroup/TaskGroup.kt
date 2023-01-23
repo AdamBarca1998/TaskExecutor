@@ -86,7 +86,7 @@ abstract class TaskGroup {
 
         // next execution
         taskWithConfigAndContext.taskConfig.nextExecution(
-            TaskContext(ZonedDateTime.now(), lastExecution, lastCompletion)
+            TaskContext(taskWithConfigAndContext.taskContext.startDateTime, lastExecution, lastCompletion)
         )?.let {
             val newContext = TaskContext(it, lastExecution, lastCompletion)
 
