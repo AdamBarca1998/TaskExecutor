@@ -67,10 +67,11 @@ abstract class TaskGroup {
         // begin
         delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskWithConfigAndContext.taskContext.startDateTime))
         val lastExecution = ZonedDateTime.now()
-        logger.debug { "${taskWithConfigAndContext.task} started." }
 
         // run
         if (!isLocked.get()) {
+            logger.debug { "${taskWithConfigAndContext.task} started." }
+
             try {
                 taskWithConfigAndContext.task.run(taskWithConfigAndContext.taskContext)
                 logger.debug { "${taskWithConfigAndContext.task} ended." }
@@ -89,11 +90,13 @@ abstract class TaskGroup {
         )?.let {
             val newContext = TaskContext(it, lastExecution, lastCompletion)
 
-            plannedTasks.add(TaskWithConfigAndContext(
-                taskWithConfigAndContext.task,
-                taskWithConfigAndContext.taskConfig,
-                newContext
-            ))
+            plannedTasks.add(
+                TaskWithConfigAndContext(
+                    taskWithConfigAndContext.task,
+                    taskWithConfigAndContext.taskConfig,
+                    newContext
+                )
+            )
         }
     }
 
