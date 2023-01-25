@@ -41,7 +41,7 @@ abstract class TaskGroup {
         ))
     }
 
-    open fun removeTask(task: Task) {
+    fun removeTask(task: Task) {
         plannedTasks.removeIf { it.task == task }
         runningTasks.find { it.taskWithConfigAndContext.task == task }?.let {
             runningTasks.remove(it)

@@ -14,11 +14,11 @@ class TaskService {
     private val scheduledTaskGroup = QueueTaskGroup()
     private val queueTaskGroup = QueueTaskGroup()
     private val daemonTaskGroup = DaemonTaskGroup()
-    private val heavyTaskGroup = SingleThreadTaskGroup()
+    private val heavyScheduledTaskGroup = SingleThreadTaskGroup()
 
     fun runSchedule(task: Task, config: TaskConfig) {
         if (config.isHeavy) {
-            heavyTaskGroup.addTask(task, config)
+            heavyScheduledTaskGroup.addTask(task, config)
         } else {
             scheduledTaskGroup.addTask(task, config)
         }
@@ -33,7 +33,7 @@ class TaskService {
     }
 
     fun removeTask(task: Task) {
-        heavyTaskGroup.removeTask(task)
+        heavyScheduledTaskGroup.removeTask(task)
         scheduledTaskGroup.removeTask(task)
         queueTaskGroup.removeTask(task)
         daemonTaskGroup.removeTask(task)
@@ -49,12 +49,12 @@ class TaskService {
 
     fun stopSchedule() {
         scheduledTaskGroup.stop()
-        heavyTaskGroup.stop()
+        heavyScheduledTaskGroup.stop()
     }
 
     fun startSchedule() {
         scheduledTaskGroup.start()
-        heavyTaskGroup.start()
+        heavyScheduledTaskGroup.start()
     }
 
     fun stopDaemon() {
