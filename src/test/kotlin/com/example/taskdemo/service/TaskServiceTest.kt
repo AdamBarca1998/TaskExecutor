@@ -4,6 +4,7 @@ import com.cronutils.builder.CronBuilder
 import com.cronutils.model.CronType
 import com.cronutils.model.definition.CronDefinitionBuilder
 import com.cronutils.model.field.expression.FieldExpressionFactory
+import com.example.taskdemo.model.Daemon
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskImpl
 import com.example.taskdemo.taskschedule.TaskSchedule
@@ -125,15 +126,11 @@ internal class TaskServiceTest {
 
     @Test
     fun testDaemonTask() {
-        val taskConfig = TaskConfig.Builder()
-            .withTaskSchedules(listOf(TaskSchedule.fromDaemon()))
-            .build()
-
         taskService.stopDaemon()
 
-        taskService.runDaemon(TaskImpl("Task Daemon 1"), taskConfig)
-        taskService.runDaemon(TaskImpl("Task Daemon 2"), taskConfig)
-        taskService.runDaemon(TaskImpl("Task Daemon 3"), taskConfig)
+        taskService.runDaemon(Daemon("Daemon 1"))
+        taskService.runDaemon(Daemon("Daemon 2"))
+        taskService.runDaemon(Daemon("Daemon 3"))
 
         Thread.sleep(Duration.ofSeconds(5))
         taskService.startDaemon()

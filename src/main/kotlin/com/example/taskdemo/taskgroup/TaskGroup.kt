@@ -28,7 +28,7 @@ abstract class TaskGroup {
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     private val logger = KotlinLogging.logger {}
 
-    fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build()) {
+    open fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build()) {
 
         plannedTasks.add(TaskWithConfigAndContext(
             task,
@@ -41,7 +41,7 @@ abstract class TaskGroup {
         ))
     }
 
-    fun removeTask(task: Task) {
+    open fun removeTask(task: Task) {
         plannedTasks.removeIf { it.task == task }
         runningTasks.find { it.taskWithConfigAndContext.task == task }?.let {
             runningTasks.remove(it)
@@ -82,9 +82,14 @@ abstract class TaskGroup {
 
         // finish
         val lastCompletion = ZonedDateTime.now()
+        planNextExecution(taskWithConfigAndContext, lastExecution, lastCompletion)
         runningTasks.removeIf { it.taskWithConfigAndContext == taskWithConfigAndContext }
+    }
 
-        // next execution
+    protected open fun planNextExecution(taskWithConfigAndContext: TaskWithConfigAndContext,
+                                         lastExecution: ZonedDateTime,
+                                         lastCompletion: ZonedDateTime
+    ) {
         taskWithConfigAndContext.taskConfig.nextExecution(
             TaskContext(taskWithConfigAndContext.taskContext.startDateTime, lastExecution, lastCompletion)
         )?.let {

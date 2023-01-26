@@ -22,11 +22,6 @@ abstract class TaskSchedule {
         fun fromFixedRate(fixedRate: Duration): TaskSchedule {
             return RateTaskSchedule(fixedRate)
         }
-
-        @JvmStatic
-        fun fromDaemon(): TaskSchedule {
-            return DaemonTaskSchedule()
-        }
     }
 
     abstract fun nextExecution(taskContext: TaskContext): ZonedDateTime?

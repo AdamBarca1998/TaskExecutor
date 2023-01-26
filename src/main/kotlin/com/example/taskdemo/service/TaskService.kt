@@ -1,5 +1,6 @@
 package com.example.taskdemo.service
 
+import com.example.taskdemo.model.Daemon
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.taskgroup.DaemonTaskGroup
@@ -28,8 +29,8 @@ class TaskService {
         queueTaskGroup.addTask(task)
     }
 
-    fun runDaemon(task: Task, config: TaskConfig) {
-        daemonTaskGroup.addTask(task, config)
+    fun runDaemon(daemon: Daemon) {
+        daemonTaskGroup.addTask(daemon)
     }
 
     fun removeTask(task: Task) {
