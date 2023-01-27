@@ -6,14 +6,14 @@ import com.example.taskdemo.model.TaskConfig
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.LinkedTransferQueue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class DaemonTaskGroup : TaskGroup() {
 
     override val name: String = "DaemonTaskGroup"
-    private val savedDaemons = PriorityBlockingQueue<TaskWithConfig>()
+    private val savedDaemons = LinkedTransferQueue<TaskWithConfig>()
 
     init {
         scope.launch(Dispatchers.IO) {
