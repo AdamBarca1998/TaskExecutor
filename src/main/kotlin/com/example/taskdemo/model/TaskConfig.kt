@@ -7,16 +7,16 @@ class TaskConfig private constructor(
     private val taskSchedules: List<TaskSchedule>,
     val priority: Int,
     val isHeavy: Boolean,
+    var startDateTime: ZonedDateTime,
     val description: String?
 ) {
 
     fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
-        val sortExecution = taskSchedules.stream()
+        return taskSchedules.stream()
             .map { it.nextExecution(taskContext) }
             .sorted()
-            .toList()
-
-        return sortExecution.firstOrNull()
+            .findFirst()
+            .orElse(null)
     }
 
     data class Builder(
@@ -46,6 +46,6 @@ class TaskConfig private constructor(
             this.description = description
         }
 
-        fun build() = TaskConfig(taskSchedules, priority, isHeavy, description)
+        fun build() = TaskConfig(taskSchedules, priority, isHeavy, startDateTime, description)
     }
 }
