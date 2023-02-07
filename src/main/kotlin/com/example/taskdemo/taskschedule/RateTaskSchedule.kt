@@ -1,6 +1,7 @@
 package com.example.taskdemo.taskschedule
 
 import com.example.taskdemo.model.TaskContext
+import jakarta.persistence.Entity
 import java.time.Duration
 import java.time.ZonedDateTime
 
