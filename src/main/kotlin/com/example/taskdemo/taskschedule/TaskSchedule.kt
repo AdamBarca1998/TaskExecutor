@@ -2,11 +2,9 @@ package com.example.taskdemo.taskschedule
 
 import com.cronutils.model.Cron
 import com.example.taskdemo.model.TaskContext
-import jakarta.persistence.MappedSuperclass
 import java.time.Duration
 import java.time.ZonedDateTime
 
-@MappedSuperclass
 abstract class TaskSchedule {
 
     companion object Factory {

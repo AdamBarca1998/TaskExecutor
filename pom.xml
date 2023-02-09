@@ -76,6 +76,11 @@
 			<version>6.1.6.Final</version>
 			<type>pom</type>
 		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.10.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>

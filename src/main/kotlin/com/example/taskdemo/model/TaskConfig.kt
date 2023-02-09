@@ -1,35 +1,20 @@
 package com.example.taskdemo.model
 
+import com.example.taskdemo.TaskType
 import com.example.taskdemo.taskschedule.TaskSchedule
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToMany
 import java.time.ZonedDateTime
 
-@Entity
 class TaskConfig private constructor(
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long?,
-
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "task_config_id", referencedColumnName = "id", nullable = false)
     private val taskSchedules: List<TaskSchedule>,
 
-    @Column(nullable = false)
     val priority: Int,
 
-    @Column(nullable = false)
     val isHeavy: Boolean,
 
-    @Column(nullable = false)
-    var startDateTime: ZonedDateTime
+    var startDateTime: ZonedDateTime,
+
+    val type: TaskType
 ) {
 
     fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
@@ -44,7 +29,8 @@ class TaskConfig private constructor(
         var taskSchedules: List<TaskSchedule> = ArrayList(),
         var priority: Int = Int.MIN_VALUE,
         var isHeavy: Boolean = false,
-        var startDateTime: ZonedDateTime = ZonedDateTime.now()
+        var startDateTime: ZonedDateTime = ZonedDateTime.now(),
+        var type: TaskType = TaskType.QUEUE
     ) {
         fun withTaskSchedules(taskSchedules: List<TaskSchedule>) = apply {
             this.taskSchedules = taskSchedules
@@ -62,6 +48,10 @@ class TaskConfig private constructor(
             this.startDateTime = startDateTime
         }
 
-        fun build() = TaskConfig(null, taskSchedules, priority, isHeavy, startDateTime)
+        fun withType(type: TaskType) = apply {
+            this.type = type
+        }
+
+        fun build() = TaskConfig(taskSchedules, priority, isHeavy, startDateTime, type)
     }
 }
