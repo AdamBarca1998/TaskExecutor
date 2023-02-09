@@ -91,6 +91,7 @@ abstract class TaskGroup {
         taskWithConfig.taskConfig.nextExecution(
             TaskContext(taskWithConfig.taskConfig.startDateTime, lastExecution, lastCompletion)
         )?.let {
+            taskWithConfig.taskConfig.startDateTime = it
             plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
         }
     }

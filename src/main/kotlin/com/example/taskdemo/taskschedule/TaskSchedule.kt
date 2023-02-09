@@ -1,16 +1,16 @@
 package com.example.taskdemo.taskschedule
 
-import com.cronutils.model.Cron
 import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.ZonedDateTime
+import org.springframework.scheduling.support.CronExpression
 
 abstract class TaskSchedule {
 
     companion object Factory {
         @JvmStatic
-        fun fromCron(cron: Cron): TaskSchedule {
-            return CronTaskSchedule(cron)
+        fun fromCron(cronExpression: CronExpression): TaskSchedule {
+            return CronTaskSchedule(cronExpression)
         }
 
         @JvmStatic

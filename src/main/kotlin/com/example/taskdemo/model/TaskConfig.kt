@@ -1,6 +1,5 @@
 package com.example.taskdemo.model
 
-import com.example.taskdemo.TaskType
 import com.example.taskdemo.taskschedule.TaskSchedule
 import java.time.ZonedDateTime
 
@@ -10,11 +9,9 @@ class TaskConfig private constructor(
 
     val priority: Int,
 
-    val isHeavy: Boolean,
+    val heavy: Boolean,
 
-    var startDateTime: ZonedDateTime,
-
-    val type: TaskType
+    var startDateTime: ZonedDateTime
 ) {
 
     fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
@@ -26,32 +23,27 @@ class TaskConfig private constructor(
     }
 
     data class Builder(
-        var taskSchedules: List<TaskSchedule> = ArrayList(),
+        var taskSchedules: ArrayList<TaskSchedule> = ArrayList(),
         var priority: Int = Int.MIN_VALUE,
-        var isHeavy: Boolean = false,
-        var startDateTime: ZonedDateTime = ZonedDateTime.now(),
-        var type: TaskType = TaskType.QUEUE
+        var heavy: Boolean = false,
+        var startDateTime: ZonedDateTime = ZonedDateTime.now()
     ) {
-        fun withTaskSchedules(taskSchedules: List<TaskSchedule>) = apply {
-            this.taskSchedules = taskSchedules
+        fun addTaskSchedule(taskSchedule: TaskSchedule) = apply {
+            this.taskSchedules.add(taskSchedule)
         }
 
         fun withPriority(priority: Int) = apply {
             this.priority = priority
         }
 
-        fun withHeavy(isHeavy: Boolean) = apply {
-            this.isHeavy = isHeavy
+        fun withHeavy(heavy: Boolean) = apply {
+            this.heavy = heavy
         }
 
         fun withStartDateTime(startDateTime: ZonedDateTime) = apply {
             this.startDateTime = startDateTime
         }
 
-        fun withType(type: TaskType) = apply {
-            this.type = type
-        }
-
-        fun build() = TaskConfig(taskSchedules, priority, isHeavy, startDateTime, type)
+        fun build() = TaskConfig(taskSchedules, priority, heavy, startDateTime)
     }
 }

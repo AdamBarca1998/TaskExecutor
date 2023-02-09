@@ -16,7 +16,7 @@ class TaskService {
     private val heavyScheduledTaskGroup = SingleThreadTaskGroup()
 
     fun addSchedule(task: Task, config: TaskConfig) {
-        if (config.isHeavy) {
+        if (config.heavy) {
             heavyScheduledTaskGroup.addTask(task, config)
         } else {
             scheduledTaskGroup.addTask(task, config)
