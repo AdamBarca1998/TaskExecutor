@@ -4,7 +4,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.service.TaskService
 import com.example.taskdemo.taskschedule.TaskSchedule
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import org.reflections.Reflections
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 class TaskReaderComponent {
 
     private val taskService = TaskService()
-    private val dateTimeFormatter = DateTimeFormatter.ISO_INSTANT.withZone(ZoneId.systemDefault())
+    private val dateTimeFormatter = DateTimeFormatter.ISO_INSTANT.withZone(ZoneOffset.UTC)
 
     private val reflections = Reflections("com.example.taskdemo.tasks")
 
