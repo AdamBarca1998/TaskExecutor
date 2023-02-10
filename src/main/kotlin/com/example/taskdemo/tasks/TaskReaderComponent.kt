@@ -3,7 +3,7 @@ package com.example.taskdemo.tasks
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.service.TaskService
-import com.example.taskdemo.taskschedule.TaskSchedule
+import com.example.taskdemo.taskschedule.Schedule
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -33,7 +33,7 @@ class TaskReaderComponent {
 
             annotations.forEach { annotation ->
                 if (annotation is Schedule) {
-                    taskConfig.addTaskSchedule(TaskSchedule.fromCron(convertAnnotationToCron(annotation)))
+                    taskConfig.addSchedule(Schedule.fromCron(convertAnnotationToCron(annotation)))
                     taskConfig.withPriority(annotation.priority)
                     taskConfig.withHeavy(annotation.heavy)
                     taskConfig.withStartDateTime(ZonedDateTime.parse(annotation.startDateTime, dateTimeFormatter))

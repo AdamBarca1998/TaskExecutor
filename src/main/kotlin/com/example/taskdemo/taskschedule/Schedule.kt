@@ -5,22 +5,22 @@ import java.time.Duration
 import java.time.ZonedDateTime
 import org.springframework.scheduling.support.CronExpression
 
-abstract class TaskSchedule {
+abstract class Schedule {
 
     companion object Factory {
         @JvmStatic
-        fun fromCron(cronExpression: CronExpression): TaskSchedule {
-            return CronTaskSchedule(cronExpression)
+        fun fromCron(cronExpression: CronExpression): Schedule {
+            return CronSchedule(cronExpression)
         }
 
         @JvmStatic
-        fun fromFixedDelay(fixedDelay: Duration): TaskSchedule {
-            return DelayTaskSchedule(fixedDelay)
+        fun fromFixedDelay(fixedDelay: Duration): Schedule {
+            return DelaySchedule(fixedDelay)
         }
 
         @JvmStatic
-        fun fromFixedRate(fixedRate: Duration): TaskSchedule {
-            return RateTaskSchedule(fixedRate)
+        fun fromFixedRate(fixedRate: Duration): Schedule {
+            return RateSchedule(fixedRate)
         }
     }
 

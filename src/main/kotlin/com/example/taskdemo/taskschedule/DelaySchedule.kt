@@ -4,7 +4,7 @@ import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.ZonedDateTime
 
-class DelayTaskSchedule(private val fixedDelay: Duration) : TaskSchedule() {
+class DelaySchedule(private val fixedDelay: Duration) : Schedule() {
 
     override fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
         return taskContext.lastCompletion.plus(fixedDelay)
