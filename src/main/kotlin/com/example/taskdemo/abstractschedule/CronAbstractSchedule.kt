@@ -1,10 +1,10 @@
-package com.example.taskdemo.taskschedule
+package com.example.taskdemo.abstractschedule
 
 import com.example.taskdemo.model.TaskContext
 import java.time.ZonedDateTime
 import org.springframework.scheduling.support.CronExpression
 
-class CronSchedule(private val cronExpression: CronExpression) : Schedule() {
+class CronAbstractSchedule(private val cronExpression: CronExpression) : AbstractSchedule() {
 
     override fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
         return cronExpression.next(ZonedDateTime.now())

@@ -1,11 +1,11 @@
 package com.example.taskdemo.model
 
-import com.example.taskdemo.taskschedule.Schedule
+import com.example.taskdemo.abstractschedule.AbstractSchedule
 import java.time.ZonedDateTime
 
 class TaskConfig private constructor(
 
-    private val schedules: List<Schedule>,
+    private val schedules: List<AbstractSchedule>,
 
     val priority: Int,
 
@@ -23,13 +23,13 @@ class TaskConfig private constructor(
     }
 
     data class Builder(
-        var schedules: ArrayList<Schedule> = ArrayList(),
+        var schedules: ArrayList<AbstractSchedule> = ArrayList(),
         var priority: Int = Int.MIN_VALUE,
         var heavy: Boolean = false,
         var startDateTime: ZonedDateTime = ZonedDateTime.now()
     ) {
-        fun addSchedule(schedule: Schedule) = apply {
-            this.schedules.add(schedule)
+        fun addSchedule(schedules: AbstractSchedule) = apply {
+            this.schedules.add(schedules)
         }
 
         fun withPriority(priority: Int) = apply {
