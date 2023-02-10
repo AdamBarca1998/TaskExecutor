@@ -1,11 +1,9 @@
 package com.example.taskdemo.service
 
-import java.time.Duration
-
 internal class TaskServiceTest {
 
-    private val taskService = TaskService()
-    private val hour1 = Duration.ofHours(1)
+//    private val taskGroupService = TaskGroupService()
+//    private val hour1 = Duration.ofHours(1)
 
 //    @Test
 //    fun testTaskDelay() {

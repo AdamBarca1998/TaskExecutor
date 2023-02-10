@@ -13,7 +13,8 @@ import java.util.concurrent.TimeUnit
         Schedule(second = "*/10"),
         Schedule(fixedRate = 7, timeUnit = TimeUnit.SECONDS)
     ],
-    startDateTime = "2023-02-09T16:22:00Z")
+    startDateTime = "2023-02-09T16:22:00Z"
+)
 class ScheduleTaskExample : Task {
 
     override fun run(taskContext: TaskContext) {

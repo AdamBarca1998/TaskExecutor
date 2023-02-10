@@ -1,66 +1,13 @@
 package com.example.taskdemo.service
 
-import com.example.taskdemo.model.Task
-import com.example.taskdemo.model.TaskConfig
-import com.example.taskdemo.taskgroup.DaemonTaskGroup
-import com.example.taskdemo.taskgroup.QueueTaskGroup
-import com.example.taskdemo.taskgroup.SingleThreadTaskGroup
+import com.example.taskdemo.model.entities.TaskEntity
+import com.example.taskdemo.repository.TaskRepository
 import org.springframework.stereotype.Service
 
 @Service
-class TaskService {
+class TaskService(val taskRepository: TaskRepository) {
 
-    private val scheduledTaskGroup = QueueTaskGroup()
-    private val queueTaskGroup = QueueTaskGroup()
-    private val daemonTaskGroup = DaemonTaskGroup()
-    private val heavyScheduledTaskGroup = SingleThreadTaskGroup()
-
-    fun addSchedule(task: Task, config: TaskConfig) {
-        if (config.heavy) {
-            heavyScheduledTaskGroup.addTask(task, config)
-        } else {
-            scheduledTaskGroup.addTask(task, config)
-        }
-    }
-
-    fun addQueue(task: Task) {
-        queueTaskGroup.addTask(task)
-    }
-
-    fun addDaemon(task: Task) {
-        daemonTaskGroup.addTask(task)
-    }
-
-    fun removeTask(task: Task) {
-        heavyScheduledTaskGroup.removeTask(task)
-        scheduledTaskGroup.removeTask(task)
-        queueTaskGroup.removeTask(task)
-        daemonTaskGroup.removeTask(task)
-    }
-
-    fun stopQueue() {
-        queueTaskGroup.stop()
-    }
-
-    fun startQueue() {
-        queueTaskGroup.start()
-    }
-
-    fun stopSchedule() {
-        scheduledTaskGroup.stop()
-        heavyScheduledTaskGroup.stop()
-    }
-
-    fun startSchedule() {
-        scheduledTaskGroup.start()
-        heavyScheduledTaskGroup.start()
-    }
-
-    fun stopDaemon() {
-        daemonTaskGroup.stop()
-    }
-
-    fun startDaemon() {
-        daemonTaskGroup.start()
+    fun createTask(taskEntity: TaskEntity) {
+        taskRepository.insert(taskEntity)
     }
 }

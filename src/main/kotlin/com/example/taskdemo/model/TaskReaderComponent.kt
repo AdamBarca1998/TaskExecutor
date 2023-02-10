@@ -1,7 +1,7 @@
 package com.example.taskdemo.model
 
 import com.example.taskdemo.abstractschedule.AbstractSchedule
-import com.example.taskdemo.service.TaskService
+import com.example.taskdemo.service.TaskGroupService
 import java.time.Duration
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -14,13 +14,10 @@ import org.springframework.stereotype.Component
 private const val TASKS_PATH = "com.example.taskdemo.tasks"
 
 @Component
-class TaskReaderComponent {
+class TaskReaderComponent(val taskGroupService: TaskGroupService) {
 
-    private val taskService = TaskService()
     private val dateTimeFormatter = DateTimeFormatter.ISO_INSTANT.withZone(ZoneOffset.UTC)
-
     private val reflections = Reflections(TASKS_PATH)
-
     private val scheduleTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(TaskSchedule::class.java).asClass<Any>()].stream()
         .map { Class.forName(it.name).getDeclaredConstructor().newInstance() }
         .filter { it is Task }
@@ -43,7 +40,7 @@ class TaskReaderComponent {
                 }
             }
 
-            taskService.addSchedule(task, taskConfig.build())
+            taskGroupService.addSchedule(task, taskConfig.build())
         }
     }
 
