@@ -14,7 +14,7 @@ START 1;
 
 CREATE TABLE task_lock (
     id  BIGINT PRIMARY KEY DEFAULT nextval('task_lock_id_seq'),
-    name    VARCHAR(64) NOT NULL,
+    name    VARCHAR(64) NOT NULL UNIQUE,
     lock_until  TIMESTAMP NOT NULL,
     locked_at   TIMESTAMP NOT NULL,
     locked_by   VARCHAR(256) NOT NULL
@@ -22,6 +22,7 @@ CREATE TABLE task_lock (
 
 CREATE TABLE task (
     id  BIGINT  PRIMARY KEY DEFAULT nextval('task_id_seq'),
-    clazz   VARCHAR(1024) NOT NULL,
+    clazz   VARCHAR(1024) NOT NULL UNIQUE,
+    enable  BOOLEAN NOT NULL,
     task_lock_id    BIGINT REFERENCES task_lock(id)
 );

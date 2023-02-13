@@ -9,9 +9,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 import jakarta.validation.constraints.Size
 
 @Entity
+@Table(name = "task")
 class TaskEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_id_gen")
@@ -20,8 +22,11 @@ class TaskEntity(
     val id: Long,
 
     @Size(max = 1024)
-    @Column(name = "clazz", nullable = false, length = 1024)
+    @Column(nullable = false, length = 1024)
     val clazz: String,
+
+    @Column(nullable = false)
+    val enable: Boolean,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_lock_id")

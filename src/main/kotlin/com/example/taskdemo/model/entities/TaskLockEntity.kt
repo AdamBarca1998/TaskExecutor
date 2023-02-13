@@ -7,10 +7,12 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 import jakarta.validation.constraints.Size
 import java.time.Instant
 
 @Entity
+@Table(name = "task_lock")
 class TaskLockEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_lock_id_gen")

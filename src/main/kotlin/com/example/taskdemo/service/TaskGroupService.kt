@@ -5,17 +5,18 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.taskgroup.DaemonTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
+import com.example.taskdemo.taskgroup.ScheduleTaskGroup
 import com.example.taskdemo.taskgroup.SingleThreadTaskGroup
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
 class TaskGroupService(
-    val taskService: TaskService,
-    val taskMapper: TaskMapper
+    private val taskService: TaskService,
+    private val taskLockService: TaskLockService,
+    private val taskMapper: TaskMapper
 ) {
 
-    private val scheduledTaskGroup = QueueTaskGroup()
+    private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, taskService, taskMapper)
     private val queueTaskGroup = QueueTaskGroup()
     private val daemonTaskGroup = DaemonTaskGroup()
     private val heavyScheduledTaskGroup = SingleThreadTaskGroup()
@@ -24,7 +25,6 @@ class TaskGroupService(
         if (config.heavy) {
             heavyScheduledTaskGroup.addTask(task, config)
         } else {
-            taskService.createTask(taskMapper.toEntity(task))
             scheduledTaskGroup.addTask(task, config)
         }
     }

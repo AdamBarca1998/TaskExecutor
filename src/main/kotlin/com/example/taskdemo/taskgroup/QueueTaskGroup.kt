@@ -3,7 +3,7 @@ package com.example.taskdemo.taskgroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class QueueTaskGroup : TaskGroup() {
+open class QueueTaskGroup : TaskGroup() {
 
     override val name: String = "QueueTaskGroup"
 

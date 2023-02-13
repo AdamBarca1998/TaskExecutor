@@ -11,6 +11,8 @@ class TaskConfig private constructor(
 
     val heavy: Boolean,
 
+    val enable: Boolean,
+
     var startDateTime: ZonedDateTime
 ) {
 
@@ -26,6 +28,7 @@ class TaskConfig private constructor(
         var schedules: ArrayList<AbstractSchedule> = ArrayList(),
         var priority: Int = Int.MIN_VALUE,
         var heavy: Boolean = false,
+        var enable: Boolean = true,
         var startDateTime: ZonedDateTime = ZonedDateTime.now()
     ) {
         fun addSchedule(schedules: AbstractSchedule) = apply {
@@ -44,6 +47,10 @@ class TaskConfig private constructor(
             this.startDateTime = startDateTime
         }
 
-        fun build() = TaskConfig(schedules, priority, heavy, startDateTime)
+        fun withEnable(enable: Boolean) = apply {
+            this.enable = enable
+        }
+
+        fun build() = TaskConfig(schedules, priority, heavy, enable, startDateTime)
     }
 }
