@@ -6,7 +6,6 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.taskgroup.DaemonTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
 import com.example.taskdemo.taskgroup.ScheduleTaskGroup
-import com.example.taskdemo.taskgroup.SingleThreadTaskGroup
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,7 +18,7 @@ class TaskGroupService(
     private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, taskService, taskMapper)
     private val queueTaskGroup = QueueTaskGroup(taskService)
     private val daemonTaskGroup = DaemonTaskGroup(taskService)
-    private val heavyScheduledTaskGroup = SingleThreadTaskGroup(taskService)
+    private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, taskService, taskMapper)
 
     fun addSchedule(task: Task, config: TaskConfig) {
         if (config.heavy) {
