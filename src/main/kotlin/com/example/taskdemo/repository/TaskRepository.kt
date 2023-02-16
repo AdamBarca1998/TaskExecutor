@@ -12,7 +12,7 @@ interface TaskRepository : JpaRepository<TaskEntity, Long> {
     @Modifying
     @Query(
         value = "INSERT INTO task(clazz, enable, task_lock_id) " +
-                "VALUES(:#{#taskEntity.clazz}, :#{#taskEntity.enable}, :#{#taskEntity.taskLockEntity.id})",
+                "VALUES(:#{#taskEntity.clazz}, true, :#{#taskEntity.taskLockEntity.id})",
         nativeQuery = true
     )
     fun insert(taskEntity: TaskEntity)

@@ -25,9 +25,6 @@ class TaskEntity(
     @Column(nullable = false, length = 1024)
     val clazz: String,
 
-    @Column(nullable = false)
-    val enable: Boolean,
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_lock_id")
     val taskLockEntity: TaskLockEntity? = null

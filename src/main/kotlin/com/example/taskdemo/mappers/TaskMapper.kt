@@ -13,6 +13,5 @@ interface TaskMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(source = "taskLockEntity", target = "taskLockEntity")
     @Mapping(target = "clazz", expression = "java(task.getClass().getName())")
-    @Mapping(source = "config.enable", target = "enable")
     fun toEntity(task: Task, config: TaskConfig, taskLockEntity: TaskLockEntity?): TaskEntity
 }
