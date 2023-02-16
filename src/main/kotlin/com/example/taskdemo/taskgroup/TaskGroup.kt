@@ -63,27 +63,26 @@ abstract class TaskGroup(
         var lastExecution: ZonedDateTime? = null
         val config = taskWithConfig.taskConfig
 
-        // begin
+        // start
         delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), config.startDateTime))
 
-        if (taskService.isEnableByClazz(taskWithConfig.task.javaClass.name)) {
+        if (taskService.isEnableByClazz(taskWithConfig.task.javaClass.name) && !isLocked.get()) {
             lastExecution = ZonedDateTime.now()
 
-            // run
-            if (!isLocked.get()) {
+            try {
+                // run
                 logger.debug { "${taskWithConfig.task} started." }
 
-                try {
-                    taskWithConfig.task.run(
-                        TaskContext(
-                            config.startDateTime,
-                            lastExecution, Instant.ofEpochMilli(Long.MAX_VALUE).atZone(ZoneOffset.UTC)
-                        )
+                taskWithConfig.task.run(
+                    TaskContext(
+                        config.startDateTime,
+                        lastExecution, Instant.ofEpochMilli(Long.MAX_VALUE).atZone(ZoneOffset.UTC)
                     )
-                    logger.debug { "${taskWithConfig.task} ended." }
-                } catch (e: Exception) {
-                    logger.error { "${taskWithConfig.task} $e" }
-                }
+                )
+
+                logger.debug { "${taskWithConfig.task} ended." }
+            } catch (e: Exception) {
+                logger.error { "${taskWithConfig.task} $e" }
             }
         }
 
