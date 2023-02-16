@@ -1,5 +1,6 @@
 package com.example.taskdemo.service
 
+import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.repository.TaskLockRepository
 import org.springframework.stereotype.Service
 
@@ -8,11 +9,11 @@ class TaskLockService(
     private val taskLockRepository: TaskLockRepository
 ) {
 
-    fun findByName(name: String) = taskLockRepository.findByName(name)
+//    fun findExpiredLocks(minutes: Int) = taskLockRepository.findExpiredLocks(minutes)
 
-    fun findExpiredLocks(minutes: Int) = taskLockRepository.findExpiredLocks(minutes)
+    fun tryRefreshLockByName(name: String, minutes: Int, appId: String): TaskLockEntity {
+        taskLockRepository.tryRefreshLockByName(name, minutes, appId)
 
-    fun refreshLockById(id: Long, minutes: Int, appId: String) = taskLockRepository.refreshLockById(id, minutes, appId) == 1
-
-    fun findById(id: Long) = taskLockRepository.findById(id)
+        return taskLockRepository.findByName(name)
+    }
 }

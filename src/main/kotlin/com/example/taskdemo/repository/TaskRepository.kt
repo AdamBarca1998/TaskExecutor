@@ -16,4 +16,10 @@ interface TaskRepository : JpaRepository<TaskEntity, Long> {
         nativeQuery = true
     )
     fun insert(taskEntity: TaskEntity)
+
+    @Query(
+        value = "SELECT enable FROM task WHERE clazz = :clazz",
+        nativeQuery = true
+    )
+    fun isEnableByClazz(clazz: String): Boolean
 }

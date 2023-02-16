@@ -1,11 +1,16 @@
 package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.DaemonTaskContext
+import com.example.taskdemo.service.TaskService
 import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class DaemonTaskGroup : TaskGroup() {
+class DaemonTaskGroup(
+    taskService: TaskService
+) : TaskGroup(
+    taskService
+) {
 
     override val name: String = "DaemonTaskGroup"
 

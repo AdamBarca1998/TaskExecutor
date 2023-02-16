@@ -1,32 +1,48 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.extensions.toNullable
 import com.example.taskdemo.mappers.TaskMapper
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
+import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.service.TaskLockService
 import com.example.taskdemo.service.TaskService
+import java.time.Duration
+import kotlin.random.Random
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.dao.DataIntegrityViolationException
-
-private const val EXPIRED_TIME_M = 12
-private const val REFRESH_TIME_M = 5
-private const val APP_ID = "ID1"
 
 class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
     private val taskService: TaskService,
     private val taskMapper: TaskMapper
-) : QueueTaskGroup() {
+) : QueueTaskGroup(
+    taskService
+) {
+
+    private val appId = "8080"
 
     override val name: String = "scheduleGroup"
-    private var scheduleLock = taskLockService.findByName("scheduleGroup")
+    private var scheduleLock: TaskLockEntity = taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appId)
     private val savedTasks: ArrayList<TaskWithConfig> = arrayListOf()
 
     init {
-        taskLockService.findByName(name)?.let {
-            if ( taskLockService.refreshLockById(it.id, EXPIRED_TIME_M, APP_ID) ) {
-                scheduleLock = taskLockService.findById(it.id).toNullable()
+        // locker
+        scope.launch(Dispatchers.IO) {
+            while (true) {
+                scheduleLock = taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appId)
+
+                if (scheduleLock.lockedBy == appId && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
+                    plannedTasks.addAll(savedTasks)
+                }
+
+                delay(
+                    Duration.ofMinutes(
+                        Random.nextLong(REFRESH_LOCK_TIME_M.toLong() / 2, REFRESH_LOCK_TIME_M.toLong() * 2)
+                    ).toMillis()
+                )
             }
         }
     }
@@ -42,7 +58,7 @@ class ScheduleTaskGroup(
         }
 
         savedTasks.add(TaskWithConfig(task, taskConfig))
-        if (scheduleLock?.lockedBy == APP_ID) {
+        if (scheduleLock.lockedBy == appId) {
             super.addTask(task, taskConfig)
         }
     }

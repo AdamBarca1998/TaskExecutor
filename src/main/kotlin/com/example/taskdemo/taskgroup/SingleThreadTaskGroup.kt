@@ -1,11 +1,16 @@
 package com.example.taskdemo.taskgroup
 
+import com.example.taskdemo.service.TaskService
 import java.util.concurrent.Executors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 
-class SingleThreadTaskGroup : TaskGroup() {
+class SingleThreadTaskGroup(
+    taskService: TaskService
+) : TaskGroup(
+    taskService
+) {
 
     override val name: String = "ScheduledTaskGroup"
     private val singleThreadDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()

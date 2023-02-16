@@ -11,15 +11,15 @@ import org.springframework.stereotype.Service
 
 @Service
 class TaskGroupService(
-    private val taskService: TaskService,
-    private val taskLockService: TaskLockService,
-    private val taskMapper: TaskMapper
+    taskService: TaskService,
+    taskLockService: TaskLockService,
+    taskMapper: TaskMapper
 ) {
 
     private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, taskService, taskMapper)
-    private val queueTaskGroup = QueueTaskGroup()
-    private val daemonTaskGroup = DaemonTaskGroup()
-    private val heavyScheduledTaskGroup = SingleThreadTaskGroup()
+    private val queueTaskGroup = QueueTaskGroup(taskService)
+    private val daemonTaskGroup = DaemonTaskGroup(taskService)
+    private val heavyScheduledTaskGroup = SingleThreadTaskGroup(taskService)
 
     fun addSchedule(task: Task, config: TaskConfig) {
         if (config.heavy) {

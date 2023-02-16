@@ -3,6 +3,7 @@ package com.example.taskdemo.taskgroup
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.service.TaskService
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneOffset
@@ -17,9 +18,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 
-private const val LAUNCH_DELAY_S = 1L
+const val REFRESH_LOCK_TIME_M = 1
+const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
+private const val LAUNCH_DELAY_TIME_S = 1L
 
-abstract class TaskGroup {
+abstract class TaskGroup(
+    private val taskService: TaskService
+) {
 
     abstract val name: String
     protected val scope = CoroutineScope(Dispatchers.Default)
@@ -50,37 +55,40 @@ abstract class TaskGroup {
 
     protected suspend fun sleepLaunch() {
         if (plannedTasks.isEmpty() || isLocked.get()) {
-            delay(Duration.ofSeconds(LAUNCH_DELAY_S).toMillis())
+            delay(Duration.ofSeconds(LAUNCH_DELAY_TIME_S).toMillis())
         }
     }
 
     protected suspend fun runTask(taskWithConfig: TaskWithConfig) {
+        var lastExecution: ZonedDateTime? = null
         val config = taskWithConfig.taskConfig
 
         // begin
         delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), config.startDateTime))
-        val lastExecution = ZonedDateTime.now()
 
-        // run
-        if (!isLocked.get()) {
-            logger.debug { "${taskWithConfig.task} started." }
+        if (taskService.isEnableByClazz(taskWithConfig.task.javaClass.name)) {
+            lastExecution = ZonedDateTime.now()
 
-            try {
-                taskWithConfig.task.run(
-                    TaskContext(
-                        config.startDateTime,
-                        lastExecution, Instant.ofEpochMilli(Long.MAX_VALUE).atZone(ZoneOffset.UTC)
+            // run
+            if (!isLocked.get()) {
+                logger.debug { "${taskWithConfig.task} started." }
+
+                try {
+                    taskWithConfig.task.run(
+                        TaskContext(
+                            config.startDateTime,
+                            lastExecution, Instant.ofEpochMilli(Long.MAX_VALUE).atZone(ZoneOffset.UTC)
+                        )
                     )
-                )
-                logger.debug { "${taskWithConfig.task} ended." }
-            } catch (e: Exception) {
-                logger.error { "${taskWithConfig.task} $e" }
+                    logger.debug { "${taskWithConfig.task} ended." }
+                } catch (e: Exception) {
+                    logger.error { "${taskWithConfig.task} $e" }
+                }
             }
         }
 
         // finish
-        val lastCompletion = ZonedDateTime.now()
-        planNextExecution(taskWithConfig, lastExecution, lastCompletion)
+        planNextExecution(taskWithConfig, lastExecution ?: ZonedDateTime.now(), ZonedDateTime.now())
         runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
     }
 

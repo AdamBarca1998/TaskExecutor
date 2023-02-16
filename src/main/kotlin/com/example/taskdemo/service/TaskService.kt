@@ -9,7 +9,7 @@ class TaskService(
     private val taskRepository: TaskRepository
 ) {
 
-    fun createTask(taskEntity: TaskEntity) {
-        taskRepository.insert(taskEntity)
-    }
+    fun createTask(taskEntity: TaskEntity) = taskRepository.insert(taskEntity)
+
+    fun isEnableByClazz(clazz: String) = taskRepository.isEnableByClazz(clazz)
 }

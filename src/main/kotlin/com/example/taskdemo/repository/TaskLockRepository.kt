@@ -8,25 +8,26 @@ import org.springframework.transaction.annotation.Transactional
 
 interface TaskLockRepository : JpaRepository<TaskLockEntity, Long> {
 
-    @Transactional
-    @Query(
-        value = "SELECT id, name, lock_until, locked_at, locked_by " +
-                "FROM barca.task_lock " +
-                "WHERE lock_until < NOW() - MAKE_INTERVAL(mins => :minutes)",
-        nativeQuery = true
-    )
-    fun findExpiredLocks(minutes: Int): List<TaskLockEntity>
+//    @Transactional
+//    @Query(
+//        value = "SELECT id, name, lock_until, locked_at, locked_by " +
+//                "FROM barca.task_lock " +
+//                "WHERE lock_until < NOW() - MAKE_INTERVAL(mins => :minutes)",
+//        nativeQuery = true
+//    )
+//    fun findExpiredLocks(minutes: Int): List<TaskLockEntity>
 
 
-    fun findByName(name: String): TaskLockEntity?
+    fun findByName(name: String): TaskLockEntity
 
     @Transactional
     @Modifying
     @Query(
         value = "UPDATE task_lock " +
                 "SET lock_until = NOW() + MAKE_INTERVAL(mins => :minutes), locked_at = NOW(), locked_by = :appId " +
-                "WHERE lock_until < NOW() - make_interval(mins => :minutes) AND id = :id",
+                "WHERE ( lock_until < NOW() - make_interval(mins => :minutes) OR locked_by = :appId) " +
+                "AND name = :name",
         nativeQuery = true
     )
-    fun refreshLockById(id: Long, minutes: Int, appId: String): Int
+    fun tryRefreshLockByName(name: String, minutes: Int, appId: String): Int
 }

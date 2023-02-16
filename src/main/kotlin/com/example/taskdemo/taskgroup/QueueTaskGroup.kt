@@ -1,9 +1,14 @@
 package com.example.taskdemo.taskgroup
 
+import com.example.taskdemo.service.TaskService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-open class QueueTaskGroup : TaskGroup() {
+open class QueueTaskGroup(
+    taskService: TaskService
+) : TaskGroup(
+    taskService
+) {
 
     override val name: String = "QueueTaskGroup"
 
