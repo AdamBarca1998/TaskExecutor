@@ -23,7 +23,7 @@ class ScheduleTaskEntity(
 
     @Size(max = 1024)
     @Column(nullable = false, length = 1024)
-    val clazz: String,
+    val clazzPath: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_lock_id")

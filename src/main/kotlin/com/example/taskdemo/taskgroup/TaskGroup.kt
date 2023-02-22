@@ -66,7 +66,7 @@ abstract class TaskGroup(
         // start
         delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), config.startDateTime))
 
-        if (scheduleTaskService.isEnableByClazz(taskWithConfig.task.javaClass.name) && !isLocked.get()) {
+        if (scheduleTaskService.isEnableByClazzPath(taskWithConfig.task.javaClass.name) && !isLocked.get()) {
             lastExecution = ZonedDateTime.now()
 
             try {

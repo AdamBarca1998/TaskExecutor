@@ -11,15 +11,15 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
     @Transactional
     @Modifying
     @Query(
-        value = "INSERT INTO schedule_task(clazz, task_lock_id) " +
-                "VALUES(:#{#scheduleTaskEntity.clazz}, :#{#scheduleTaskEntity.taskLockEntity.id})",
+        value = "INSERT INTO schedule_task(clazz_path, task_lock_id) " +
+                "VALUES(:#{#scheduleTaskEntity.clazzPath}, :#{#scheduleTaskEntity.taskLockEntity.id})",
         nativeQuery = true
     )
     fun insert(scheduleTaskEntity: ScheduleTaskEntity)
 
     @Query(
-        value = "SELECT enable FROM schedule_task WHERE clazz = :clazz",
+        value = "SELECT enable FROM schedule_task WHERE clazz_path = :clazzPath",
         nativeQuery = true
     )
-    fun isEnableByClazz(clazz: String): Boolean
+    fun isEnableByClazzPath(clazzPath: String): Boolean
 }

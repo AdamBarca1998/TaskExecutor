@@ -1,6 +1,6 @@
 package com.example.taskdemo.controller
 
-import com.example.taskdemo.model.dto.EmailExampleDTO
+import com.example.taskdemo.model.dto.EmailTaskExampleDTO
 import com.example.taskdemo.service.QueueTaskService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,8 +14,8 @@ class QueueTaskController(
 ) {
 
     @PostMapping("/email-example")
-    fun createEmailExample(@RequestBody emailExampleDTO: EmailExampleDTO): Boolean {
-        println(emailExampleDTO.receiver)
+    fun createEmailExample(@RequestBody emailTaskExampleDTO: EmailTaskExampleDTO): Boolean {
+        queueTaskService.createTask(emailTaskExampleDTO)
 
         return true
     }
