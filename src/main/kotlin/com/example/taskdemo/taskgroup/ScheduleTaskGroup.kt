@@ -5,7 +5,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.service.TaskLockService
-import com.example.taskdemo.service.TaskService
+import com.example.taskdemo.service.ScheduleTaskService
 import java.time.Duration
 import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
@@ -16,10 +16,10 @@ import org.springframework.dao.DataIntegrityViolationException
 
 class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
-    private val taskService: TaskService,
+    private val scheduleTaskService: ScheduleTaskService,
     private val scheduleTaskMapper: ScheduleTaskMapper
 ) : SerializedTaskGroup(
-    taskService
+    scheduleTaskService
 ) {
 
     private val appId = "8080" //TODO:DELETE
@@ -50,7 +50,7 @@ class ScheduleTaskGroup(
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         // try create
         try {
-            taskService.createTask(scheduleTaskMapper.toEntity(task, taskConfig, scheduleLock))
+            scheduleTaskService.createTask(scheduleTaskMapper.toEntity(task, taskConfig, scheduleLock))
         } catch (e: DataIntegrityViolationException) {
             if ((e.cause as ConstraintViolationException).constraintName != "task_clazz_key") {
                 throw e

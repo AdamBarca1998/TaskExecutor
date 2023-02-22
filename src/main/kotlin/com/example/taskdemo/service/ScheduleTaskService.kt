@@ -5,7 +5,7 @@ import com.example.taskdemo.repository.ScheduleTaskRepository
 import org.springframework.stereotype.Service
 
 @Service
-class TaskService(
+class ScheduleTaskService(
     private val scheduleTaskRepository: ScheduleTaskRepository
 ) {
 
