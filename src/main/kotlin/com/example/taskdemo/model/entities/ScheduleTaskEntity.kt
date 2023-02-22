@@ -13,8 +13,8 @@ import jakarta.persistence.Table
 import jakarta.validation.constraints.Size
 
 @Entity
-@Table(name = "task")
-class TaskEntity(
+@Table(name = "schedule_task")
+class ScheduleTaskEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_id_gen")
     @SequenceGenerator(name = "task_id_gen", sequenceName = "task_id_seq", allocationSize = 1)

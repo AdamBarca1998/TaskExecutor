@@ -1,24 +1,24 @@
 package com.example.taskdemo.repository;
 
-import com.example.taskdemo.model.entities.TaskEntity
+import com.example.taskdemo.model.entities.ScheduleTaskEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.transaction.annotation.Transactional
 
-interface TaskRepository : JpaRepository<TaskEntity, Long> {
+interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
 
     @Transactional
     @Modifying
     @Query(
-        value = "INSERT INTO task(clazz, enable, task_lock_id) " +
-                "VALUES(:#{#taskEntity.clazz}, true, :#{#taskEntity.taskLockEntity.id})",
+        value = "INSERT INTO schedule_task(clazz, task_lock_id) " +
+                "VALUES(:#{#scheduleTaskEntity.clazz}, :#{#scheduleTaskEntity.taskLockEntity.id})",
         nativeQuery = true
     )
-    fun insert(taskEntity: TaskEntity)
+    fun insert(scheduleTaskEntity: ScheduleTaskEntity)
 
     @Query(
-        value = "SELECT enable FROM task WHERE clazz = :clazz",
+        value = "SELECT enable FROM schedule_task WHERE clazz = :clazz",
         nativeQuery = true
     )
     fun isEnableByClazz(clazz: String): Boolean

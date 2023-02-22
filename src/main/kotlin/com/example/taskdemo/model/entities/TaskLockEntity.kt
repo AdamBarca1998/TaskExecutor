@@ -33,7 +33,4 @@ class TaskLockEntity(
     @Size(max = 256)
     @Column(nullable = false, length = 256)
     val lockedBy: String,
-
-    @OneToMany(mappedBy = "taskLockEntity")
-    val taskEntities: List<TaskEntity>
 )

@@ -1,6 +1,6 @@
 package com.example.taskdemo.service
 
-import com.example.taskdemo.mappers.TaskMapper
+import com.example.taskdemo.mappers.ScheduleTaskMapper
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.taskgroup.DaemonTaskGroup
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service
 class TaskGroupService(
     taskService: TaskService,
     taskLockService: TaskLockService,
-    taskMapper: TaskMapper
+    scheduleTaskMapper: ScheduleTaskMapper
 ) {
 
-    private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, taskService, taskMapper)
+    private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, taskService, scheduleTaskMapper)
     private val queueTaskGroup = QueueTaskGroup(taskService)
     private val daemonTaskGroup = DaemonTaskGroup(taskService)
-    private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, taskService, taskMapper)
+    private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, taskService, scheduleTaskMapper)
 
     fun addSchedule(task: Task, config: TaskConfig) {
         if (config.heavy) {
@@ -26,10 +26,6 @@ class TaskGroupService(
         } else {
             scheduledTaskGroup.addTask(task, config)
         }
-    }
-
-    fun addQueue(task: Task) {
-        queueTaskGroup.addTask(task)
     }
 
     fun addDaemon(task: Task) {

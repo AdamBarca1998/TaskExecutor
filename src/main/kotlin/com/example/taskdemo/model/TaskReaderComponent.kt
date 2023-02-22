@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component
 private const val TASKS_PATH = "com.example.taskdemo.tasks"
 
 @Component
-class TaskReaderComponent(val taskGroupService: TaskGroupService) {
+class TaskReaderComponent(
+    private val taskGroupService: TaskGroupService
+) {
 
     private val dateTimeFormatter = DateTimeFormatter.ISO_INSTANT.withZone(ZoneOffset.UTC)
     private val reflections = Reflections(TASKS_PATH)
