@@ -12,6 +12,7 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.LinkedTransferQueue
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -101,6 +102,12 @@ abstract class TaskGroup(
             taskWithConfig.taskConfig.startDateTime = it
             plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
         }
+    }
+
+    protected fun getNextRefreshMillis(): Long {
+        val seconds = REFRESH_LOCK_TIME_M * 60L
+
+        return Duration.ofSeconds(Random.nextLong(seconds / 2, seconds * 2)).toMillis()
     }
 
     protected data class TaskWithConfig(val task: Task, val taskConfig: TaskConfig) : Comparable<TaskWithConfig> {

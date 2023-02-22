@@ -16,8 +16,8 @@ import jakarta.validation.constraints.Size
 @Table(name = "schedule_task")
 class ScheduleTaskEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_id_gen")
-    @SequenceGenerator(name = "task_id_gen", sequenceName = "task_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "schedule_task_id_gen")
+    @SequenceGenerator(name = "schedule_task_id_gen", sequenceName = "schedule_task_id_seq", allocationSize = 1)
     @Column(nullable = false)
     val id: Long,
 

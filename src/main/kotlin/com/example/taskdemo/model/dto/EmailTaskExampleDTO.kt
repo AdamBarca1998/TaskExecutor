@@ -4,6 +4,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 
+//@Serializable
 data class EmailTaskExampleDTO(
     val receiver: String = ""
 ) : Task {

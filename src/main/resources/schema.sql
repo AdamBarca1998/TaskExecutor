@@ -34,6 +34,6 @@ CREATE TABLE schedule_task (
 
 CREATE TABLE queue_task (
     id BIGINT PRIMARY KEY DEFAULT nextval('queue_task_id_seq'),
-
+    clazz TEXT NOT NULL,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW()
 )

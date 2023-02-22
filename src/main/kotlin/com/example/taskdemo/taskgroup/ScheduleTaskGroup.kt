@@ -5,8 +5,6 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.service.ScheduleTaskService
 import com.example.taskdemo.service.TaskLockService
-import java.time.Duration
-import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -36,11 +34,7 @@ class ScheduleTaskGroup(
                     plannedTasks.addAll(savedTasks)
                 }
 
-                delay(
-                    Duration.ofMinutes(
-                        Random.nextLong(REFRESH_LOCK_TIME_M.toLong() / 2, REFRESH_LOCK_TIME_M.toLong() * 2)
-                    ).toMillis()
-                )
+                delay(getNextRefreshMillis())
             }
         }
     }
