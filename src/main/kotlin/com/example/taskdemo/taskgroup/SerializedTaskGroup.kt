@@ -1,14 +1,9 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.service.ScheduleTaskService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-abstract class SerializedTaskGroup(
-    scheduleTaskService: ScheduleTaskService
-) : TaskGroup(
-    scheduleTaskService
-) {
+abstract class SerializedTaskGroup : TaskGroup() {
 
     override val name: String = "SerializedTaskGroup"
 

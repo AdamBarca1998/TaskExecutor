@@ -3,7 +3,6 @@ package com.example.taskdemo.taskgroup
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
-import com.example.taskdemo.service.ScheduleTaskService
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneOffset
@@ -23,9 +22,7 @@ const val REFRESH_LOCK_TIME_M = 1
 const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
 private const val LAUNCH_DELAY_TIME_S = 1L
 
-abstract class TaskGroup(
-    private val scheduleTaskService: ScheduleTaskService
-) {
+abstract class TaskGroup() {
 
     abstract val name: String
     protected val scope = CoroutineScope(Dispatchers.Default)
@@ -33,6 +30,8 @@ abstract class TaskGroup(
     protected val runningTasks = LinkedTransferQueue<TaskWithJob>()
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     private val logger = KotlinLogging.logger {}
+
+    abstract fun isEnable(task: Task): Boolean
 
     open fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build()) {
         plannedTasks.add(TaskWithConfig(task, taskConfig))
@@ -67,7 +66,7 @@ abstract class TaskGroup(
         // start
         delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), config.startDateTime))
 
-        if (scheduleTaskService.isEnableByClazzPath(taskWithConfig.task.javaClass.name) && !isLocked.get()) {
+        if (isEnable(taskWithConfig.task) && !isLocked.get()) {
             lastExecution = ZonedDateTime.now()
 
             try {

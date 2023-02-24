@@ -10,8 +10,7 @@ import org.mapstruct.Mapping
 @Mapper(componentModel = "spring")
 interface ScheduleTaskMapper {
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(source = "taskLockEntity", target = "taskLockEntity")
     @Mapping(target = "clazzPath", expression = "java(task.getClass().getName())")
-    fun toEntity(task: Task, config: TaskConfig, taskLockEntity: TaskLockEntity?): ScheduleTaskEntity
+    fun toEntity(task: Task, config: TaskConfig, taskLockEntity: TaskLockEntity): ScheduleTaskEntity
 }

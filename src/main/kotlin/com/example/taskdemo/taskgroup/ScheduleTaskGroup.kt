@@ -14,9 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException
 class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
     private val scheduleTaskService: ScheduleTaskService
-) : SerializedTaskGroup(
-    scheduleTaskService
-) {
+) : SerializedTaskGroup() {
 
     private val appId = "8080" //TODO:DELETE
 
@@ -37,6 +35,10 @@ class ScheduleTaskGroup(
                 delay(getNextRefreshMillis())
             }
         }
+    }
+
+    override fun isEnable(task: Task): Boolean {
+        return scheduleTaskService.isEnableByClazzPath(task.javaClass.name)
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {

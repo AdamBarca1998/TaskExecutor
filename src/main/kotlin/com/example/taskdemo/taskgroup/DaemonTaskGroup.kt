@@ -1,16 +1,12 @@
 package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.DaemonTaskContext
-import com.example.taskdemo.service.ScheduleTaskService
+import com.example.taskdemo.model.Task
 import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class DaemonTaskGroup(
-    scheduleTaskService: ScheduleTaskService
-) : TaskGroup(
-    scheduleTaskService
-) {
+class DaemonTaskGroup : TaskGroup() {
 
     override val name: String = "DaemonTaskGroup"
 
@@ -31,6 +27,8 @@ class DaemonTaskGroup(
             }
         }
     }
+
+    override fun isEnable(task: Task): Boolean = true
 
     override fun planNextExecution(taskWithConfig: TaskWithConfig,
                                     lastExecution: ZonedDateTime,
