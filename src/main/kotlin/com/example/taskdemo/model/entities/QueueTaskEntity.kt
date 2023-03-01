@@ -1,8 +1,12 @@
 package com.example.taskdemo.model.entities
 
+import com.example.taskdemo.AppVars
+import com.example.taskdemo.enums.QueueTaskState
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -25,13 +29,30 @@ open class QueueTaskEntity {
 
     @NotNull
     @Column(name = "clazz", nullable = false, length = Integer.MAX_VALUE)
-    open var clazz: String? = null
+    open var clazz: String = ""
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state", nullable = false, length = 16)
+    open var state: QueueTaskState = QueueTaskState.CREATED
 
     @NotNull
     @Column(name = "created_at", nullable = false)
-    open var createdAt: Instant? = Instant.now()
+    open var createdAt: Instant = Instant.now()
+
+    @NotNull
+    @Column(name = "created_by", nullable = false, length = 1024)
+    open var createdBy: String = AppVars().appId
+
+    @NotNull
+    @Column(name = "owned_by", nullable = false, length = 1024)
+    open var ownedBy: String = "all"
+
+    @NotNull
+    @Column(name = "result", nullable = false, length = 1024)
+    open var result: String = ""
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
     @JoinColumn(name = "task_lock_id")
-    open var taskLockEntity: TaskLockEntity? = null
+    open var taskLockEntity: TaskLockEntity = TaskLockEntity()
 }

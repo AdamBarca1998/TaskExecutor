@@ -8,16 +8,6 @@ import org.springframework.transaction.annotation.Transactional
 
 interface TaskLockRepository : JpaRepository<TaskLockEntity, Long> {
 
-//    @Transactional
-//    @Query(
-//        value = "SELECT id, name, lock_until, locked_at, locked_by " +
-//                "FROM barca.task_lock " +
-//                "WHERE lock_until < NOW() - MAKE_INTERVAL(mins => :minutes)",
-//        nativeQuery = true
-//    )
-//    fun findExpiredLocks(minutes: Int): List<TaskLockEntity>
-
-
     fun findByName(name: String): TaskLockEntity
 
     @Transactional

@@ -12,7 +12,9 @@ class TaskLockService(
 //    fun findExpiredLocks(minutes: Int) = taskLockRepository.findExpiredLocks(minutes)
 
     fun tryRefreshLockByName(name: String, minutes: Int, appId: String): TaskLockEntity {
-        taskLockRepository.tryRefreshLockByName(name, minutes, appId)
+        val b = taskLockRepository.tryRefreshLockByName(name, minutes, appId)
+
+        val a = taskLockRepository.findByName(name)
 
         return taskLockRepository.findByName(name)
     }

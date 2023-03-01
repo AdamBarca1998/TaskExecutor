@@ -4,6 +4,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.entities.QueueTaskEntity
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.tasks.queues.EmailTaskExample
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.*
@@ -21,14 +22,22 @@ private val format = Json {
     }
 }
 
-@Mapper(componentModel = "spring", imports = [TaskLockMapper::class])
+@Mapper(componentModel = "spring")
 interface QueueTaskMapper {
 
     @Mapping(source = "task", target = "clazz", qualifiedByName = ["serializeTask"])
     @Mapping(source = "task", target = "taskLockEntity", qualifiedByName = ["mapTaskLockEntity"])
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "ownedBy", ignore = true)
+    @Mapping(target = "result", ignore = true)
     fun toEntity(task: Task): QueueTaskEntity
+
+    fun toTask(queueTaskEntity: QueueTaskEntity): Task {
+        return format.decodeFromString(queueTaskEntity.clazz)
+    }
 
     companion object {
 
@@ -44,6 +53,12 @@ interface QueueTaskMapper {
         @Named("mapTaskLockEntity")
         fun mapTaskLockEntity(task: Task): TaskLockEntity {
             return taskLockMapper.toEntity(task)
+        }
+
+        @JvmStatic
+        @Named("deserializeTask")
+        fun deserializeTask(queueTaskEntity: QueueTaskEntity): Task {
+            return format.decodeFromString(queueTaskEntity.clazz)
         }
     }
 }

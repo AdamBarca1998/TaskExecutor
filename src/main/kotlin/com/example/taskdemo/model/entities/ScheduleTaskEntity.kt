@@ -25,10 +25,10 @@ open class ScheduleTaskEntity {
     @Size(max = 1024)
     @NotNull
     @Column(name = "clazz_path", nullable = false, length = 1024)
-    open var clazzPath: String? = null
+    open var clazzPath: String = ""
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "task_lock_id", nullable = false)
-    open var taskLockEntity: TaskLockEntity? = null
+    open var taskLockEntity: TaskLockEntity = TaskLockEntity()
 }

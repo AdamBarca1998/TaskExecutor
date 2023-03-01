@@ -23,18 +23,18 @@ open class TaskLockEntity {
     @Size(max = 1024)
     @NotNull
     @Column(name = "name", nullable = false, length = 1024)
-    open var name: String? = null
+    open var name: String = ""
 
     @NotNull
     @Column(name = "lock_until", nullable = false)
-    open var lockUntil: Instant? = Instant.now()
+    open var lockUntil: Instant = Instant.EPOCH
 
     @NotNull
     @Column(name = "locked_at", nullable = false)
-    open var lockedAt: Instant? = Instant.now()
+    open var lockedAt: Instant = Instant.EPOCH
 
     @Size(max = 256)
     @NotNull
     @Column(name = "locked_by", nullable = false, length = 256)
-    open var lockedBy: String? = "nobody"
+    open var lockedBy: String = "nobody"
 }

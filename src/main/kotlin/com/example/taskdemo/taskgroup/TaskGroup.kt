@@ -29,7 +29,7 @@ abstract class TaskGroup() {
     protected val plannedTasks = PriorityBlockingQueue<TaskWithConfig>()
     protected val runningTasks = LinkedTransferQueue<TaskWithJob>()
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
-    private val logger = KotlinLogging.logger {}
+    protected val logger = KotlinLogging.logger {}
 
     abstract fun isEnable(task: Task): Boolean
 

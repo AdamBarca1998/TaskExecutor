@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit
 )
 class ScheduleTaskExample : Task {
 
+    override val id = -1L
+
     override fun run(taskContext: TaskContext) {
         println("${LocalDateTime.now()}  ScheduleTaskExample running...")
         Thread.sleep(Duration.ofSeconds(1))

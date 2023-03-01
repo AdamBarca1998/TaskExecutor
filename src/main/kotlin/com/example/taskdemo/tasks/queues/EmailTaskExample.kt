@@ -10,6 +10,8 @@ class EmailTaskExample(
     private val receiver: String
 ) : Task {
 
+    override val id = -1L
+
     override fun run(taskContext: TaskContext) {
         println("Sending email to $receiver")
         Thread.sleep(Duration.ofSeconds(1))

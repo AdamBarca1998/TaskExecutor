@@ -1,5 +1,6 @@
 package com.example.taskdemo.taskgroup
 
+import com.example.taskdemo.AppVars
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskLockEntity
@@ -16,23 +17,26 @@ class ScheduleTaskGroup(
     private val scheduleTaskService: ScheduleTaskService
 ) : SerializedTaskGroup() {
 
-    private val appId = "8080" //TODO:DELETE
-
+    private val appVars = AppVars()
     override val name: String = "scheduleGroup"
-    private var scheduleLock: TaskLockEntity = taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appId)
+    private var scheduleLock: TaskLockEntity = taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appVars.appId)
     private val savedTasks: ArrayList<TaskWithConfig> = arrayListOf()
 
     init {
         // locker
         scope.launch(Dispatchers.IO) {
             while (true) {
-                scheduleLock = taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appId)
+                try {
+                    scheduleLock = taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appVars.appId)
 
-                if (scheduleLock.lockedBy == appId && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
-                    plannedTasks.addAll(savedTasks)
+                    if (scheduleLock.lockedBy == appVars.appId && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
+                        plannedTasks.addAll(savedTasks)
+                    }
+                } catch (e: Exception) {
+                    logger.error { e }
+                } finally {
+                    delay(getNextRefreshMillis())
                 }
-
-                delay(getNextRefreshMillis())
             }
         }
     }
@@ -46,13 +50,13 @@ class ScheduleTaskGroup(
         try {
             scheduleTaskService.createTask(task, taskConfig, scheduleLock)
         } catch (e: DataIntegrityViolationException) {
-            if ((e.cause as ConstraintViolationException).constraintName != "task_clazz_key") {
+            if ((e.cause as ConstraintViolationException).constraintName != "schedule_task_clazz_path_key") {
                 throw e
             }
         }
 
         savedTasks.add(TaskWithConfig(task, taskConfig))
-        if (scheduleLock.lockedBy == appId) {
+        if (scheduleLock.lockedBy == appVars.appId) {
             super.addTask(task, taskConfig)
         }
     }

@@ -12,5 +12,6 @@ interface ScheduleTaskMapper {
 
     @Mapping(source = "taskLockEntity", target = "taskLockEntity")
     @Mapping(target = "clazzPath", expression = "java(task.getClass().getName())")
+    @Mapping(target = "id", ignore = true)
     fun toEntity(task: Task, config: TaskConfig, taskLockEntity: TaskLockEntity): ScheduleTaskEntity
 }

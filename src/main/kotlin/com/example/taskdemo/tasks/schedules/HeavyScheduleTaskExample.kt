@@ -16,6 +16,8 @@ import java.time.LocalDateTime
 )
 class HeavyScheduleTaskExample : Task {
 
+    override val id = -1L
+
     override fun run(taskContext: TaskContext) {
         println("${LocalDateTime.now()}  HeavyScheduleTaskExample running...")
         Thread.sleep(Duration.ofSeconds(1))

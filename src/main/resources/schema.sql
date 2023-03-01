@@ -35,6 +35,10 @@ CREATE TABLE schedule_task (
 CREATE TABLE queue_task (
     id BIGINT PRIMARY KEY DEFAULT nextval('queue_task_id_seq'),
     clazz TEXT NOT NULL,
+    state VARCHAR(16) NOT NULL,
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by  VARCHAR(1024) NOT NULL, --
+    owned_by    VARCHAR(1024) NOT NULL, --
+    result      VARCHAR(1024) NOT NULL, --
     task_lock_id    BIGINT REFERENCES task_lock(id)
 )
