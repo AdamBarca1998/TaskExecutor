@@ -5,20 +5,22 @@ import kotlinx.coroutines.launch
 
 abstract class SerializedTaskGroup : TaskGroup() {
 
-    override val name: String = "SerializedTaskGroup"
-
     init {
         scope.launch(Dispatchers.IO) {
             while (true) {
-                if (!isLocked.get() && runningTasks.isEmpty()) {
-                    plannedTasks.poll()?.let {
-                        val job = launch { runTask(it) }
+                try {
+                    if (!isLocked.get() && runningTasks.isEmpty()) {
+                        plannedTasks.poll()?.let {
+                            val job = launch { runTask(it) }
 
-                        runningTasks.add(TaskWithJob(it, job))
+                            runningTasks.add(TaskWithJob(it, job))
+                        }
                     }
+                } catch (e: Exception) {
+                    logger.error { e }
+                } finally {
+                    sleepLaunch()
                 }
-
-                sleepLaunch()
             }
         }
     }

@@ -24,7 +24,6 @@ private const val LAUNCH_DELAY_TIME_S = 1L
 
 abstract class TaskGroup() {
 
-    abstract val name: String
     protected val scope = CoroutineScope(Dispatchers.Default)
     protected val plannedTasks = PriorityBlockingQueue<TaskWithConfig>()
     protected val runningTasks = LinkedTransferQueue<TaskWithJob>()
@@ -79,7 +78,7 @@ abstract class TaskGroup() {
         // start
         delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), config.startDateTime))
 
-        if (isEnable(task) && !isLocked.get()) {
+        if (!isLocked.get() && isEnable(task)) {
             handleRun(task)
             lastExecution = ZonedDateTime.now()
 

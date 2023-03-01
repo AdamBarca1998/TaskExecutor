@@ -1,29 +1,25 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.AppVars
 import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.service.QueueTaskService
-import com.example.taskdemo.service.TaskLockService
-import java.time.Duration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class QueueTaskGroup(
-    private val queueTaskService: QueueTaskService,
-    private val taskLockService: TaskLockService
+    private val queueTaskService: QueueTaskService
 ) : SerializedTaskGroup() {
 
-    private val appVars = AppVars()
+    private val port = "8082" //TODO:DELETE
 
     init {
         // locker
         scope.launch(Dispatchers.IO) {
             while (true) {
                 try {
-                    val expiredTasks = queueTaskService.findExpired(EXPIRED_LOCK_TIME_M, appVars.appId)
+                    val expiredTasks = queueTaskService.findExpired(EXPIRED_LOCK_TIME_M, port)
 
                     expiredTasks.forEach {
                         queueTaskService.updateState(it, QueueTaskState.PLANNED)
@@ -32,7 +28,7 @@ class QueueTaskGroup(
                 } catch (e: Exception) {
                     logger.error { e }
                 } finally {
-                    delay(/*getNextRefreshMillis()*/Duration.ofSeconds(5).toMillis())
+                    delay(getNextRefreshMillis())
                 }
             }
         }

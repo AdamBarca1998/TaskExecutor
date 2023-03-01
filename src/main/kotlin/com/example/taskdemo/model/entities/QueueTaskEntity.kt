@@ -1,6 +1,5 @@
 package com.example.taskdemo.model.entities
 
-import com.example.taskdemo.AppVars
 import com.example.taskdemo.enums.QueueTaskState
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -42,7 +41,7 @@ open class QueueTaskEntity {
 
     @NotNull
     @Column(name = "created_by", nullable = false, length = 1024)
-    open var createdBy: String = AppVars().appId
+    open var createdBy: String = "nobobdy"
 
     @NotNull
     @Column(name = "owned_by", nullable = false, length = 1024)

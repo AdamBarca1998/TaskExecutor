@@ -15,7 +15,7 @@ class TaskGroupService(
 ) {
 
     private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService)
-    private val queueTaskGroup = QueueTaskGroup(queueTaskService, taskLockService)
+    private val queueTaskGroup = QueueTaskGroup(queueTaskService)
     private val daemonTaskGroup = DaemonTaskGroup()
     private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService)
 

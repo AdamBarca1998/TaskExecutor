@@ -8,8 +8,6 @@ import kotlinx.coroutines.launch
 
 class DaemonTaskGroup : TaskGroup() {
 
-    override val name: String = "DaemonTaskGroup"
-
     init {
         scope.launch(Dispatchers.IO) {
             while (true) {

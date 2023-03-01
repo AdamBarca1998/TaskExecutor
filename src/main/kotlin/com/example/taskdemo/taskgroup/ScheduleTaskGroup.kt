@@ -1,6 +1,5 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.AppVars
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskLockEntity
@@ -17,9 +16,9 @@ class ScheduleTaskGroup(
     private val scheduleTaskService: ScheduleTaskService
 ) : SerializedTaskGroup() {
 
-    private val appVars = AppVars()
-    override val name: String = "scheduleGroup"
-    private var scheduleLock: TaskLockEntity = taskLockService.findByName(name)
+    private val port = "8080" //TODO:DELETE
+    private val lockName: String = "scheduleGroup"
+    private var scheduleLock: TaskLockEntity = taskLockService.findByName(lockName)
     private val savedTasks: ArrayList<TaskWithConfig> = arrayListOf()
 
     init {
@@ -27,11 +26,11 @@ class ScheduleTaskGroup(
         scope.launch(Dispatchers.IO) {
             while (true) {
                 try {
-                    if (taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appVars.appId)) {
-                        scheduleLock = taskLockService.findByName(name)
+                    if (taskLockService.tryRefreshLockByName(lockName, EXPIRED_LOCK_TIME_M, port)) {
+                        scheduleLock = taskLockService.findByName(lockName)
                     }
 
-                    if (scheduleLock.lockedBy == appVars.appId && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
+                    if (scheduleLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
                         plannedTasks.addAll(savedTasks)
                     }
                 } catch (e: Exception) {
@@ -58,7 +57,7 @@ class ScheduleTaskGroup(
         }
 
         savedTasks.add(TaskWithConfig(task, taskConfig))
-        if (scheduleLock.lockedBy == appVars.appId) {
+        if (scheduleLock.lockedBy == port) {
             super.addTask(task, taskConfig)
         }
     }
