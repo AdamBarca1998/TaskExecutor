@@ -40,6 +40,21 @@ class QueueTaskGroup(
 
     override fun isEnable(task: Task): Boolean = true
 
+    override fun handleRun(task: Task) {
+        super.handleRun(task)
+        queueTaskService.updateState(task, QueueTaskState.RUNNING)
+    }
+
+    override fun handleError(task: Task, e: Exception) {
+        super.handleError(task, e)
+        queueTaskService.updateStateAndResult(task, QueueTaskState.ERROR, e.message ?: "Default value")
+    }
+
+    override fun handleFinish(task: Task) {
+        super.handleFinish(task)
+        queueTaskService.updateState(task, QueueTaskState.FINISHED)
+    }
+
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         queueTaskService.saveTask(task)
     }

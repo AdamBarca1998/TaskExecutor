@@ -14,5 +14,6 @@ class EmailTaskExample(
     override fun run(taskContext: TaskContext) {
         println("Sending email to $receiver")
         Thread.sleep(Duration.ofSeconds(1))
+        throw NullPointerException("Zlyhanie posielania emailu")
     }
 }

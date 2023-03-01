@@ -31,9 +31,19 @@ abstract class TaskGroup() {
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     protected val logger = KotlinLogging.logger {}
 
-    abstract fun isEnable(task: Task): Boolean
+    protected abstract fun isEnable(task: Task): Boolean
 
-//    abstract fun handleRun()
+    protected open fun handleRun(task: Task) {
+        logger.debug { "$task started." }
+    }
+
+    protected open fun handleError(task: Task, e: Exception) {
+        logger.error { "$task $e" }
+    }
+
+    protected open fun handleFinish(task: Task) {
+        logger.debug { "$task ended." }
+    }
 
     open fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build()) {
         plannedTasks.add(TaskWithConfig(task, taskConfig))
@@ -64,27 +74,26 @@ abstract class TaskGroup() {
     protected suspend fun runTask(taskWithConfig: TaskWithConfig) {
         var lastExecution: ZonedDateTime? = null
         val config = taskWithConfig.taskConfig
+        val task = taskWithConfig.task
 
         // start
         delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), config.startDateTime))
 
-        if (isEnable(taskWithConfig.task) && !isLocked.get()) {
+        if (isEnable(task) && !isLocked.get()) {
+            handleRun(task)
             lastExecution = ZonedDateTime.now()
 
             try {
-                // run
-                logger.debug { "${taskWithConfig.task} started." }
-
-                taskWithConfig.task.run(
+                task.run(
                     TaskContext(
                         config.startDateTime,
                         lastExecution, Instant.ofEpochMilli(Long.MAX_VALUE).atZone(ZoneOffset.UTC)
                     )
                 )
 
-                logger.debug { "${taskWithConfig.task} ended." }
+                handleFinish(task)
             } catch (e: Exception) {
-                logger.error { "${taskWithConfig.task} $e" }
+                handleError(task, e)
             }
         }
 

@@ -31,7 +31,10 @@ open class QueueTaskService(
     }
 
     open fun updateState(task: Task, state: QueueTaskState): Boolean {
-        val a = queueTaskRepository.updateStateById(task.id, state) > 0
-        return a
+        return queueTaskRepository.updateStateById(task.id, state) > 0
+    }
+
+    open fun updateStateAndResult(task: Task, state: QueueTaskState, result: String): Boolean {
+        return queueTaskRepository.updateStateAndResultById(task.id, state, result) > 0
     }
 }

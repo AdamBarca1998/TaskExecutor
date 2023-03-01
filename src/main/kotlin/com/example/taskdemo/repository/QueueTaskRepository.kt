@@ -25,9 +25,19 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
     @Modifying
     @Query(
         value = "UPDATE queue_task " +
-                "SET state = :state " +
+                "SET state = :#{#state.name()} " +
                 "WHERE id = :id",
         nativeQuery = true
     )
     fun updateStateById(id: Long, state: QueueTaskState): Int
+
+    @Transactional
+    @Modifying
+    @Query(
+        value = "UPDATE queue_task " +
+                "SET state = :#{#state.name()}, result = :result " +
+                "WHERE id = :id",
+        nativeQuery = true
+    )
+    fun updateStateAndResultById(id: Long, state: QueueTaskState, result: String): Int
 }
