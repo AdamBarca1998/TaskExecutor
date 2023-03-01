@@ -22,7 +22,7 @@ open class QueueTaskService(
     open fun findExpired(minutes: Int, appId: String): List<Task> {
         val expiredEntities = queueTaskRepository.findExpired(minutes)
         val lockedEntities = expiredEntities.stream()
-            .filter { taskLockService.tryRefreshLockByName(it.taskLockEntity.name, minutes, appId).lockedBy == appId }
+            .filter { taskLockService.tryRefreshLockByName(it.taskLockEntity.name, minutes, appId) }
             .toList()
 
         return lockedEntities.stream()
@@ -30,7 +30,8 @@ open class QueueTaskService(
             .toList()
     }
 
-    fun updateState(task: Task, state: QueueTaskState) {
-
+    open fun updateState(task: Task, state: QueueTaskState): Boolean {
+        val a = queueTaskRepository.updateStateById(task.id, state) > 0
+        return a
     }
 }

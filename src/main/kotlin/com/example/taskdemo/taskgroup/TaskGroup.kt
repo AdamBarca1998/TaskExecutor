@@ -33,6 +33,8 @@ abstract class TaskGroup() {
 
     abstract fun isEnable(task: Task): Boolean
 
+//    abstract fun handleRun()
+
     open fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build()) {
         plannedTasks.add(TaskWithConfig(task, taskConfig))
     }

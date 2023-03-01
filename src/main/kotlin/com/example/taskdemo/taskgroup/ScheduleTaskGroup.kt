@@ -19,7 +19,7 @@ class ScheduleTaskGroup(
 
     private val appVars = AppVars()
     override val name: String = "scheduleGroup"
-    private var scheduleLock: TaskLockEntity = taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appVars.appId)
+    private var scheduleLock: TaskLockEntity = taskLockService.findByName(name)
     private val savedTasks: ArrayList<TaskWithConfig> = arrayListOf()
 
     init {
@@ -27,7 +27,9 @@ class ScheduleTaskGroup(
         scope.launch(Dispatchers.IO) {
             while (true) {
                 try {
-                    scheduleLock = taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appVars.appId)
+                    if (taskLockService.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appVars.appId)) {
+                        scheduleLock = taskLockService.findByName(name)
+                    }
 
                     if (scheduleLock.lockedBy == appVars.appId && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
                         plannedTasks.addAll(savedTasks)

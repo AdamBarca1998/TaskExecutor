@@ -36,7 +36,10 @@ interface QueueTaskMapper {
     fun toEntity(task: Task): QueueTaskEntity
 
     fun toTask(queueTaskEntity: QueueTaskEntity): Task {
-        return format.decodeFromString(queueTaskEntity.clazz)
+        val clazz = "{\"id\":\"${queueTaskEntity.id}\"," +
+                queueTaskEntity.clazz.substringAfter("{", "}")
+
+        return format.decodeFromString(clazz)
     }
 
     companion object {
@@ -53,12 +56,6 @@ interface QueueTaskMapper {
         @Named("mapTaskLockEntity")
         fun mapTaskLockEntity(task: Task): TaskLockEntity {
             return taskLockMapper.toEntity(task)
-        }
-
-        @JvmStatic
-        @Named("deserializeTask")
-        fun deserializeTask(queueTaskEntity: QueueTaskEntity): Task {
-            return format.decodeFromString(queueTaskEntity.clazz)
         }
     }
 }

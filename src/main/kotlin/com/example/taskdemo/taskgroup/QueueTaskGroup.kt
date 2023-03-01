@@ -1,6 +1,7 @@
 package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.AppVars
+import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.service.QueueTaskService
@@ -25,12 +26,13 @@ class QueueTaskGroup(
                     val expiredTasks = queueTaskService.findExpired(EXPIRED_LOCK_TIME_M, appVars.appId)
 
                     expiredTasks.forEach {
+                        queueTaskService.updateState(it, QueueTaskState.PLANNED)
                         plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
                     }
                 } catch (e: Exception) {
                     logger.error { e }
                 } finally {
-                    delay(/*getNextRefreshMillis()*/Duration.ofSeconds(30).toMillis())
+                    delay(/*getNextRefreshMillis()*/Duration.ofSeconds(5).toMillis())
                 }
             }
         }

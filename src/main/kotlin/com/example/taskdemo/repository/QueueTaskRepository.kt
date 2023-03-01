@@ -1,9 +1,14 @@
 package com.example.taskdemo.repository
 
+import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.model.entities.QueueTaskEntity
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
+@Repository
 interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
 
     @Query(
@@ -15,4 +20,14 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
         nativeQuery = true
     )
     fun findExpired(minutes: Int): List<QueueTaskEntity>
+
+    @Transactional
+    @Modifying
+    @Query(
+        value = "UPDATE queue_task " +
+                "SET state = :state " +
+                "WHERE id = :id",
+        nativeQuery = true
+    )
+    fun updateStateById(id: Long, state: QueueTaskState): Int
 }

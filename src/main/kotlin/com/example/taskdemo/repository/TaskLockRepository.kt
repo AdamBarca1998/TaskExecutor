@@ -4,8 +4,10 @@ import com.example.taskdemo.model.entities.TaskLockEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
+@Repository
 interface TaskLockRepository : JpaRepository<TaskLockEntity, Long> {
 
     fun findByName(name: String): TaskLockEntity
