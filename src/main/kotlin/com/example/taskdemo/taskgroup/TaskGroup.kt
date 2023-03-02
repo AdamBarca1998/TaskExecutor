@@ -22,7 +22,7 @@ const val REFRESH_LOCK_TIME_M = 1
 const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
 private const val LAUNCH_DELAY_TIME_S = 1L
 
-abstract class TaskGroup() {
+abstract class TaskGroup {
 
     protected val scope = CoroutineScope(Dispatchers.Default)
     protected val plannedTasks = PriorityBlockingQueue<TaskWithConfig>()
@@ -97,8 +97,8 @@ abstract class TaskGroup() {
         }
 
         // finish
-        planNextExecution(taskWithConfig, lastExecution ?: ZonedDateTime.now(), ZonedDateTime.now())
         runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
+        planNextExecution(taskWithConfig, lastExecution ?: ZonedDateTime.now(), ZonedDateTime.now())
     }
 
     protected open fun planNextExecution(taskWithConfig: TaskWithConfig,

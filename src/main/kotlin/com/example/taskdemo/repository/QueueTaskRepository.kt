@@ -24,6 +24,18 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
     @Transactional
     @Modifying
     @Query(
+        value = "UPDATE task_lock AS tl " +
+                "SET lock_until = NOW() + MAKE_INTERVAL(mins => :minutes), locked_at = NOW() " +
+                "FROM queue_task AS qt " +
+                "WHERE qt.task_lock_id = tl.id " +
+                "AND qt.id in :ids",
+        nativeQuery = true
+    )
+    fun refreshTasksByIds(ids: List<Long>, minutes: Int): Int
+
+    @Transactional
+    @Modifying
+    @Query(
         value = "UPDATE queue_task " +
                 "SET state = :#{#state.name()} " +
                 "WHERE id = :id",

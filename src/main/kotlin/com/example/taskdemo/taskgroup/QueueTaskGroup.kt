@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 
 class QueueTaskGroup(
     private val queueTaskService: QueueTaskService
-) : SerializedTaskGroup() {
+) : TaskGroup() {
 
     private val port = "8082" //TODO:DELETE
 
@@ -19,6 +19,7 @@ class QueueTaskGroup(
         scope.launch(Dispatchers.IO) {
             while (true) {
                 try {
+                    queueTaskService.refreshLocks(getAllPlannedAndRunningTaskIds(), EXPIRED_LOCK_TIME_M)
                     val expiredTasks = queueTaskService.findExpired(EXPIRED_LOCK_TIME_M, port)
 
                     expiredTasks.forEach {
@@ -43,7 +44,7 @@ class QueueTaskGroup(
 
     override fun handleError(task: Task, e: Exception) {
         super.handleError(task, e)
-        queueTaskService.updateStateAndResult(task, QueueTaskState.ERROR, e.message ?: "Default value")
+        queueTaskService.updateStateAndResult(task, QueueTaskState.ERROR, e.message ?: "Default value: handleError()")
     }
 
     override fun handleFinish(task: Task) {
@@ -53,5 +54,16 @@ class QueueTaskGroup(
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         queueTaskService.saveTask(task)
+    }
+
+    private fun getAllPlannedAndRunningTaskIds(): List<Long> {
+        val plannedTaskIds = plannedTasks.toList().stream()
+            .map { it.task.id }
+            .toList()
+        val runningTaskIds = runningTasks.toList().stream()
+            .map { it.taskWithConfig.task.id }
+            .toList()
+
+        return plannedTaskIds + runningTaskIds
     }
 }

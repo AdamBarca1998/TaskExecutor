@@ -30,6 +30,10 @@ open class QueueTaskService(
             .toList()
     }
 
+    open fun refreshLocks(ids: List<Long>, minutes: Int): Boolean {
+        return queueTaskRepository.refreshTasksByIds(ids, minutes) == ids.size
+    }
+
     open fun updateState(task: Task, state: QueueTaskState): Boolean {
         return queueTaskRepository.updateStateById(task.id, state) > 0
     }
