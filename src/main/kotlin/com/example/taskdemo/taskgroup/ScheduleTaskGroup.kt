@@ -26,7 +26,7 @@ class ScheduleTaskGroup(
         scope.launch(Dispatchers.IO) {
             while (true) {
                 try {
-                    if (taskLockService.tryRefreshLockByName(lockName, EXPIRED_LOCK_TIME_M, port)) {
+                    if (taskLockService.tryRefreshLockByName(lockName, port)) {
                         scheduleLock = taskLockService.findByName(lockName)
                     }
 

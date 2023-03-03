@@ -4,6 +4,7 @@ import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.mappers.QueueTaskMapper
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.repository.QueueTaskRepository
+import com.example.taskdemo.taskgroup.EXPIRED_LOCK_TIME_M
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,10 +20,10 @@ open class QueueTaskService(
     }
 
     @Transactional
-    open fun findExpired(minutes: Int, appId: String): List<Task> {
-        val expiredEntities = queueTaskRepository.findExpired(minutes)
+    open fun findExpired(appId: String): List<Task> {
+        val expiredEntities = queueTaskRepository.findExpired(EXPIRED_LOCK_TIME_M)
         val lockedEntities = expiredEntities.stream()
-            .filter { taskLockService.tryRefreshLockByName(it.taskLockEntity.name, minutes, appId) }
+            .filter { taskLockService.tryRefreshLockByName(it.taskLockEntity.name, appId) }
             .toList()
 
         return lockedEntities.stream()
@@ -30,8 +31,8 @@ open class QueueTaskService(
             .toList()
     }
 
-    open fun refreshLocks(ids: List<Long>, minutes: Int): Boolean {
-        return queueTaskRepository.refreshTasksByIds(ids, minutes) == ids.size
+    open fun refreshLocks(ids: List<Long>): Boolean {
+        return queueTaskRepository.refreshTasksByIds(ids, EXPIRED_LOCK_TIME_M) == ids.size
     }
 
     open fun updateState(task: Task, state: QueueTaskState): Boolean {

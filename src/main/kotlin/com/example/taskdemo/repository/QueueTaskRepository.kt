@@ -13,10 +13,11 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
 
     @Query(
         value = "SELECT q.id, clazz, state, created_at, created_by, owned_by, result, task_lock_id " +
-                "FROM barca.queue_task AS q " +
+                "FROM queue_task AS q " +
                 "LEFT JOIN task_lock AS tl ON tl.id = q.task_lock_id " +
                 "WHERE lock_until < NOW() - MAKE_INTERVAL(mins => :minutes) " +
-                "AND state != 'FINISHED'",
+                "AND state != 'FINISHED' " +
+                "ORDER BY created_at",
         nativeQuery = true
     )
     fun findExpired(minutes: Int): List<QueueTaskEntity>

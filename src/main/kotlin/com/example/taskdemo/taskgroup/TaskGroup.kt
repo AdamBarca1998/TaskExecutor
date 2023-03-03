@@ -18,7 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 
-const val REFRESH_LOCK_TIME_M = 1
+private const val REFRESH_LOCK_TIME_M = 1
 const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
 private const val LAUNCH_DELAY_TIME_S = 1L
 
@@ -97,8 +97,8 @@ abstract class TaskGroup {
         }
 
         // finish
-        runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
         planNextExecution(taskWithConfig, lastExecution ?: ZonedDateTime.now(), ZonedDateTime.now())
+        runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
     }
 
     protected open fun planNextExecution(taskWithConfig: TaskWithConfig,

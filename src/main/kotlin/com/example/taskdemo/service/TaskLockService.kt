@@ -2,6 +2,7 @@ package com.example.taskdemo.service
 
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.repository.TaskLockRepository
+import com.example.taskdemo.taskgroup.EXPIRED_LOCK_TIME_M
 import org.springframework.stereotype.Service
 
 @Service
@@ -13,7 +14,7 @@ class TaskLockService(
 
     fun findByName(name: String): TaskLockEntity = taskLockRepository.findByName(name)
 
-    fun tryRefreshLockByName(name: String, minutes: Int, appId: String): Boolean {
-        return taskLockRepository.tryRefreshLockByName(name, minutes, appId) > 0
+    fun tryRefreshLockByName(name: String, appId: String): Boolean {
+        return taskLockRepository.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appId) > 0
     }
 }
