@@ -2,8 +2,10 @@ package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.DaemonTaskContext
 import com.example.taskdemo.model.Task
+import com.example.taskdemo.model.TaskConfig
 import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class DaemonTaskGroup : TaskGroup() {
@@ -11,19 +13,26 @@ class DaemonTaskGroup : TaskGroup() {
     init {
         scope.launch(Dispatchers.IO) {
             while (true) {
-                if (!isLocked.get()) {
-                    while (plannedTasks.isNotEmpty()) {
-                        plannedTasks.poll()?.let {
-                            val job = launch { runTask(it) }
+                try {
+                    if (!isLocked.get()) {
+                        while (plannedTasks.isNotEmpty()) {
+                            plannedTasks.poll()?.let {
+                                val job = launch { runTask(it) }
 
-                            runningTasks.add(TaskWithJob(it, job))
+                                runningTasks.add(TaskWithJob(it, job))
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    logger.error { e }
+                } finally {
+                    delay(getNextRefreshMillis())
                 }
-
-                sleepLaunch()
             }
         }
+    }
+
+    override fun addTask(task: Task, taskConfig: TaskConfig) {
     }
 
     override fun isEnable(task: Task): Boolean = true

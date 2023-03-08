@@ -16,11 +16,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 
 private const val REFRESH_LOCK_TIME_M = 1
 const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
-private const val LAUNCH_DELAY_TIME_S = 1L
 
 abstract class TaskGroup {
 
@@ -44,9 +44,7 @@ abstract class TaskGroup {
         logger.debug { "$task ended." }
     }
 
-    open fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build()) {
-        plannedTasks.add(TaskWithConfig(task, taskConfig))
-    }
+    abstract fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build())
 
     open fun removeTask(task: Task) {
         plannedTasks.removeIf { it.task == task }
@@ -64,9 +62,11 @@ abstract class TaskGroup {
         isLocked.set(true)
     }
 
-    protected suspend fun sleepLaunch() {
-        if (plannedTasks.isEmpty() || isLocked.get()) {
-            delay(Duration.ofSeconds(LAUNCH_DELAY_TIME_S).toMillis())
+    protected fun runNextTask() {
+        plannedTasks.poll()?.let {
+            val job = scope.launch { runTask(it) }
+
+            runningTasks.add(TaskWithJob(it, job))
         }
     }
 
@@ -99,6 +99,7 @@ abstract class TaskGroup {
         // finish
         planNextExecution(taskWithConfig, lastExecution ?: ZonedDateTime.now(), ZonedDateTime.now())
         runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
+        runNextTask()
     }
 
     protected open fun planNextExecution(taskWithConfig: TaskWithConfig,

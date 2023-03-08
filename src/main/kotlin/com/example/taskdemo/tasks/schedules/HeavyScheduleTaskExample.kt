@@ -1,9 +1,9 @@
 package com.example.taskdemo.tasks.schedules
 
-import com.example.taskdemo.model.Schedule
+import com.example.taskdemo.annotations.Schedule
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskContext
-import com.example.taskdemo.model.TaskSchedule
+import com.example.taskdemo.annotations.TaskSchedule
 import java.time.Duration
 import java.time.LocalDateTime
 

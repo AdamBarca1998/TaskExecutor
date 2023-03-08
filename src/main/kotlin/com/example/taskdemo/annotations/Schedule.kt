@@ -1,4 +1,4 @@
-package com.example.taskdemo.model
+package com.example.taskdemo.annotations
 
 import java.util.concurrent.TimeUnit
 

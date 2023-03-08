@@ -1,8 +1,9 @@
-package com.example.taskdemo.tasks
+package com.example.taskdemo.tasks.daemons
 
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskContext
 import java.time.Duration
+
 
 class DaemonTaskExample : Task {
 

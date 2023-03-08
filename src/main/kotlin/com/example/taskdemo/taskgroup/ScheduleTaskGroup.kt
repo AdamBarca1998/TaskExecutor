@@ -14,7 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException
 class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
     private val scheduleTaskService: ScheduleTaskService
-) : SerializedTaskGroup() {
+) : TaskGroup() {
 
     private val port = "8080" //TODO:DELETE
     private val lockName: String = "scheduleGroup"
@@ -26,12 +26,15 @@ class ScheduleTaskGroup(
         scope.launch(Dispatchers.IO) {
             while (true) {
                 try {
-                    if (taskLockService.tryRefreshLockByName(lockName, port)) {
-                        scheduleLock = taskLockService.findByName(lockName)
-                    }
+                    if (!isLocked.get()) {
+                        if (taskLockService.tryRefreshLockByName(lockName, port)) {
+                            scheduleLock = taskLockService.findByName(lockName)
+                        }
 
-                    if (scheduleLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
-                        plannedTasks.addAll(savedTasks)
+                        if (scheduleLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
+                            plannedTasks.addAll(savedTasks)
+                            runNextTask()
+                        }
                     }
                 } catch (e: Exception) {
                     logger.error { e }
@@ -58,7 +61,10 @@ class ScheduleTaskGroup(
 
         savedTasks.add(TaskWithConfig(task, taskConfig))
         if (scheduleLock.lockedBy == port) {
-            super.addTask(task, taskConfig)
+            plannedTasks.add(TaskWithConfig(task, taskConfig))
+            if (runningTasks.isEmpty()) {
+                runNextTask()
+            }
         }
     }
 }

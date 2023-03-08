@@ -4,7 +4,6 @@ import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.service.QueueTaskService
-import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -20,16 +19,18 @@ class QueueTaskGroup(
         scope.launch(Dispatchers.IO) {
             while (true) {
                 try {
-                    queueTaskService.refreshLocks(getAllPlannedAndRunningTaskIds())
-                    val expiredTasks = queueTaskService.findExpired(port)
+                    if (!isLocked.get()) {
+                        queueTaskService.refreshLocks(getAllPlannedAndRunningTaskIds())
+                        val expiredTasks = queueTaskService.findExpired(port)
 
-                    expiredTasks.forEach {
-                        queueTaskService.updateState(it, QueueTaskState.PLANNED)
-                        plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
-                    }
+                        expiredTasks.forEach {
+                            queueTaskService.updateState(it, QueueTaskState.PLANNED)
+                            plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
+                        }
 
-                    if (runningTasks.isEmpty()) {
-                        planNextTask()
+                        if (runningTasks.isEmpty()) {
+                            runNextTask()
+                        }
                     }
                 } catch (e: Exception) {
                     logger.error { e }
@@ -59,18 +60,6 @@ class QueueTaskGroup(
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         queueTaskService.saveTask(task)
-    }
-
-    override fun planNextExecution(taskWithConfig: TaskWithConfig, lastExecution: ZonedDateTime, lastCompletion: ZonedDateTime) {
-        planNextTask()
-    }
-
-    private fun planNextTask() {
-        plannedTasks.poll()?.let {
-            val job = scope.launch { runTask(it) }
-
-            runningTasks.add(TaskWithJob(it, job))
-        }
     }
 
     private fun getAllPlannedAndRunningTaskIds(): List<Long> {
