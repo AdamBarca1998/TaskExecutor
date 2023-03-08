@@ -6,12 +6,12 @@ import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 
 @TaskDaemon
-class DaemonTaskExample : Task {
+class Daemon2TaskExample : Task {
 
     override val id = -1L
 
     override fun run(taskContext: TaskContext) {
-        println("DaemonTaskExample running...")
-        Thread.sleep(Duration.ofSeconds(1))
+        println("Daemon2TaskExample running...")
+        Thread.sleep(Duration.ofSeconds(30))
     }
 }

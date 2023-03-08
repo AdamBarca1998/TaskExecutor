@@ -3,6 +3,7 @@ package com.example.taskdemo.model
 import com.example.taskdemo.abstractschedule.AbstractSchedule
 import com.example.taskdemo.annotations.DEFAULT_FIXED_RATE_OR_DELAY
 import com.example.taskdemo.annotations.Schedule
+import com.example.taskdemo.annotations.TaskDaemon
 import com.example.taskdemo.annotations.TaskSchedule
 import com.example.taskdemo.service.TaskGroupService
 import java.time.Duration
@@ -28,6 +29,11 @@ class TaskReaderComponent(
         .filter { it is Task }
         .map { it as Task }
         .toList()
+    private val daemonTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(TaskDaemon::class.java).asClass<Any>()].stream()
+        .map { Class.forName(it.name).getDeclaredConstructor().newInstance() }
+        .filter { it is Task }
+        .map { it as Task }
+        .toList()
 
     init {
         scheduleTasks.forEach { task ->
@@ -47,6 +53,7 @@ class TaskReaderComponent(
 
             taskGroupService.addSchedule(task, taskConfig.build())
         }
+        daemonTasks.forEach { taskGroupService.addDaemon(it) }
     }
 
     private fun convertAnnotationToSchedule(annotation: Schedule): AbstractSchedule {

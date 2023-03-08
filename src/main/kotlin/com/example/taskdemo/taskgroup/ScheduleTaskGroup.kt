@@ -45,23 +45,23 @@ class ScheduleTaskGroup(
         }
     }
 
-    override fun isEnable(task: Task): Boolean {
-        return scheduleTaskService.isEnableByClazzPath(task.javaClass.name)
-    }
+    override fun isEnable(task: Task) = scheduleTaskService.isEnableByClazzPath(task.javaClass.name)
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
+        val taskWithConfig = TaskWithConfig(task, taskConfig)
+
         // try create
         try {
-            scheduleTaskService.createTask(task, taskConfig, scheduleLock)
+            scheduleTaskService.createTask(task, scheduleLock)
         } catch (e: DataIntegrityViolationException) {
             if ((e.cause as ConstraintViolationException).constraintName != "schedule_task_clazz_path_key") {
                 throw e
             }
         }
 
-        savedTasks.add(TaskWithConfig(task, taskConfig))
+        savedTasks.add(taskWithConfig)
         if (scheduleLock.lockedBy == port) {
-            plannedTasks.add(TaskWithConfig(task, taskConfig))
+            plannedTasks.add(taskWithConfig)
             if (runningTasks.isEmpty()) {
                 runNextTask()
             }
