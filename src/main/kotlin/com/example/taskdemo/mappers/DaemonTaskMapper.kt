@@ -12,5 +12,6 @@ interface DaemonTaskMapper {
     @Mapping(source = "taskLockEntity", target = "taskLockEntity")
     @Mapping(target = "clazzPath", expression = "java(task.getClass().getName())")
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "taskContext", ignore = true)
     fun toEntity(task: Task, taskLockEntity: TaskLockEntity): DaemonTaskEntity
 }

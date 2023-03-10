@@ -32,16 +32,16 @@ START 1;
 CREATE TABLE task_lock (
     id  BIGINT PRIMARY KEY DEFAULT nextval('task_lock_id_seq'),
     name    VARCHAR(1024) NOT NULL UNIQUE,
-    lock_until  TIMESTAMP NOT NULL,
-    locked_at   TIMESTAMP NOT NULL,
+    lock_until  TIMESTAMP WITH TIME ZONE NOT NULL,
+    locked_at   TIMESTAMP WITH TIME ZONE NOT NULL,
     locked_by   VARCHAR(256) NOT NULL
 );
 
 CREATE TABLE task_context (
     id BIGINT PRIMARY KEY DEFAULT nextval('task_context_id_seq'),
-    start_date_time TIMESTAMP NOT NULL,
-    last_execution TIMESTAMP NOT NULL,
-    last_completion TIMESTAMP NOT NULL
+    start_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_execution TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_completion TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 CREATE TABLE schedule_task (
@@ -56,14 +56,14 @@ CREATE TABLE daemon_task (
     clazz_path   VARCHAR(1024) NOT NULL UNIQUE,
     enable  BOOLEAN NOT NULL DEFAULT TRUE,
     task_lock_id    BIGINT NOT NULL REFERENCES task_lock(id),
-    task_context_id BIGINT REFERENCES task_context(id)
+    task_context_id BIGINT NOT NULL REFERENCES task_context(id)
 );
 
 CREATE TABLE queue_task (
     id BIGINT PRIMARY KEY DEFAULT nextval('queue_task_id_seq'),
     clazz TEXT NOT NULL,
     state VARCHAR(16) NOT NULL,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     created_by  VARCHAR(1024) NOT NULL, --
     owned_by    VARCHAR(1024) NOT NULL, --
     result      VARCHAR(1024) NOT NULL, --

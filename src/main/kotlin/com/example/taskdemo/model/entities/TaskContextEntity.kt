@@ -19,13 +19,13 @@ open class TaskContextEntity {
 
     @NotNull
     @Column(name = "start_date_time", nullable = false)
-    open val startDateTime: Instant = Instant.MAX
+    open var startDateTime: Instant = Instant.now()
 
     @NotNull
     @Column(name = "last_execution", nullable = false)
-    open val lastExecution: Instant = Instant.MAX
+    open var lastExecution: Instant = Instant.now()
 
     @NotNull
     @Column(name = "last_completion", nullable = false)
-    open val lastCompletion: Instant = Instant.MAX
+    open var lastCompletion: Instant = Instant.now()
 }

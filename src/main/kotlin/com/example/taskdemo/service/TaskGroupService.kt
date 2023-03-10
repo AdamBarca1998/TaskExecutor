@@ -12,12 +12,13 @@ class TaskGroupService(
     scheduleTaskService: ScheduleTaskService,
     queueTaskService: QueueTaskService,
     taskLockService: TaskLockService,
-    daemonTaskService: DaemonTaskService
+    daemonTaskService: DaemonTaskService,
+    taskContextService: TaskContextService
 ) {
 
     private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService)
     private val queueTaskGroup = QueueTaskGroup(queueTaskService)
-    private val daemonTaskGroup = DaemonTaskGroup(taskLockService, daemonTaskService)
+    private val daemonTaskGroup = DaemonTaskGroup(taskLockService, daemonTaskService, taskContextService)
     private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService)
 
     fun addSchedule(task: Task, config: TaskConfig) {

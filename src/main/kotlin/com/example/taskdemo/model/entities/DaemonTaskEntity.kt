@@ -1,5 +1,6 @@
 package com.example.taskdemo.model.entities
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -12,9 +13,11 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import org.springframework.transaction.annotation.Transactional
 
 @Entity
 @Table(name = "daemon_task")
+@Transactional
 open class DaemonTaskEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "daemon_task_id_gen")
@@ -32,7 +35,8 @@ open class DaemonTaskEntity {
     @JoinColumn(name = "task_lock_id", nullable = false)
     open var taskLockEntity: TaskLockEntity = TaskLockEntity()
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_context_id")
-    open var taskContext: TaskContextEntity? = null
+    @NotNull
+    @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = [CascadeType.PERSIST])
+    @JoinColumn(name = "task_context_id", nullable = false)
+    open var taskContext: TaskContextEntity = TaskContextEntity()
 }

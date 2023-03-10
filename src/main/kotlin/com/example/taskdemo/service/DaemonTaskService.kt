@@ -2,6 +2,7 @@ package com.example.taskdemo.service
 
 import com.example.taskdemo.mappers.DaemonTaskMapper
 import com.example.taskdemo.model.Task
+import com.example.taskdemo.model.entities.DaemonTaskEntity
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.repository.DaemonTaskRepository
 import org.springframework.stereotype.Service
@@ -13,8 +14,12 @@ class DaemonTaskService(
 ) {
 
     fun createTask(task: Task, scheduleLock: TaskLockEntity) {
-        daemonTaskRepository.insert(daemonTaskMapper.toEntity(task, scheduleLock))
+        daemonTaskRepository.save(daemonTaskMapper.toEntity(task, scheduleLock))
     }
 
     fun isEnableByClazzPath(clazzPath: String) = daemonTaskRepository.isEnableByClazzPath(clazzPath)
+
+    fun findAll(): List<DaemonTaskEntity> {
+        return daemonTaskRepository.findAll()
+    }
 }

@@ -5,6 +5,7 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.service.DaemonTaskService
+import com.example.taskdemo.service.TaskContextService
 import com.example.taskdemo.service.TaskLockService
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -16,7 +17,8 @@ import org.springframework.dao.DataIntegrityViolationException
 
 class DaemonTaskGroup(
     private val taskLockService: TaskLockService,
-    private val daemonTaskService: DaemonTaskService
+    private val daemonTaskService: DaemonTaskService,
+    private val taskContextService: TaskContextService
 ) : TaskGroup() {
 
     private val port = "8080" //TODO:DELETE
@@ -35,11 +37,16 @@ class DaemonTaskGroup(
                         }
 
                         if (daemonLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
+                            val entities = daemonTaskService.findAll()
                             // async run
-                            savedTasks.forEach {
-                                val job = launch { runTask(it) }
+                            entities.forEach { entity ->
+                                savedTasks.find { it.task.javaClass.name == entity.clazzPath }?.let {
+                                    it.taskConfig.startDateTime = entity.taskContext.startDateTime
 
-                                runningTasks.add(TaskWithJob(it, job))
+                                    val job = launch { runTask(it) }
+
+                                    runningTasks.add(TaskWithJob(it, job))
+                                }
                             }
                         }
                     }
@@ -55,7 +62,14 @@ class DaemonTaskGroup(
     override fun isEnable(task: Task) = daemonTaskService.isEnableByClazzPath(task.javaClass.name)
 
     override fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
-        taskWithConfig.taskConfig.startDateTime = taskContext.nextExecution ?: Instant.now().plus(1, ChronoUnit.DAYS)
+        val newContext = TaskContext(
+            taskContext.nextExecution ?: Instant.now().plus(1, ChronoUnit.DAYS),
+            taskContext.lastExecution,
+            taskContext.lastCompletion,
+            null
+        )
+        taskWithConfig.taskConfig.startDateTime = newContext.startDateTime
+        taskContextService.updateByClazzPath(newContext, taskWithConfig.task.javaClass.name)
         plannedTasks.add(taskWithConfig)
     }
 
