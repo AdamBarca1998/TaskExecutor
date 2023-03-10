@@ -1,12 +1,13 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.model.DaemonTaskContext
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
+import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.service.DaemonTaskService
 import com.example.taskdemo.service.TaskLockService
-import java.time.ZonedDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -53,16 +54,9 @@ class DaemonTaskGroup(
 
     override fun isEnable(task: Task) = daemonTaskService.isEnableByClazzPath(task.javaClass.name)
 
-    override fun planNextExecution(taskWithConfig: TaskWithConfig,
-                                    lastExecution: ZonedDateTime,
-                                    lastCompletion: ZonedDateTime
-    ) {
-        val context = DaemonTaskContext(taskWithConfig.taskConfig.startDateTime, lastExecution, lastCompletion)
-
-        context.nextExecution().let {
-            taskWithConfig.taskConfig.startDateTime = it ?: ZonedDateTime.now().plusDays(1L)
-            plannedTasks.add(taskWithConfig)
-        }
+    override fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+        taskWithConfig.taskConfig.startDateTime = taskContext.nextExecution ?: Instant.now().plus(1, ChronoUnit.DAYS)
+        plannedTasks.add(taskWithConfig)
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {

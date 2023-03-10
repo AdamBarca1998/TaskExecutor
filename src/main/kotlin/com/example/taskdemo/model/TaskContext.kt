@@ -1,13 +1,10 @@
 package com.example.taskdemo.model
 
-import java.time.ZonedDateTime
+import java.time.Instant
 
-open class TaskContext(
-    val startDateTime: ZonedDateTime,
-    val lastExecution: ZonedDateTime,
-    val lastCompletion: ZonedDateTime
-) {
-    open fun nextExecution(): ZonedDateTime? {
-        throw UnsupportedOperationException("Method is not implemented for task.")
-    }
-}
+class TaskContext(
+    val startDateTime: Instant,
+    val lastExecution: Instant,
+    var lastCompletion: Instant,
+    var nextExecution: Instant?
+)

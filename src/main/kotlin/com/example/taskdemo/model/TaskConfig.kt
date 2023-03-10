@@ -1,7 +1,7 @@
 package com.example.taskdemo.model
 
 import com.example.taskdemo.abstractschedule.AbstractSchedule
-import java.time.ZonedDateTime
+import java.time.Instant
 
 class TaskConfig private constructor(
 
@@ -11,10 +11,10 @@ class TaskConfig private constructor(
 
     val heavy: Boolean,
 
-    var startDateTime: ZonedDateTime
+    var startDateTime: Instant
 ) {
 
-    fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
+    fun nextExecution(taskContext: TaskContext): Instant? {
         return schedules.stream()
             .map { it.nextExecution(taskContext) }
             .sorted()
@@ -26,7 +26,7 @@ class TaskConfig private constructor(
         var schedules: ArrayList<AbstractSchedule> = ArrayList(),
         var priority: Int = Int.MIN_VALUE,
         var heavy: Boolean = false,
-        var startDateTime: ZonedDateTime = ZonedDateTime.now()
+        var startDateTime: Instant = Instant.now()
     ) {
         fun addSchedule(schedules: AbstractSchedule) = apply {
             this.schedules.add(schedules)
@@ -40,7 +40,7 @@ class TaskConfig private constructor(
             this.heavy = heavy
         }
 
-        fun withStartDateTime(startDateTime: ZonedDateTime) = apply {
+        fun withStartDateTime(startDateTime: Instant) = apply {
             this.startDateTime = startDateTime
         }
 

@@ -5,8 +5,6 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.Instant
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.LinkedTransferQueue
 import java.util.concurrent.PriorityBlockingQueue
@@ -71,44 +69,38 @@ abstract class TaskGroup {
     }
 
     protected suspend fun runTask(taskWithConfig: TaskWithConfig) {
-        var lastExecution: ZonedDateTime? = null
-        val config = taskWithConfig.taskConfig
-        val task = taskWithConfig.task
-
         // start
-        delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), config.startDateTime))
+        delay(ChronoUnit.MILLIS.between(Instant.now(), taskWithConfig.taskConfig.startDateTime))
+
+        val task = taskWithConfig.task
+        val taskContext = TaskContext(
+            taskWithConfig.taskConfig.startDateTime,
+            Instant.now(),
+            Instant.MAX,
+            null
+        )
 
         if (!isLocked.get() && isEnable(task)) {
             handleRun(task)
-            lastExecution = ZonedDateTime.now()
 
             try {
-                task.run(
-                    TaskContext(
-                        config.startDateTime,
-                        lastExecution, Instant.ofEpochMilli(Long.MAX_VALUE).atZone(ZoneOffset.UTC)
-                    )
-                )
+                task.run(taskContext)
 
                 handleFinish(task)
             } catch (e: Exception) {
                 handleError(task, e)
             }
         }
+        taskContext.lastCompletion = Instant.now()
 
         // finish
-        planNextExecution(taskWithConfig, lastExecution ?: ZonedDateTime.now(), ZonedDateTime.now())
+        planNextExecution(taskWithConfig, taskContext)
         runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
         runNextTask()
     }
 
-    protected open fun planNextExecution(taskWithConfig: TaskWithConfig,
-                                         lastExecution: ZonedDateTime,
-                                         lastCompletion: ZonedDateTime
-    ) {
-        taskWithConfig.taskConfig.nextExecution(
-            TaskContext(taskWithConfig.taskConfig.startDateTime, lastExecution, lastCompletion)
-        )?.let {
+    protected open fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+        taskWithConfig.taskConfig.nextExecution(taskContext)?.let {
             taskWithConfig.taskConfig.startDateTime = it
             plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
         }

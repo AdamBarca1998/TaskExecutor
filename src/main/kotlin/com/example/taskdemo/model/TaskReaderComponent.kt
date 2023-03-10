@@ -7,9 +7,7 @@ import com.example.taskdemo.annotations.TaskDaemon
 import com.example.taskdemo.annotations.TaskSchedule
 import com.example.taskdemo.service.TaskGroupService
 import java.time.Duration
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.time.Instant
 import org.reflections.Reflections
 import org.reflections.scanners.Scanners
 import org.springframework.scheduling.support.CronExpression
@@ -22,7 +20,6 @@ class TaskReaderComponent(
     private val taskGroupService: TaskGroupService
 ) {
 
-    private val dateTimeFormatter = DateTimeFormatter.ISO_INSTANT.withZone(ZoneOffset.UTC)
     private val reflections = Reflections(TASKS_PATH)
     private val scheduleTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(TaskSchedule::class.java).asClass<Any>()].stream()
         .map { Class.forName(it.name).getDeclaredConstructor().newInstance() }
@@ -47,7 +44,7 @@ class TaskReaderComponent(
                     }
                     taskConfig.withPriority(annotation.priority)
                     taskConfig.withHeavy(annotation.heavy)
-                    taskConfig.withStartDateTime(ZonedDateTime.parse(annotation.startDateTime, dateTimeFormatter))
+                    taskConfig.withStartDateTime(Instant.parse(annotation.startDateTime))
                 }
             }
 

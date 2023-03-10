@@ -31,4 +31,8 @@ open class DaemonTaskEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "task_lock_id", nullable = false)
     open var taskLockEntity: TaskLockEntity = TaskLockEntity()
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_context_id")
+    open var taskContext: TaskContextEntity? = null
 }
