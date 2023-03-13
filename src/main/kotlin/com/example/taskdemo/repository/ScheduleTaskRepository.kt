@@ -14,10 +14,11 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
     @Modifying
     @Query(
         value = "INSERT INTO schedule_task(clazz_path, task_lock_id) " +
-                "VALUES(:#{#scheduleTaskEntity.clazzPath}, :#{#scheduleTaskEntity.taskLockEntity.id})",
+                "VALUES(:#{#scheduleTaskEntity.clazzPath}, :#{#scheduleTaskEntity.taskLockEntity.id}) " +
+                "ON CONFLICT DO NOTHING",
         nativeQuery = true
     )
-    fun insert(scheduleTaskEntity: ScheduleTaskEntity)
+    fun insertIfNotExists(scheduleTaskEntity: ScheduleTaskEntity)
 
     @Query(
         value = "SELECT enable FROM schedule_task WHERE clazz_path = :clazzPath",

@@ -23,10 +23,13 @@ const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
 abstract class TaskGroup {
 
     protected val scope = CoroutineScope(Dispatchers.Default)
+    protected val savedTasks: ArrayList<TaskWithConfig> = arrayListOf()
     protected val plannedTasks = PriorityBlockingQueue<TaskWithConfig>()
     protected val runningTasks = LinkedTransferQueue<TaskWithJob>()
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     protected val logger = KotlinLogging.logger {}
+
+    protected val port = "8080" //TODO:DELETE
 
     protected abstract fun isEnable(task: Task): Boolean
 
@@ -46,6 +49,21 @@ abstract class TaskGroup {
 
     fun stopGroup() {
         isLocked.set(true)
+    }
+
+    fun getAllClazzPath(): List<String> {
+        return savedTasks.stream()
+            .map { it.task.javaClass.name }
+            .toList()
+    }
+
+    fun removeTaskByClazzPath(clazzPath: String) {
+        savedTasks.removeIf { it.task.javaClass.name == clazzPath }
+        plannedTasks.removeIf { it.task.javaClass.name == clazzPath }
+        runningTasks.find { it.taskWithConfig.task.javaClass.name == clazzPath }?.let {
+            runningTasks.remove(it)
+            it.job.cancel()
+        }
     }
 
     protected fun runNextTask() {

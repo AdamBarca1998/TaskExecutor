@@ -13,11 +13,12 @@ interface DaemonTaskRepository : JpaRepository<DaemonTaskEntity, Long> {
     @Transactional
     @Modifying
     @Query(
-        value = "INSERT INTO daemon_task(clazz_path, task_lock_id) " +
-                "VALUES(:#{#daemonTaskEntity.clazzPath}, :#{#daemonTaskEntity.taskLockEntity.id})",
+        value = "INSERT INTO daemon_task(clazz_path, task_lock_id, task_context_id) " +
+                "VALUES(:#{#daemonTaskEntity.clazzPath}, :#{#daemonTaskEntity.taskLockEntity.id}, :#{#daemonTaskEntity.taskContext.id})" +
+                "ON CONFLICT DO NOTHING",
         nativeQuery = true
     )
-    fun insert(daemonTaskEntity: DaemonTaskEntity)
+    fun insertIfNotExists(daemonTaskEntity: DaemonTaskEntity)
 
     @Query(
         value = "SELECT enable FROM daemon_task WHERE clazz_path = :clazzPath",

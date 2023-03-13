@@ -8,18 +8,14 @@ import com.example.taskdemo.service.TaskLockService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.hibernate.exception.ConstraintViolationException
-import org.springframework.dao.DataIntegrityViolationException
 
 class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
     private val scheduleTaskService: ScheduleTaskService
 ) : TaskGroup() {
 
-    private val port = "8080" //TODO:DELETE
     private val lockName: String = "scheduleGroup"
     private var scheduleLock: TaskLockEntity = taskLockService.findByName(lockName)
-    private val savedTasks: ArrayList<TaskWithConfig> = arrayListOf()
 
     init {
         // locker
@@ -50,14 +46,7 @@ class ScheduleTaskGroup(
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         val taskWithConfig = TaskWithConfig(task, taskConfig)
 
-        // try create
-        try {
-            scheduleTaskService.createTask(task, scheduleLock)
-        } catch (e: DataIntegrityViolationException) {
-            if ((e.cause as ConstraintViolationException).constraintName != "schedule_task_clazz_path_key") {
-                throw e
-            }
-        }
+        scheduleTaskService.createIfNotExists(task, scheduleLock)
 
         savedTasks.add(taskWithConfig)
         if (scheduleLock.lockedBy == port) {

@@ -5,21 +5,27 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.entities.DaemonTaskEntity
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.repository.DaemonTaskRepository
+import com.example.taskdemo.repository.TaskContextRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-class DaemonTaskService(
+open class DaemonTaskService(
     private val daemonTaskRepository: DaemonTaskRepository,
-    private val daemonTaskMapper: DaemonTaskMapper
+    private val daemonTaskMapper: DaemonTaskMapper,
+    private val taskContextRepository: TaskContextRepository
 ) {
 
-    fun createTask(task: Task, scheduleLock: TaskLockEntity) {
-        daemonTaskRepository.save(daemonTaskMapper.toEntity(task, scheduleLock))
+    @Transactional
+    open fun createIfNotExists(task: Task, scheduleLock: TaskLockEntity) {
+        val daemonTaskEntity = daemonTaskMapper.toEntity(task, scheduleLock);
+        daemonTaskEntity.taskContext = taskContextRepository.save(daemonTaskEntity.taskContext)
+        daemonTaskRepository.insertIfNotExists(daemonTaskEntity)
     }
 
-    fun isEnableByClazzPath(clazzPath: String) = daemonTaskRepository.isEnableByClazzPath(clazzPath)
+    open fun isEnableByClazzPath(clazzPath: String) = daemonTaskRepository.isEnableByClazzPath(clazzPath)
 
-    fun findAll(): List<DaemonTaskEntity> {
+    open fun findAll(): List<DaemonTaskEntity> {
         return daemonTaskRepository.findAll()
     }
 }

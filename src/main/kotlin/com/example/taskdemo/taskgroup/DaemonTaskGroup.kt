@@ -12,8 +12,6 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.hibernate.exception.ConstraintViolationException
-import org.springframework.dao.DataIntegrityViolationException
 
 class DaemonTaskGroup(
     private val taskLockService: TaskLockService,
@@ -21,10 +19,8 @@ class DaemonTaskGroup(
     private val taskContextService: TaskContextService
 ) : TaskGroup() {
 
-    private val port = "8080" //TODO:DELETE
     private val lockName: String = "daemonGroup"
     private var daemonLock: TaskLockEntity = taskLockService.findByName(lockName)
-    private val savedTasks: ArrayList<TaskWithConfig> = arrayListOf()
 
     init {
         // locker
@@ -59,27 +55,6 @@ class DaemonTaskGroup(
         }
     }
 
-    fun getAll(): List<String> {
-        val plannedTaskIds = plannedTasks.toList().stream()
-            .map { it.task.javaClass.name }
-            .toList()
-        val runningTaskIds = runningTasks.toList().stream()
-            .map { it.taskWithConfig.task.javaClass.name }
-            .toList()
-
-        return plannedTaskIds + runningTaskIds
-    }
-
-    fun removeTaskByClazzPath(clazzPath: String) {
-        savedTasks.removeIf { it.task.javaClass.name == clazzPath }
-        plannedTasks.removeIf { it.task.javaClass.name == clazzPath }
-        runningTasks.find { it.taskWithConfig.task.javaClass.name == clazzPath }?.let {
-            runningTasks.remove(it)
-            it.job.cancel()
-        }
-    }
-
-
     override fun isEnable(task: Task) = daemonTaskService.isEnableByClazzPath(task.javaClass.name)
 
     override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
@@ -99,14 +74,7 @@ class DaemonTaskGroup(
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         val taskWithConfig = TaskWithConfig(task, taskConfig)
 
-        // try create
-        try {
-            daemonTaskService.createTask(task, daemonLock)
-        } catch (e: DataIntegrityViolationException) {
-            if ((e.cause as ConstraintViolationException).constraintName != "daemon_task_clazz_path_key") {
-                throw e
-            }
-        }
+        daemonTaskService.createIfNotExists(task, daemonLock)
 
         savedTasks.add(taskWithConfig)
         if (daemonLock.lockedBy == port) {

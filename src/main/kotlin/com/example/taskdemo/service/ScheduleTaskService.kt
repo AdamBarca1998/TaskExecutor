@@ -12,8 +12,8 @@ class ScheduleTaskService(
     private val scheduleTaskMapper: ScheduleTaskMapper
 ) {
 
-    fun createTask(task: Task, scheduleLock: TaskLockEntity) {
-        scheduleTaskRepository.insert(scheduleTaskMapper.toEntity(task, scheduleLock))
+    fun createIfNotExists(task: Task, scheduleLock: TaskLockEntity) {
+        scheduleTaskRepository.insertIfNotExists(scheduleTaskMapper.toEntity(task, scheduleLock))
     }
 
     fun isEnableByClazzPath(clazzPath: String) = scheduleTaskRepository.isEnableByClazzPath(clazzPath)
