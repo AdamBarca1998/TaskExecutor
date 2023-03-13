@@ -15,6 +15,6 @@ class DaemonTaskExample : Task {
     override fun run(taskContext: TaskContext) {
         println("\"${LocalDateTime.now()}   DaemonTaskExample running...")
         Thread.sleep(Duration.ofSeconds(1))
-        taskContext.nextExecution = Instant.now().plusSeconds(15)
+        taskContext.nextExecution = Instant.now().plusSeconds(1)
     }
 }

@@ -44,19 +44,7 @@ abstract class TaskGroup {
 
     abstract fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build())
 
-    open fun removeTask(task: Task) {
-        plannedTasks.removeIf { it.task == task }
-        runningTasks.find { it.taskWithConfig.task == task }?.let {
-            runningTasks.remove(it)
-            it.job.cancel()
-        }
-    }
-
-    fun start() {
-        isLocked.set(false)
-    }
-
-    fun stop() {
+    fun stopGroup() {
         isLocked.set(true)
     }
 
@@ -99,7 +87,7 @@ abstract class TaskGroup {
         runNextTask()
     }
 
-    protected open fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+    protected open suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
         taskWithConfig.taskConfig.nextExecution(taskContext)?.let {
             taskWithConfig.taskConfig.startDateTime = it
             plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))

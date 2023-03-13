@@ -59,9 +59,30 @@ class DaemonTaskGroup(
         }
     }
 
+    fun getAll(): List<String> {
+        val plannedTaskIds = plannedTasks.toList().stream()
+            .map { it.task.javaClass.name }
+            .toList()
+        val runningTaskIds = runningTasks.toList().stream()
+            .map { it.taskWithConfig.task.javaClass.name }
+            .toList()
+
+        return plannedTaskIds + runningTaskIds
+    }
+
+    fun removeTaskByClazzPath(clazzPath: String) {
+        savedTasks.removeIf { it.task.javaClass.name == clazzPath }
+        plannedTasks.removeIf { it.task.javaClass.name == clazzPath }
+        runningTasks.find { it.taskWithConfig.task.javaClass.name == clazzPath }?.let {
+            runningTasks.remove(it)
+            it.job.cancel()
+        }
+    }
+
+
     override fun isEnable(task: Task) = daemonTaskService.isEnableByClazzPath(task.javaClass.name)
 
-    override fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+    override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
         val newContext = TaskContext(
             taskContext.nextExecution ?: Instant.now().plus(1, ChronoUnit.DAYS),
             taskContext.lastExecution,
@@ -70,7 +91,9 @@ class DaemonTaskGroup(
         )
         taskWithConfig.taskConfig.startDateTime = newContext.startDateTime
         taskContextService.updateByClazzPath(newContext, taskWithConfig.task.javaClass.name)
-        plannedTasks.add(taskWithConfig)
+        savedTasks.find { it == taskWithConfig }?.let {
+            plannedTasks.add(it)
+        }
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {

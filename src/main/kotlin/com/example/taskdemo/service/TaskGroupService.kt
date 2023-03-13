@@ -37,36 +37,24 @@ class TaskGroupService(
         daemonTaskGroup.addTask(task)
     }
 
-    fun removeTask(task: Task) {
-        heavyScheduledTaskGroup.removeTask(task)
-        scheduledTaskGroup.removeTask(task)
-        queueTaskGroup.removeTask(task)
-        daemonTaskGroup.removeTask(task)
-    }
-
     fun stopQueue() {
-        queueTaskGroup.stop()
-    }
-
-    fun startQueue() {
-        queueTaskGroup.start()
+        queueTaskGroup.stopGroup()
     }
 
     fun stopSchedule() {
-        scheduledTaskGroup.stop()
-        heavyScheduledTaskGroup.stop()
-    }
-
-    fun startSchedule() {
-        scheduledTaskGroup.start()
-        heavyScheduledTaskGroup.start()
+        scheduledTaskGroup.stopGroup()
+        heavyScheduledTaskGroup.stopGroup()
     }
 
     fun stopDaemon() {
-        daemonTaskGroup.stop()
+        daemonTaskGroup.stopGroup()
     }
 
-    fun startDaemon() {
-        daemonTaskGroup.start()
+    fun getAllDaemons() = daemonTaskGroup.getAll()
+
+    fun cancelDaemonByClazzPath(clazzPath: String) = daemonTaskGroup.removeTaskByClazzPath(clazzPath)
+
+    fun cancelQueueById() {
+
     }
 }

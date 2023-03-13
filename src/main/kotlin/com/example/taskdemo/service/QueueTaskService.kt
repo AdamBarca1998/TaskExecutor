@@ -42,4 +42,8 @@ open class QueueTaskService(
     open fun updateStateAndResult(task: Task, state: QueueTaskState, result: String): Boolean {
         return queueTaskRepository.updateStateAndResultById(task.id, state, result) > 0
     }
+
+    open fun findAll() {
+
+    }
 }
