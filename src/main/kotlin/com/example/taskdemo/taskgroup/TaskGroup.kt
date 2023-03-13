@@ -106,9 +106,11 @@ abstract class TaskGroup {
     }
 
     protected open suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
-        taskWithConfig.taskConfig.nextExecution(taskContext)?.let {
-            taskWithConfig.taskConfig.startDateTime = it
-            plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
+        taskWithConfig.taskConfig.nextExecution(taskContext)?.let { nextTime ->
+            savedTasks.find { savedTask -> savedTask == taskWithConfig }?.let {
+                taskWithConfig.taskConfig.startDateTime = nextTime
+                plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
+            }
         }
     }
 

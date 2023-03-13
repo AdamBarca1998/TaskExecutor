@@ -64,9 +64,10 @@ class DaemonTaskGroup(
             taskContext.lastCompletion,
             null
         )
-        taskWithConfig.taskConfig.startDateTime = newContext.startDateTime
+
         taskContextService.updateByClazzPath(newContext, taskWithConfig.task.javaClass.name)
         savedTasks.find { it == taskWithConfig }?.let {
+            taskWithConfig.taskConfig.startDateTime = newContext.startDateTime
             plannedTasks.add(it)
         }
     }

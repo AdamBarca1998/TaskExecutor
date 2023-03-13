@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/daemon-tasks")
-class DaemonController(
+class DaemonTaskController(
     private val taskGroupService: TaskGroupService
 ) {
 

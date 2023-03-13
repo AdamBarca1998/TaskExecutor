@@ -1,5 +1,6 @@
 package com.example.taskdemo.mappers
 
+import com.example.taskdemo.dto.QueueTaskDto
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.entities.QueueTaskEntity
 import com.example.taskdemo.model.entities.TaskLockEntity
@@ -41,6 +42,8 @@ interface QueueTaskMapper {
 
         return format.decodeFromString(clazz)
     }
+
+    fun toDto(queueTaskEntity: QueueTaskEntity): QueueTaskDto
 
     companion object {
 

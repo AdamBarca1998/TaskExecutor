@@ -12,8 +12,6 @@ class QueueTaskGroup(
     private val queueTaskService: QueueTaskService
 ) : TaskGroup() {
 
-    private val port = "8082" //TODO:DELETE
-
     init {
         // locker
         scope.launch(Dispatchers.IO) {
@@ -24,7 +22,7 @@ class QueueTaskGroup(
                         val expiredTasks = queueTaskService.findExpired(port)
 
                         expiredTasks.forEach {
-                            queueTaskService.updateState(it, QueueTaskState.PLANNED)
+                            queueTaskService.updateStateById(it.id, QueueTaskState.PLANNED)
                             plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
                         }
 
@@ -41,21 +39,30 @@ class QueueTaskGroup(
         }
     }
 
+    fun removeTaskById(id: Long) {
+        plannedTasks.removeIf { it.task.id == id }
+        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
+            runningTasks.remove(it)
+            it.job.cancel()
+        }
+        queueTaskService.updateStateById(id, QueueTaskState.CANCELED)
+    }
+
     override fun isEnable(task: Task): Boolean = true
 
     override fun handleRun(task: Task) {
         super.handleRun(task)
-        queueTaskService.updateState(task, QueueTaskState.RUNNING)
+        queueTaskService.updateStateById(task.id, QueueTaskState.RUNNING)
     }
 
     override fun handleError(task: Task, e: Exception) {
         super.handleError(task, e)
-        queueTaskService.updateStateAndResult(task, QueueTaskState.ERROR, e.message ?: "Default value: handleError()")
+        queueTaskService.updateStateAndResultById(task.id, QueueTaskState.ERROR, e.message ?: "Default value: handleError()")
     }
 
     override fun handleFinish(task: Task) {
         super.handleFinish(task)
-        queueTaskService.updateState(task, QueueTaskState.FINISHED)
+        queueTaskService.updateStateById(task.id, QueueTaskState.FINISHED)
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
