@@ -5,6 +5,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.service.QueueTaskService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -12,31 +13,11 @@ class QueueTaskGroup(
     private val queueTaskService: QueueTaskService
 ) : TaskGroup() {
 
-    init {
-        // locker
-        scope.launch(Dispatchers.IO) {
-            while (true) {
-                try {
-                    if (!isLocked.get()) {
-                        queueTaskService.refreshLocks(getAllPlannedAndRunningTaskIds())
-                        val expiredTasks = queueTaskService.findExpired(port)
+    private var locker: Job = launchNewLocker()
 
-                        expiredTasks.forEach {
-                            queueTaskService.updateStateById(it.id, QueueTaskState.PLANNED)
-                            plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
-                        }
-
-                        if (runningTasks.isEmpty()) {
-                            runNextTask()
-                        }
-                    }
-                } catch (e: Exception) {
-                    logger.error { e }
-                } finally {
-                    delay(getNextRefreshMillis())
-                }
-            }
-        }
+    fun start() {
+        locker.cancel()
+        locker = launchNewLocker()
     }
 
     fun removeTaskById(id: Long) {
@@ -78,5 +59,31 @@ class QueueTaskGroup(
             .toList()
 
         return plannedTaskIds + runningTaskIds
+    }
+
+    private fun launchNewLocker(): Job {
+        return scope.launch(Dispatchers.IO) {
+            while (true) {
+                try {
+                    if (!isLocked.get()) {
+                        queueTaskService.refreshLocks(getAllPlannedAndRunningTaskIds())
+                        val expiredTasks = queueTaskService.findExpired(port)
+
+                        expiredTasks.forEach {
+                            queueTaskService.updateStateById(it.id, QueueTaskState.PLANNED)
+                            plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
+                        }
+
+                        if (runningTasks.isEmpty()) {
+                            runNextTask()
+                        }
+                    }
+                } catch (e: Exception) {
+                    logger.error { e }
+                } finally {
+                    delay(getNextRefreshMillis())
+                }
+            }
+        }
     }
 }

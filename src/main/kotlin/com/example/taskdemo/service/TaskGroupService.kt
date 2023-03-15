@@ -62,4 +62,6 @@ class TaskGroupService(
     }
 
     fun cancelQueueTaskById(id: Long) = queueTaskGroup.removeTaskById(id)
+
+    fun start() = queueTaskGroup.start()
 }

@@ -32,4 +32,7 @@ class QueueTaskController(
 
     @PutMapping("/cancel/{id}")
     fun cancel(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.cancelQueueTaskById(id))
+
+    @GetMapping("/start")
+    fun start() = ResponseEntity.ok(taskGroupService.start())
 }
