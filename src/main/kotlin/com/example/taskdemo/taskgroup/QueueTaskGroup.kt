@@ -15,7 +15,7 @@ class QueueTaskGroup(
 
     private var locker: Job = launchNewLocker()
 
-    fun start() {
+    fun restart() {
         locker.cancel()
         locker = launchNewLocker()
     }
