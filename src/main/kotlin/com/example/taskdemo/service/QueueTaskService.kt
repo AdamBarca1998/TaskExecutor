@@ -26,19 +26,22 @@ open class QueueTaskService(
     }
 
     @Transactional
-    open fun findExpired(appId: String): List<Task> {
-        val expiredEntities = queueTaskRepository.findExpired(EXPIRED_LOCK_TIME_M, finishedStates)
-        val lockedEntities = expiredEntities.stream()
-            .filter { taskLockService.tryRefreshLockByName(it.taskLockEntity.name, appId) }
-            .toList()
+    open fun findOldestExpired(appId: String): Task? {
+        val expiredTask = queueTaskRepository.findOldestExpired(EXPIRED_LOCK_TIME_M, finishedStates)
 
-        return lockedEntities.stream()
-            .map { queueTaskMapper.toTask(it) }
-            .toList()
+        return if (expiredTask == null) {
+            null // if not exist
+        } else {
+            if (taskLockService.tryRefreshLockByName(expiredTask.taskLockEntity.name, appId)) {
+                queueTaskMapper.toTask(expiredTask) // if exist and locked
+            } else {
+                findOldestExpired(appId) // if exist but not locked (try find next task and lock)
+            }
+        }
     }
 
-    open fun refreshLocks(ids: List<Long>): Boolean {
-        return queueTaskRepository.refreshTasksByIds(ids, EXPIRED_LOCK_TIME_M) == ids.size
+    open fun refreshLockByTaskId(id: Long): Boolean {
+        return queueTaskRepository.refreshLockByTaskId(id, EXPIRED_LOCK_TIME_M) > 0
     }
 
     open fun updateStateById(id: Long, state: QueueTaskState): Boolean {

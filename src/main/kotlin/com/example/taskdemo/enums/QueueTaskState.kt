@@ -4,7 +4,6 @@ enum class QueueTaskState {
 
     CREATED,
     ERROR,
-    PLANNED,
     RUNNING,
     FINISHED,
     CANCELED

@@ -3,6 +3,7 @@ package com.example.taskdemo.taskgroup
 import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
+import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.service.QueueTaskService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,10 +23,6 @@ class QueueTaskGroup(
 
     fun removeTaskById(id: Long) {
         plannedTasks.removeIf { it.task.id == id }
-        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            runningTasks.remove(it)
-            it.job.cancel()
-        }
         queueTaskService.updateStateById(id, QueueTaskState.CANCELED)
     }
 
@@ -50,15 +47,8 @@ class QueueTaskGroup(
         queueTaskService.saveTask(task)
     }
 
-    private fun getAllPlannedAndRunningTaskIds(): List<Long> {
-        val plannedTaskIds = plannedTasks.toList().stream()
-            .map { it.task.id }
-            .toList()
-        val runningTaskIds = runningTasks.toList().stream()
-            .map { it.taskWithConfig.task.id }
-            .toList()
-
-        return plannedTaskIds + runningTaskIds
+    override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+        planNextTask()
     }
 
     private fun launchNewLocker(): Job {
@@ -66,16 +56,11 @@ class QueueTaskGroup(
             while (true) {
                 try {
                     if (!isLocked.get()) {
-                        queueTaskService.refreshLocks(getAllPlannedAndRunningTaskIds())
-                        val expiredTasks = queueTaskService.findExpired(port)
-
-                        expiredTasks.forEach {
-                            queueTaskService.updateStateById(it.id, QueueTaskState.PLANNED)
-                            plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
-                        }
-
                         if (runningTasks.isEmpty()) {
+                            planNextTask()
                             runNextTask()
+                        } else {
+                            queueTaskService.refreshLockByTaskId(runningTasks.peek().taskWithConfig.task.id)
                         }
                     }
                 } catch (e: Exception) {
@@ -84,6 +69,12 @@ class QueueTaskGroup(
                     delay(getNextRefreshMillis())
                 }
             }
+        }
+    }
+
+    private fun planNextTask() {
+        queueTaskService.findOldestExpired(port)?.let {
+            plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
         }
     }
 }

@@ -60,10 +60,6 @@ abstract class TaskGroup {
     fun removeTaskByClazzPath(clazzPath: String) {
         savedTasks.removeIf { it.task.javaClass.name == clazzPath }
         plannedTasks.removeIf { it.task.javaClass.name == clazzPath }
-        runningTasks.find { it.taskWithConfig.task.javaClass.name == clazzPath }?.let {
-            runningTasks.remove(it)
-            it.job.cancel()
-        }
     }
 
     protected fun runNextTask() {

@@ -1,13 +1,12 @@
 package com.example.taskdemo.tasks.daemons
 
-import com.example.taskdemo.annotations.TaskDaemon
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 
-@TaskDaemon
+//@TaskDaemon
 class Daemon2TaskExample : Task {
 
     override val id = -1L

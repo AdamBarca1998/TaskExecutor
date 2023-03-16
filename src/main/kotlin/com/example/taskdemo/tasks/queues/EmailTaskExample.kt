@@ -13,6 +13,6 @@ class EmailTaskExample(
 
     override fun run(taskContext: TaskContext) {
         println("Sending email to $receiver")
-        Thread.sleep(Duration.ofMinutes(1))
+        Thread.sleep(Duration.ofSeconds(60 * 15))
     }
 }

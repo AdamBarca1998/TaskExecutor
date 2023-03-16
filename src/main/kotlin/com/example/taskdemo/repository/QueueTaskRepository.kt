@@ -17,10 +17,11 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
                 "LEFT JOIN task_lock AS tl ON tl.id = q.task_lock_id " +
                 "WHERE lock_until < NOW() - MAKE_INTERVAL(mins => :minutes) " +
                 "AND q.state NOT IN :#{#withoutStates.![name()]} " +
-                "ORDER BY created_at",
+                "ORDER BY created_at " +
+                "LIMIT 1",
         nativeQuery = true
     )
-    fun findExpired(minutes: Int, withoutStates: List<QueueTaskState>): List<QueueTaskEntity>
+    fun findOldestExpired(minutes: Int, withoutStates: List<QueueTaskState>): QueueTaskEntity?
 
     fun findAllByStateNotIn(states: List<QueueTaskState>): List<QueueTaskEntity>
 
@@ -31,10 +32,10 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
                 "SET lock_until = NOW() + MAKE_INTERVAL(mins => :minutes), locked_at = NOW() " +
                 "FROM queue_task AS qt " +
                 "WHERE qt.task_lock_id = tl.id " +
-                "AND qt.id in :ids",
+                "AND qt.id = :id",
         nativeQuery = true
     )
-    fun refreshTasksByIds(ids: List<Long>, minutes: Int): Int
+    fun refreshLockByTaskId(id: Long, minutes: Int): Int
 
     @Transactional
     @Modifying
