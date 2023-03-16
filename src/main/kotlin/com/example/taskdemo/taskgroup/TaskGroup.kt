@@ -60,6 +60,10 @@ abstract class TaskGroup {
     fun removeTaskByClazzPath(clazzPath: String) {
         savedTasks.removeIf { it.task.javaClass.name == clazzPath }
         plannedTasks.removeIf { it.task.javaClass.name == clazzPath }
+        runningTasks.find { it.taskWithConfig.task.javaClass.name == clazzPath }?.let {
+            runningTasks.remove(it)
+            it.job.cancel()
+        }
     }
 
     protected fun runNextTask() {
@@ -71,9 +75,6 @@ abstract class TaskGroup {
     }
 
     protected suspend fun runTask(taskWithConfig: TaskWithConfig) {
-        // start
-        delay(ChronoUnit.MILLIS.between(Instant.now(), taskWithConfig.taskConfig.startDateTime))
-
         val task = taskWithConfig.task
         val taskContext = TaskContext(
             taskWithConfig.taskConfig.startDateTime,
@@ -82,23 +83,27 @@ abstract class TaskGroup {
             null
         )
 
-        if (!isLocked.get() && isEnable(task)) {
-            handleRun(task)
+        try {
+            // start
+            delay(ChronoUnit.MILLIS.between(Instant.now(), taskWithConfig.taskConfig.startDateTime))
 
-            try {
+            if (!isLocked.get() && isEnable(task)) {
+                handleRun(task)
+
                 task.run(taskContext)
 
                 handleFinish(task)
-            } catch (e: Exception) {
-                handleError(task, e)
             }
-        }
-        taskContext.lastCompletion = Instant.now()
+        } catch (e: Exception) {
+            handleError(task, e)
+        } finally {
+            taskContext.lastCompletion = Instant.now()
 
-        // finish
-        planNextExecution(taskWithConfig, taskContext)
-        runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
-        runNextTask()
+            // finish
+            planNextExecution(taskWithConfig, taskContext)
+            runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
+            runNextTask()
+        }
     }
 
     protected open suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {

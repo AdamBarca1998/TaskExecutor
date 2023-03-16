@@ -23,6 +23,10 @@ class QueueTaskGroup(
 
     fun removeTaskById(id: Long) {
         plannedTasks.removeIf { it.task.id == id }
+        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
+            runningTasks.remove(it)
+            it.job.cancel()
+        }
         queueTaskService.updateStateById(id, QueueTaskState.CANCELED)
     }
 
