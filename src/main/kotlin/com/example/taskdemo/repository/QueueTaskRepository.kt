@@ -11,18 +11,6 @@ import org.springframework.transaction.annotation.Transactional
 @Repository
 interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
 
-    @Query(
-        value = "SELECT q.id, clazz, state, created_at, created_by, owned_by, result, task_lock_id " +
-                "FROM queue_task AS q " +
-                "LEFT JOIN task_lock AS tl ON tl.id = q.task_lock_id " +
-                "WHERE lock_until < NOW() - MAKE_INTERVAL(mins => :minutes) " +
-                "AND q.state NOT IN :#{#withoutStates.![name()]} " +
-                "ORDER BY lock_until " +
-                "LIMIT 1",
-        nativeQuery = true
-    )
-    fun findOldestExpired(minutes: Int, withoutStates: List<QueueTaskState>): QueueTaskEntity?
-
     fun findAllByStateNotIn(states: List<QueueTaskState>): List<QueueTaskEntity>
 
     @Transactional
@@ -57,4 +45,15 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
         nativeQuery = true
     )
     fun updateStateAndResultById(id: Long, state: QueueTaskState, result: String): Int
+
+    @Query(
+        value = "SELECT qt.id, qt.clazz, qt.state, qt.created_at, qt.created_by, qt.owned_by, qt.result, qt.task_lock_id " +
+                "FROM queue_task AS qt " +
+                "LEFT JOIN task_lock AS tl ON tl.id = qt.task_lock_id " +
+                "WHERE tl.locked_by = :appId " +
+                "ORDER BY tl.lock_until DESC " +
+                "LIMIT 1",
+        nativeQuery = true
+    )
+    fun getNewestLocked(appId: String): QueueTaskEntity
 }

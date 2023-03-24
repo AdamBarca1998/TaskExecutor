@@ -7,10 +7,9 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.repository.QueueTaskRepository
 import com.example.taskdemo.taskgroup.EXPIRED_LOCK_TIME_M
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
-open class QueueTaskService(
+class QueueTaskService(
     private val queueTaskRepository: QueueTaskRepository,
     private val taskLockService: TaskLockService,
     private val queueTaskMapper: QueueTaskMapper
@@ -21,38 +20,31 @@ open class QueueTaskService(
         QueueTaskState.CANCELED
     )
 
-    open fun saveTask(task: Task) {
+    fun saveTask(task: Task) {
         queueTaskRepository.save(queueTaskMapper.toEntity(task))
     }
 
-    @Transactional
-    open fun findOldestExpired(appId: String): Task? {
-        val expiredTask = queueTaskRepository.findOldestExpired(EXPIRED_LOCK_TIME_M, finishedStates)
-
-        return if (expiredTask == null) {
-            null // if not exist
+    fun findOldestExpired(appId: String): Task? {
+        return if (taskLockService.lockOldestExpiredQueue(EXPIRED_LOCK_TIME_M, appId, finishedStates)) {
+            queueTaskMapper.toTask(queueTaskRepository.getNewestLocked(appId))
         } else {
-            if (taskLockService.tryRefreshLockByName(expiredTask.taskLockEntity.name, appId)) {
-                queueTaskMapper.toTask(expiredTask) // if exist and locked
-            } else {
-                findOldestExpired(appId) // if exist but not locked (try find next task and lock)
-            }
+            null
         }
     }
 
-    open fun refreshLockByTaskId(id: Long): Boolean {
+    fun refreshLockByTaskId(id: Long): Boolean {
         return queueTaskRepository.refreshLockByTaskId(id, EXPIRED_LOCK_TIME_M) > 0
     }
 
-    open fun updateStateById(id: Long, state: QueueTaskState): Boolean {
+    fun updateStateById(id: Long, state: QueueTaskState): Boolean {
         return queueTaskRepository.updateStateById(id, state, finishedStates) > 0
     }
 
-    open fun updateStateAndResultById(id: Long, state: QueueTaskState, result: String): Boolean {
+    fun updateStateAndResultById(id: Long, state: QueueTaskState, result: String): Boolean {
         return queueTaskRepository.updateStateAndResultById(id, state, result) > 0
     }
 
-    open fun findAll(): List<QueueTaskDto> {
+    fun findAll(): List<QueueTaskDto> {
         val queueTaskEntities = queueTaskRepository.findAllByStateNotIn(finishedStates)
 
         return queueTaskEntities.stream()
