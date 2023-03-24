@@ -40,5 +40,5 @@ interface TaskLockRepository : JpaRepository<TaskLockEntity, Long> {
                 ") ",
         nativeQuery = true
     )
-    fun lockOldestExpiredQueue(minutes: Int, appId: String, withoutStates: List<QueueTaskState>): Int
+    fun lockOldestExpiredQueueTask(minutes: Int, appId: String, withoutStates: List<QueueTaskState>): Int
 }

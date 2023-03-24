@@ -25,7 +25,7 @@ class QueueTaskService(
     }
 
     fun findOldestExpired(appId: String): Task? {
-        return if (taskLockService.lockOldestExpiredQueue(EXPIRED_LOCK_TIME_M, appId, finishedStates)) {
+        return if (taskLockService.lockOldestExpiredQueueTask(EXPIRED_LOCK_TIME_M, appId, finishedStates)) {
             queueTaskMapper.toTask(queueTaskRepository.getNewestLocked(appId))
         } else {
             null

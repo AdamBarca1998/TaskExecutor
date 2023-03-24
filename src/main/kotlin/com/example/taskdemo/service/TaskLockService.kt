@@ -19,7 +19,7 @@ class TaskLockService(
         return taskLockRepository.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appId) > 0
     }
 
-    fun lockOldestExpiredQueue(minutes: Int, appId: String, withoutStates: List<QueueTaskState>): Boolean {
-        return taskLockRepository.lockOldestExpiredQueue(minutes, appId, withoutStates) > 0
+    fun lockOldestExpiredQueueTask(minutes: Int, appId: String, withoutStates: List<QueueTaskState>): Boolean {
+        return taskLockRepository.lockOldestExpiredQueueTask(minutes, appId, withoutStates) > 0
     }
 }
