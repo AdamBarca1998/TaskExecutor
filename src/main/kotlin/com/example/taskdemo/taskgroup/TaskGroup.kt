@@ -6,6 +6,7 @@ import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.CancellationException
 import java.util.concurrent.LinkedTransferQueue
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
@@ -47,6 +48,8 @@ abstract class TaskGroup {
 
     abstract fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build())
 
+    protected abstract suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext)
+
     fun stopGroup() {
         isLocked.set(true)
     }
@@ -83,10 +86,14 @@ abstract class TaskGroup {
             null
         )
 
+        // start
         try {
-            // start
             delay(ChronoUnit.MILLIS.between(Instant.now(), taskWithConfig.taskConfig.startDateTime))
+        } catch (e: CancellationException) {
+            println(e)
+        }
 
+        try {
             if (!isLocked.get() && isEnable(task)) {
                 handleRun(task)
 
@@ -103,15 +110,6 @@ abstract class TaskGroup {
             planNextExecution(taskWithConfig, taskContext)
             runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
             runNextTask()
-        }
-    }
-
-    protected open suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
-        taskWithConfig.taskConfig.nextExecution(taskContext)?.let { nextTime ->
-            savedTasks.find { savedTask -> savedTask == taskWithConfig }?.let {
-                taskWithConfig.taskConfig.startDateTime = nextTime
-                plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
-            }
         }
     }
 

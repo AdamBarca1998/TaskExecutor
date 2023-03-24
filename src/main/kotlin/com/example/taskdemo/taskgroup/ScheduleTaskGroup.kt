@@ -2,6 +2,7 @@ package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
+import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.service.ScheduleTaskService
 import com.example.taskdemo.service.TaskLockService
@@ -53,6 +54,15 @@ class ScheduleTaskGroup(
             plannedTasks.add(taskWithConfig)
             if (runningTasks.isEmpty()) {
                 runNextTask()
+            }
+        }
+    }
+
+    override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+        taskWithConfig.taskConfig.nextExecution(taskContext)?.let { nextTime ->
+            savedTasks.find { savedTask -> savedTask == taskWithConfig }?.let {
+                taskWithConfig.taskConfig.startDateTime = nextTime
+                plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
             }
         }
     }

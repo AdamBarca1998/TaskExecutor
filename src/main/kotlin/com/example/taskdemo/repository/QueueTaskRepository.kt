@@ -17,7 +17,7 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
                 "LEFT JOIN task_lock AS tl ON tl.id = q.task_lock_id " +
                 "WHERE lock_until < NOW() - MAKE_INTERVAL(mins => :minutes) " +
                 "AND q.state NOT IN :#{#withoutStates.![name()]} " +
-                "ORDER BY created_at " +
+                "ORDER BY lock_until " +
                 "LIMIT 1",
         nativeQuery = true
     )
