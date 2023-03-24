@@ -52,16 +52,18 @@ class TaskGroupService(
 
     fun getAllDaemons() = daemonTaskGroup.getAllClazzPath()
 
-    fun cancelDaemonByClazzPath(clazzPath: String) = daemonTaskGroup.removeTaskByClazzPath(clazzPath)
+    fun cancelDaemonByClazzPath(clazzPath: String) = daemonTaskGroup.cancelTaskByClazzPath(clazzPath)
 
     fun getAllSchedules() = scheduledTaskGroup.getAllClazzPath() + heavyScheduledTaskGroup.getAllClazzPath()
 
     fun cancelScheduleByClazzPath(clazzPath: String) {
-        scheduledTaskGroup.removeTaskByClazzPath(clazzPath)
-        heavyScheduledTaskGroup.removeTaskByClazzPath(clazzPath)
+        scheduledTaskGroup.cancelTaskByClazzPath(clazzPath)
+        heavyScheduledTaskGroup.cancelTaskByClazzPath(clazzPath)
     }
 
-    fun cancelQueueTaskById(id: Long) = queueTaskGroup.removeTaskById(id)
+    fun cancelQueueTaskById(id: Long) = queueTaskGroup.cancelTaskById(id)
+
+    fun startQueueTaskById(id: Long) = queueTaskGroup.startTaskById(id)
 
     fun restart() = queueTaskGroup.restart()
 }

@@ -33,6 +33,9 @@ class QueueTaskController(
     @PutMapping("/cancel/{id}")
     fun cancel(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.cancelQueueTaskById(id))
 
+    @PutMapping("/start/{id}")
+    fun start(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.startQueueTaskById(id))
+
     @GetMapping("/restart")
     fun restart() = ResponseEntity.ok(taskGroupService.restart())
 }

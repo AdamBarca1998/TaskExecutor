@@ -1,5 +1,6 @@
 package com.example.taskdemo.taskgroup
 
+import com.example.taskdemo.enums.CancelState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
@@ -46,6 +47,10 @@ abstract class TaskGroup {
         logger.debug { "$task ended." }
     }
 
+    protected open fun handleCancel(task: Task) {
+        logger.debug { "$task canceled." }
+    }
+
     abstract fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build())
 
     protected abstract suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext)
@@ -60,10 +65,11 @@ abstract class TaskGroup {
             .toList()
     }
 
-    fun removeTaskByClazzPath(clazzPath: String) {
+    fun cancelTaskByClazzPath(clazzPath: String) {
         savedTasks.removeIf { it.task.javaClass.name == clazzPath }
         plannedTasks.removeIf { it.task.javaClass.name == clazzPath }
         runningTasks.find { it.taskWithConfig.task.javaClass.name == clazzPath }?.let {
+            it.taskWithConfig.taskConfig.cancelState.set(CancelState.CANCEL)
             runningTasks.remove(it)
             it.job.cancel()
         }
@@ -90,7 +96,10 @@ abstract class TaskGroup {
         try {
             delay(ChronoUnit.MILLIS.between(Instant.now(), taskWithConfig.taskConfig.startDateTime))
         } catch (e: CancellationException) {
-            println(e)
+            if (taskWithConfig.taskConfig.cancelState.get() == CancelState.CANCEL) {
+                handleCancel(task)
+                return
+            }
         }
 
         try {

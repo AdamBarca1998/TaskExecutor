@@ -1,5 +1,6 @@
 package com.example.taskdemo.taskgroup
 
+import com.example.taskdemo.enums.CancelState
 import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
@@ -21,13 +22,21 @@ class QueueTaskGroup(
         locker = launchNewLocker()
     }
 
-    fun removeTaskById(id: Long) {
+    fun cancelTaskById(id: Long) {
+        savedTasks.removeIf { it.task.id == id }
         plannedTasks.removeIf { it.task.id == id }
         runningTasks.find { it.taskWithConfig.task.id == id }?.let {
+            it.taskWithConfig.taskConfig.cancelState.set(CancelState.CANCEL)
             runningTasks.remove(it)
             it.job.cancel()
         }
-        queueTaskService.updateStateById(id, QueueTaskState.CANCELED)
+    }
+
+    fun startTaskById(id: Long) {
+        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
+            it.taskWithConfig.taskConfig.cancelState.set(CancelState.START)
+            it.job.cancel()
+        }
     }
 
     override fun isEnable(task: Task): Boolean = true
@@ -45,6 +54,11 @@ class QueueTaskGroup(
     override fun handleFinish(task: Task) {
         super.handleFinish(task)
         queueTaskService.updateStateById(task.id, QueueTaskState.FINISHED)
+    }
+
+    override fun handleCancel(task: Task) {
+        super.handleCancel(task)
+        queueTaskService.updateStateById(task.id, QueueTaskState.CANCELED)
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
@@ -79,6 +93,7 @@ class QueueTaskGroup(
     private fun planNextTask() {
         queueTaskService.findOldestExpired(port)?.let {
             plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
+            queueTaskService.updateStateById(it.id, QueueTaskState.PLANNED)
         }
     }
 }
