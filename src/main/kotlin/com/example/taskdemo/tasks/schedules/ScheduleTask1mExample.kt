@@ -7,12 +7,12 @@ import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.LocalDateTime
 
-@TaskSchedule(
-    schedules = [
-        Schedule(minute = "*/1")
-    ],
-    startDateTime = "2023-02-09T16:22:00Z"
-)
+//@TaskSchedule(
+//    schedules = [
+//        Schedule(minute = "*/1")
+//    ],
+//    startDateTime = "2023-02-09T16:22:00Z"
+//)
 class ScheduleTask1mExample : Task {
 
     override var id = -1L

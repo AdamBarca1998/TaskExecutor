@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
-import java.time.Instant
+import java.time.ZonedDateTime
 
 @Entity
 @Table(name = "task_context")
@@ -19,13 +19,13 @@ open class TaskContextEntity {
 
     @NotNull
     @Column(name = "start_date_time", nullable = false)
-    open var startDateTime: Instant = Instant.now()
+    open var startDateTime: ZonedDateTime = ZonedDateTime.now()
 
     @NotNull
     @Column(name = "last_execution", nullable = false)
-    open var lastExecution: Instant = Instant.now()
+    open var lastExecution: ZonedDateTime = ZonedDateTime.now()
 
     @NotNull
     @Column(name = "last_completion", nullable = false)
-    open var lastCompletion: Instant = Instant.now()
+    open var lastCompletion: ZonedDateTime = ZonedDateTime.now()
 }

@@ -1,10 +1,10 @@
 package com.example.taskdemo.model
 
-import java.time.Instant
+import java.time.ZonedDateTime
 
 class TaskContext(
-    val startDateTime: Instant,
-    val lastExecution: Instant,
-    var lastCompletion: Instant,
-    var nextExecution: Instant?
+    val startDateTime: ZonedDateTime,
+    val lastExecution: ZonedDateTime,
+    var lastCompletion: ZonedDateTime,
+    var nextExecution: ZonedDateTime?
 )

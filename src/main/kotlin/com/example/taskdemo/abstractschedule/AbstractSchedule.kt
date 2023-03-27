@@ -2,7 +2,7 @@ package com.example.taskdemo.abstractschedule
 
 import com.example.taskdemo.model.TaskContext
 import java.time.Duration
-import java.time.Instant
+import java.time.ZonedDateTime
 import org.springframework.scheduling.support.CronExpression
 
 abstract class AbstractSchedule {
@@ -24,5 +24,5 @@ abstract class AbstractSchedule {
         }
     }
 
-    abstract fun nextExecution(taskContext: TaskContext): Instant?
+    abstract fun nextExecution(taskContext: TaskContext): ZonedDateTime?
 }

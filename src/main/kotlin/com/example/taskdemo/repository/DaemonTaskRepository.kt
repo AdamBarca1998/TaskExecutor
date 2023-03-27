@@ -27,5 +27,5 @@ interface DaemonTaskRepository : JpaRepository<DaemonTaskEntity, Long> {
     )
     fun isEnableByClazzPath(clazzPath: String): Boolean
 
-    fun findByClazzPath(clazzPath: String): ScheduleTaskEntity
+    fun findByClazzPath(clazzPath: String): DaemonTaskEntity
 }

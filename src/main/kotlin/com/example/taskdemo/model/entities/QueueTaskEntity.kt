@@ -15,7 +15,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
-import java.time.Instant
+import java.time.ZonedDateTime
 
 @Entity
 @Table(name = "queue_task")
@@ -37,7 +37,7 @@ open class QueueTaskEntity {
 
     @NotNull
     @Column(name = "created_at", nullable = false)
-    open var createdAt: Instant = Instant.now()
+    open var createdAt: ZonedDateTime = ZonedDateTime.now()
 
     @NotNull
     @Column(name = "created_by", nullable = false, length = 1024)

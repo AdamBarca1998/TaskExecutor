@@ -1,11 +1,13 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.enums.State
+import com.example.taskdemo.enums.CancelState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CancellationException
 import java.util.concurrent.LinkedTransferQueue
@@ -47,8 +49,8 @@ abstract class TaskGroup {
         logger.debug { "$task ended." }
     }
 
-    protected open fun handleCancel(task: Task) {
-        logger.debug { "$task canceled." }
+    protected open fun handleCancel(id: Long) {
+        logger.debug { "task canceled with id: $id." }
     }
 
     abstract fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build())
@@ -74,21 +76,22 @@ abstract class TaskGroup {
     fun cancelTaskById(id: Long) {
         plannedTasks.removeIf { it.task.id == id }
         runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.taskConfig.state.set(State.CANCEL)
+            it.taskWithConfig.taskConfig.cancelState.set(CancelState.CANCEL)
             runningTasks.remove(it)
             it.job.cancel()
         }
+        handleCancel(id)
     }
 
     fun startTaskById(id: Long) {
         runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.taskConfig.state.set(State.START)
+            it.taskWithConfig.taskConfig.cancelState.set(CancelState.START)
             it.job.cancel()
             return
         }
 
         plannedTasks.find { it.task.id == id }?.let {
-            it.taskConfig.startDateTime = Instant.EPOCH
+            it.taskConfig.startDateTime = Instant.EPOCH.atZone(ZoneId.systemDefault())
             runNextTask(RunType.PARALLEL)
             return
         }
@@ -110,18 +113,17 @@ abstract class TaskGroup {
         val config = taskWithConfig.taskConfig
         val taskContext = TaskContext(
             taskWithConfig.taskConfig.startDateTime,
-            Instant.now(),
-            Instant.MAX,
+            ZonedDateTime.now(),
+            ZonedDateTime.now(),
             null
         )
 
         // start
         try {
             try {
-                delay(ChronoUnit.MILLIS.between(Instant.now(), taskWithConfig.taskConfig.startDateTime))
+                delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskWithConfig.taskConfig.startDateTime))
             } catch (e: CancellationException) {
-                if (config.state.get() == State.CANCEL) {
-                    handleCancel(task)
+                if (config.cancelState.get() == CancelState.CANCEL) {
                     return
                 }
             }
@@ -136,11 +138,11 @@ abstract class TaskGroup {
         } catch (e: Exception) {
             handleError(task, e)
         } finally {
-            taskContext.lastCompletion = Instant.now()
+            taskContext.lastCompletion = ZonedDateTime.now()
 
             // finish
             planNextExecution(taskWithConfig, taskContext)
-            runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
+            runningTasks.removeIf { it.taskWithConfig.task.id == taskWithConfig.task.id }
             if (runType != RunType.PARALLEL || runningTasks.isEmpty()) {
                 runNextTask()
             }

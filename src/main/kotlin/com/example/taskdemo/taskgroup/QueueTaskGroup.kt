@@ -38,9 +38,9 @@ class QueueTaskGroup(
         queueTaskService.updateStateById(task.id, QueueTaskState.FINISHED)
     }
 
-    override fun handleCancel(task: Task) {
-        super.handleCancel(task)
-        queueTaskService.updateStateById(task.id, QueueTaskState.CANCELED)
+    override fun handleCancel(id: Long) {
+        super.handleCancel(id)
+        queueTaskService.updateStateById(id, QueueTaskState.CANCELED)
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {

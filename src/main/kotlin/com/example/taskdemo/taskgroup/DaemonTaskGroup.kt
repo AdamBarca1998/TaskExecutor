@@ -7,8 +7,7 @@ import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.service.DaemonTaskService
 import com.example.taskdemo.service.TaskContextService
 import com.example.taskdemo.service.TaskLockService
-import java.time.Instant
-import java.time.temporal.ChronoUnit
+import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -59,7 +58,7 @@ class DaemonTaskGroup(
 
     override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
         val newContext = TaskContext(
-            taskContext.nextExecution ?: Instant.now().plus(1, ChronoUnit.DAYS),
+            taskContext.nextExecution ?: ZonedDateTime.now().plusDays(1),
             taskContext.lastExecution,
             taskContext.lastCompletion,
             null

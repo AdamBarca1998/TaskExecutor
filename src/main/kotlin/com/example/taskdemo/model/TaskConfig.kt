@@ -1,8 +1,8 @@
 package com.example.taskdemo.model
 
 import com.example.taskdemo.abstractschedule.AbstractSchedule
-import com.example.taskdemo.enums.State
-import java.time.Instant
+import com.example.taskdemo.enums.CancelState
+import java.time.ZonedDateTime
 import java.util.concurrent.atomic.AtomicReference
 
 class TaskConfig private constructor(
@@ -13,12 +13,12 @@ class TaskConfig private constructor(
 
     val heavy: Boolean,
 
-    var startDateTime: Instant,
+    var startDateTime: ZonedDateTime,
 
-    var state: AtomicReference<State>
+    var cancelState: AtomicReference<CancelState>
 ) {
 
-    fun nextExecution(taskContext: TaskContext): Instant? {
+    fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
         return schedules.stream()
             .map { it.nextExecution(taskContext) }
             .sorted()
@@ -30,8 +30,8 @@ class TaskConfig private constructor(
         var schedules: ArrayList<AbstractSchedule> = ArrayList(),
         var priority: Int = Int.MIN_VALUE,
         var heavy: Boolean = false,
-        var startDateTime: Instant = Instant.now(),
-        var state: AtomicReference<State> = AtomicReference(State.CANCEL)
+        var startDateTime: ZonedDateTime = ZonedDateTime.now(),
+        var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL)
     ) {
         fun addSchedule(schedules: AbstractSchedule) = apply {
             this.schedules.add(schedules)
@@ -45,14 +45,14 @@ class TaskConfig private constructor(
             this.heavy = heavy
         }
 
-        fun withStartDateTime(startDateTime: Instant) = apply {
+        fun withStartDateTime(startDateTime: ZonedDateTime) = apply {
             this.startDateTime = startDateTime
         }
 
-        fun withCancelState(state: State) = apply {
-            this.state.set(state)
+        fun withCancelState(cancelState: CancelState) = apply {
+            this.cancelState.set(cancelState)
         }
 
-        fun build() = TaskConfig(schedules, priority, heavy, startDateTime, state)
+        fun build() = TaskConfig(schedules, priority, heavy, startDateTime, cancelState)
     }
 }

@@ -7,7 +7,7 @@ import com.example.taskdemo.annotations.TaskDaemon
 import com.example.taskdemo.annotations.TaskSchedule
 import com.example.taskdemo.service.TaskGroupService
 import java.time.Duration
-import java.time.Instant
+import java.time.ZonedDateTime
 import org.reflections.Reflections
 import org.reflections.scanners.Scanners
 import org.springframework.scheduling.support.CronExpression
@@ -44,7 +44,7 @@ class TaskReaderComponent(
                     }
                     taskConfig.withPriority(annotation.priority)
                     taskConfig.withHeavy(annotation.heavy)
-                    taskConfig.withStartDateTime(Instant.parse(annotation.startDateTime))
+                    taskConfig.withStartDateTime(ZonedDateTime.parse(annotation.startDateTime))
                 }
             }
 
