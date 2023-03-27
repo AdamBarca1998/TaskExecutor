@@ -1,6 +1,7 @@
 package com.example.taskdemo.repository
 
 import com.example.taskdemo.model.entities.DaemonTaskEntity
+import com.example.taskdemo.model.entities.ScheduleTaskEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -25,4 +26,6 @@ interface DaemonTaskRepository : JpaRepository<DaemonTaskEntity, Long> {
         nativeQuery = true
     )
     fun isEnableByClazzPath(clazzPath: String): Boolean
+
+    fun findByClazzPath(clazzPath: String): ScheduleTaskEntity
 }

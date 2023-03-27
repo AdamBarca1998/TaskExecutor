@@ -1,7 +1,7 @@
 package com.example.taskdemo.enums
 
-enum class CancelState {
+enum class State {
 
     CANCEL,
-    START
+    START,
 }

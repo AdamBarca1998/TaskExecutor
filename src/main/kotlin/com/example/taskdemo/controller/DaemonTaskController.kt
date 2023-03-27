@@ -17,6 +17,6 @@ class DaemonTaskController(
     @GetMapping("/get-all")
     fun getAll() = ResponseEntity.ok(taskGroupService.getAllDaemons())
 
-    @PutMapping("/cancel/{clazzPath}")
-    fun cancel(@PathVariable clazzPath: String) = ResponseEntity.ok(taskGroupService.cancelDaemonByClazzPath(clazzPath))
+    @PutMapping("/cancel/{id}")
+    fun cancel(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.cancelDaemonById(id))
 }

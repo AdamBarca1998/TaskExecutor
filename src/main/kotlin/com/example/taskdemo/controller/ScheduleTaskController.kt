@@ -17,6 +17,9 @@ class ScheduleTaskController(
     @GetMapping("/get-all")
     fun getAll() = ResponseEntity.ok(taskGroupService.getAllSchedules())
 
-    @PutMapping("/cancel/{clazzPath}")
-    fun cancel(@PathVariable clazzPath: String) = ResponseEntity.ok(taskGroupService.cancelScheduleByClazzPath(clazzPath))
+    @PutMapping("/cancel/{id}")
+    fun cancel(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.cancelScheduleById(id))
+
+    @PutMapping("/start/{id}")
+    fun start(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.startScheduleById(id))
 }

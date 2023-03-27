@@ -66,21 +66,25 @@ class DaemonTaskGroup(
         )
 
         taskContextService.updateByClazzPath(newContext, taskWithConfig.task.javaClass.name)
-        savedTasks.find { it == taskWithConfig }?.let {
+        runningTasks.find { it.taskWithConfig.task.id == taskWithConfig.task.id }?.let {
             taskWithConfig.taskConfig.startDateTime = newContext.startDateTime
-            plannedTasks.add(it)
+            plannedTasks.add(it.taskWithConfig)
         }
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         val taskWithConfig = TaskWithConfig(task, taskConfig)
 
-        daemonTaskService.createIfNotExists(task, daemonLock)
+        task.id = daemonTaskService.createIfNotExists(task, daemonLock)
 
         savedTasks.add(taskWithConfig)
         if (daemonLock.lockedBy == port) {
             plannedTasks.add(taskWithConfig)
             runNextTask()
         }
+    }
+
+    override fun runNextTask(runType: RunType) {
+        super.runNextTask(RunType.TASK_GROUP)
     }
 }

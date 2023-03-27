@@ -1,6 +1,5 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.enums.CancelState
 import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
@@ -20,16 +19,6 @@ class QueueTaskGroup(
     fun restart() {
         locker.cancel()
         locker = launchNewLocker()
-    }
-
-    fun cancelTaskById(id: Long) {
-        savedTasks.removeIf { it.task.id == id }
-        plannedTasks.removeIf { it.task.id == id }
-        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.taskConfig.cancelState.set(CancelState.CANCEL)
-            runningTasks.remove(it)
-            it.job.cancel()
-        }
     }
 
     override fun isEnable(task: Task): Boolean = true

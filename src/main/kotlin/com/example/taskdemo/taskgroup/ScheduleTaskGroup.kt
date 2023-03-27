@@ -59,8 +59,8 @@ class ScheduleTaskGroup(
     }
 
     override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
-        taskWithConfig.taskConfig.nextExecution(taskContext)?.let { nextTime ->
-            savedTasks.find { savedTask -> savedTask == taskWithConfig }?.let {
+        runningTasks.find { it.taskWithConfig.task.id == taskWithConfig.task.id }?.let {
+            taskWithConfig.taskConfig.nextExecution(taskContext)?.let { nextTime ->
                 taskWithConfig.taskConfig.startDateTime = nextTime
                 plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
             }

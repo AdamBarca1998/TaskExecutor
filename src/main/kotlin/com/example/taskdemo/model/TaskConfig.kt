@@ -1,7 +1,7 @@
 package com.example.taskdemo.model
 
 import com.example.taskdemo.abstractschedule.AbstractSchedule
-import com.example.taskdemo.enums.CancelState
+import com.example.taskdemo.enums.State
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 
@@ -15,7 +15,7 @@ class TaskConfig private constructor(
 
     var startDateTime: Instant,
 
-    var cancelState: AtomicReference<CancelState>
+    var state: AtomicReference<State>
 ) {
 
     fun nextExecution(taskContext: TaskContext): Instant? {
@@ -31,7 +31,7 @@ class TaskConfig private constructor(
         var priority: Int = Int.MIN_VALUE,
         var heavy: Boolean = false,
         var startDateTime: Instant = Instant.now(),
-        var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL)
+        var state: AtomicReference<State> = AtomicReference(State.CANCEL)
     ) {
         fun addSchedule(schedules: AbstractSchedule) = apply {
             this.schedules.add(schedules)
@@ -49,10 +49,10 @@ class TaskConfig private constructor(
             this.startDateTime = startDateTime
         }
 
-        fun withCancelState(cancelState: CancelState) = apply {
-            this.cancelState.set(cancelState)
+        fun withCancelState(state: State) = apply {
+            this.state.set(state)
         }
 
-        fun build() = TaskConfig(schedules, priority, heavy, startDateTime, cancelState)
+        fun build() = TaskConfig(schedules, priority, heavy, startDateTime, state)
     }
 }

@@ -1,6 +1,6 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.enums.CancelState
+import com.example.taskdemo.enums.State
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
@@ -65,50 +65,49 @@ abstract class TaskGroup {
         isLocked.set(true)
     }
 
-    fun getAllClazzPath(): List<String> {
+    fun getAll(): List<Pair<Long, String>> {
         return savedTasks.stream()
-            .map { it.task.javaClass.name }
+            .map { Pair(it.task.id, it.task.javaClass.name) }
             .toList()
     }
 
-    fun cancelTaskByClazzPath(clazzPath: String) {
-        savedTasks.removeIf { it.task.javaClass.name == clazzPath }
-        plannedTasks.removeIf { it.task.javaClass.name == clazzPath }
-        runningTasks.find { it.taskWithConfig.task.javaClass.name == clazzPath }?.let {
-            it.taskWithConfig.taskConfig.cancelState.set(CancelState.CANCEL)
+    fun cancelTaskById(id: Long) {
+        plannedTasks.removeIf { it.task.id == id }
+        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
+            it.taskWithConfig.taskConfig.state.set(State.CANCEL)
             runningTasks.remove(it)
             it.job.cancel()
         }
     }
 
     fun startTaskById(id: Long) {
-        var founded = false
-        plannedTasks.find { it.task.id == id }?.let {
-            it.taskConfig.cancelState.set(CancelState.START)
-            it.taskConfig.startDateTime = Instant.MIN
-            founded = true
-        }
         runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.taskConfig.cancelState.set(CancelState.START)
+            it.taskWithConfig.taskConfig.state.set(State.START)
             it.job.cancel()
-            founded = true
+            return
         }
 
-        if (!founded) {
-            planNextTaskById(id)
+        plannedTasks.find { it.task.id == id }?.let {
+            it.taskConfig.startDateTime = Instant.EPOCH
+            runNextTask(RunType.PARALLEL)
+            return
         }
+
+        planNextTaskById(id)
+        startTaskById(id)
     }
 
-    protected fun runNextTask() {
+    protected open fun runNextTask(runType: RunType = RunType.TASK_GROUP) {
         plannedTasks.poll()?.let {
-            val job = scope.launch { runTask(it) }
+            val job = scope.launch { runTask(it, runType) }
 
             runningTasks.add(TaskWithJob(it, job))
         }
     }
 
-    protected suspend fun runTask(taskWithConfig: TaskWithConfig) {
+    protected suspend fun runTask(taskWithConfig: TaskWithConfig, runType: RunType = RunType.TASK_GROUP) {
         val task = taskWithConfig.task
+        val config = taskWithConfig.taskConfig
         val taskContext = TaskContext(
             taskWithConfig.taskConfig.startDateTime,
             Instant.now(),
@@ -118,15 +117,15 @@ abstract class TaskGroup {
 
         // start
         try {
-            delay(ChronoUnit.MILLIS.between(Instant.now(), taskWithConfig.taskConfig.startDateTime))
-        } catch (e: CancellationException) {
-            if (taskWithConfig.taskConfig.cancelState.get() == CancelState.CANCEL) {
-                handleCancel(task)
-                return
+            try {
+                delay(ChronoUnit.MILLIS.between(Instant.now(), taskWithConfig.taskConfig.startDateTime))
+            } catch (e: CancellationException) {
+                if (config.state.get() == State.CANCEL) {
+                    handleCancel(task)
+                    return
+                }
             }
-        }
 
-        try {
             if (!isLocked.get() && isEnable(task)) {
                 handleRun(task)
 
@@ -142,7 +141,9 @@ abstract class TaskGroup {
             // finish
             planNextExecution(taskWithConfig, taskContext)
             runningTasks.removeIf { it.taskWithConfig == taskWithConfig }
-            runNextTask()
+            if (runType != RunType.PARALLEL || runningTasks.isEmpty()) {
+                runNextTask()
+            }
         }
     }
 
@@ -174,4 +175,9 @@ abstract class TaskGroup {
     }
 
     protected data class TaskWithJob(val taskWithConfig: TaskWithConfig, val job: Job)
+
+    protected enum class RunType {
+        TASK_GROUP,
+        PARALLEL
+    }
 }

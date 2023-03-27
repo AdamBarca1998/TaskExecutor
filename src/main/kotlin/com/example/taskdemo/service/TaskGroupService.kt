@@ -5,12 +5,13 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.taskgroup.DaemonTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
 import com.example.taskdemo.taskgroup.ScheduleTaskGroup
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
 class TaskGroupService(
     scheduleTaskService: ScheduleTaskService,
-    queueTaskService: QueueTaskService,
+    private val queueTaskService: QueueTaskService,
     taskLockService: TaskLockService,
     daemonTaskService: DaemonTaskService,
     taskContextService: TaskContextService
@@ -21,6 +22,11 @@ class TaskGroupService(
     private val daemonTaskGroup = DaemonTaskGroup(taskLockService, daemonTaskService, taskContextService)
     private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService)
 
+    // add
+    fun addQueue(task: Task) {
+        queueTaskGroup.addTask(task)
+    }
+
     fun addSchedule(task: Task, config: TaskConfig) {
         if (config.heavy) {
             heavyScheduledTaskGroup.addTask(task, config)
@@ -29,13 +35,33 @@ class TaskGroupService(
         }
     }
 
-    fun addQueue(task: Task) {
-        queueTaskGroup.addTask(task)
-    }
-
     fun addDaemon(task: Task) {
         daemonTaskGroup.addTask(task)
     }
+
+    // get all
+    fun getAllQueues() = ResponseEntity.ok(queueTaskService.findAll())
+
+    fun getAllSchedules() = scheduledTaskGroup.getAll() + heavyScheduledTaskGroup.getAll()
+
+    fun getAllDaemons() = daemonTaskGroup.getAll()
+
+    // start
+    fun startQueueById(id: Long) = queueTaskGroup.startTaskById(id)
+
+    fun startScheduleById(id: Long) = scheduledTaskGroup.startTaskById(id)
+
+    // cancel
+    fun cancelQueueTaskById(id: Long) = queueTaskGroup.cancelTaskById(id)
+
+    fun cancelScheduleById(id: Long) {
+        scheduledTaskGroup.cancelTaskById(id)
+        heavyScheduledTaskGroup.cancelTaskById(id)
+    }
+
+    fun cancelDaemonById(id: Long) = daemonTaskGroup.cancelTaskById(id)
+
+    // stop
 
     fun stopQueue() {
         queueTaskGroup.stopGroup()
@@ -50,20 +76,7 @@ class TaskGroupService(
         daemonTaskGroup.stopGroup()
     }
 
-    fun getAllDaemons() = daemonTaskGroup.getAllClazzPath()
-
-    fun cancelDaemonByClazzPath(clazzPath: String) = daemonTaskGroup.cancelTaskByClazzPath(clazzPath)
-
-    fun getAllSchedules() = scheduledTaskGroup.getAllClazzPath() + heavyScheduledTaskGroup.getAllClazzPath()
-
-    fun cancelScheduleByClazzPath(clazzPath: String) {
-        scheduledTaskGroup.cancelTaskByClazzPath(clazzPath)
-        heavyScheduledTaskGroup.cancelTaskByClazzPath(clazzPath)
-    }
-
-    fun cancelQueueTaskById(id: Long) = queueTaskGroup.cancelTaskById(id)
-
-    fun startQueueTaskById(id: Long) = queueTaskGroup.startTaskById(id)
+    //
 
     fun restart() = queueTaskGroup.restart()
 }
