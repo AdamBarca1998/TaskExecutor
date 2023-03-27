@@ -49,7 +49,12 @@ class TaskGroupService(
     // start
     fun startQueueById(id: Long) = queueTaskGroup.startTaskById(id)
 
-    fun startScheduleById(id: Long) = scheduledTaskGroup.startTaskById(id)
+    fun startScheduleById(id: Long) {
+        scheduledTaskGroup.startTaskById(id)
+        heavyScheduledTaskGroup.startTaskById(id)
+    }
+
+    fun startDaemonById(id: Long) = daemonTaskGroup.startTaskById(id)
 
     // cancel
     fun cancelQueueTaskById(id: Long) = queueTaskGroup.cancelTaskById(id)
