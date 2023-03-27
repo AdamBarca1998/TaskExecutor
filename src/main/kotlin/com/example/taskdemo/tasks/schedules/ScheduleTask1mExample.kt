@@ -7,18 +7,18 @@ import com.example.taskdemo.model.TaskContext
 import java.time.Duration
 import java.time.LocalDateTime
 
-//@TaskSchedule(
-//    schedules = [
-//        Schedule(second = "*/10")
-//    ],
-//    startDateTime = "2023-02-09T16:22:00Z"
-//)
-class ScheduleTaskExample : Task {
+@TaskSchedule(
+    schedules = [
+        Schedule(minute = "*/1")
+    ],
+    startDateTime = "2023-02-09T16:22:00Z"
+)
+class ScheduleTask1mExample : Task {
 
-    override val id = -1L
+    override var id = -1L
 
     override fun run(taskContext: TaskContext) {
-        println("${LocalDateTime.now()}  ScheduleTaskExample running...")
+        println("${LocalDateTime.now()}  ScheduleTask1mExample running...")
         Thread.sleep(Duration.ofSeconds(5))
     }
 }

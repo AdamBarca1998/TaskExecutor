@@ -47,7 +47,7 @@ class ScheduleTaskGroup(
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         val taskWithConfig = TaskWithConfig(task, taskConfig)
 
-        scheduleTaskService.createIfNotExists(task, scheduleLock)
+        task.id = scheduleTaskService.createIfNotExists(task, scheduleLock)
 
         savedTasks.add(taskWithConfig)
         if (scheduleLock.lockedBy == port) {

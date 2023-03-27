@@ -55,6 +55,12 @@ abstract class TaskGroup {
 
     protected abstract suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext)
 
+    protected open fun planNextTaskById(id: Long) {
+        savedTasks.find { it.task.id == id }?.let {
+            plannedTasks.add(it)
+        }
+    }
+
     fun stopGroup() {
         isLocked.set(true)
     }
@@ -72,6 +78,24 @@ abstract class TaskGroup {
             it.taskWithConfig.taskConfig.cancelState.set(CancelState.CANCEL)
             runningTasks.remove(it)
             it.job.cancel()
+        }
+    }
+
+    fun startTaskById(id: Long) {
+        var founded = false
+        plannedTasks.find { it.task.id == id }?.let {
+            it.taskConfig.cancelState.set(CancelState.START)
+            it.taskConfig.startDateTime = Instant.MIN
+            founded = true
+        }
+        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
+            it.taskWithConfig.taskConfig.cancelState.set(CancelState.START)
+            it.job.cancel()
+            founded = true
+        }
+
+        if (!founded) {
+            planNextTaskById(id)
         }
     }
 

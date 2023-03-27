@@ -30,7 +30,7 @@ class TaskConfig private constructor(
         var schedules: ArrayList<AbstractSchedule> = ArrayList(),
         var priority: Int = Int.MIN_VALUE,
         var heavy: Boolean = false,
-        var startDateTime: Instant = Instant.now().plusSeconds(60000),
+        var startDateTime: Instant = Instant.now(),
         var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL)
     ) {
         fun addSchedule(schedules: AbstractSchedule) = apply {

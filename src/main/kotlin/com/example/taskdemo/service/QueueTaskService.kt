@@ -44,6 +44,8 @@ class QueueTaskService(
         return queueTaskRepository.updateStateAndResultById(id, state, result) > 0
     }
 
+    fun findById(id: Long) = queueTaskMapper.toTask(queueTaskRepository.findById(id).orElse(null))
+
     fun findAll(): List<QueueTaskDto> {
         val queueTaskEntities = queueTaskRepository.findAllByStateNotIn(finishedStates)
 

@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class EmailTaskExample(
     private val receiver: String,
-    override val id: Long = -1
+    override var id: Long = -1
 ) : Task {
 
     override fun run(taskContext: TaskContext) {

@@ -32,13 +32,6 @@ class QueueTaskGroup(
         }
     }
 
-    fun startTaskById(id: Long) {
-        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.taskConfig.cancelState.set(CancelState.START)
-            it.job.cancel()
-        }
-    }
-
     override fun isEnable(task: Task): Boolean = true
 
     override fun handleRun(task: Task) {
@@ -74,7 +67,7 @@ class QueueTaskGroup(
             while (true) {
                 try {
                     if (!isLocked.get()) {
-                        if (runningTasks.isEmpty()) {
+                        if (runningTasks.isEmpty() && plannedTasks.isEmpty()) {
                             planNextTask()
                             runNextTask()
                         } else {
@@ -95,5 +88,12 @@ class QueueTaskGroup(
             plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
             queueTaskService.updateStateById(it.id, QueueTaskState.PLANNED)
         }
+    }
+
+    override fun planNextTaskById(id: Long) {
+        val task = queueTaskService.findById(id)
+
+        plannedTasks.add(TaskWithConfig(task, TaskConfig.Builder().build()))
+        queueTaskService.updateStateById(task.id, QueueTaskState.PLANNED)
     }
 }

@@ -25,4 +25,6 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
         nativeQuery = true
     )
     fun isEnableByClazzPath(clazzPath: String): Boolean
+
+    fun findByClazzPath(clazzPath: String): ScheduleTaskEntity
 }

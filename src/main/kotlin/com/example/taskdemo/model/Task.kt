@@ -2,7 +2,7 @@ package com.example.taskdemo.model
 
 interface Task {
 
-    val id: Long
+    var id: Long
 
     fun run(taskContext: TaskContext)
 }

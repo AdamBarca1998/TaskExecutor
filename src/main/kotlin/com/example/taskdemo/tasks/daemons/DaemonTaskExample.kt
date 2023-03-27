@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 //@TaskDaemon
 class DaemonTaskExample : Task {
 
-    override val id = -1L
+    override var id = -1L
 
     override fun run(taskContext: TaskContext) {
         println("\"${LocalDateTime.now()}   DaemonTaskExample running...")
