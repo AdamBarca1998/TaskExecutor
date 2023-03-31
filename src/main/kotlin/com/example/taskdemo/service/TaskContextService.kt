@@ -11,7 +11,7 @@ class TaskContextService(
     private val taskContextMapper: TaskContextMapper
 ) {
 
-    fun updateByClazzPath(taskContext: TaskContext, clazzPath: String): Boolean {
-        return taskContextRepository.updateByClazzPath(taskContextMapper.toEntity(taskContext), clazzPath) > 0
+    fun updateByDaemonId(taskContext: TaskContext, id: Long): Boolean {
+        return taskContextRepository.updateByDaemonId(taskContextMapper.toEntity(taskContext), id) > 0
     }
 }

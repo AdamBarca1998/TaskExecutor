@@ -30,7 +30,7 @@ interface TaskLockRepository : JpaRepository<TaskLockEntity, Long> {
     @Query(
         value = "UPDATE task_lock " +
                 "SET lock_until = NOW() + MAKE_INTERVAL(mins => :minutes), locked_at = NOW(), locked_by = :appId " +
-                "WHERE ( lock_until < NOW() - MAKE_INTERVAL(mins => :minutes) OR locked_by = :appId) " +
+                "WHERE ( lock_until < NOW() OR locked_by = :appId) " +
                 "AND name = :name AND cluster_name = :clusterName",
         nativeQuery = true
     )
@@ -45,7 +45,7 @@ interface TaskLockRepository : JpaRepository<TaskLockEntity, Long> {
                     "SELECT tl2.id " +
                     "FROM queue_task AS qt2 " +
                     "LEFT JOIN task_lock AS tl2 ON tl2.id = qt2.task_lock_id " +
-                    "WHERE tl2.lock_until < NOW() - MAKE_INTERVAL(mins => :minutes) " +
+                    "WHERE tl2.lock_until < NOW()" +
                     "AND qt2.state NOT IN :#{#withoutStates.![name()]} AND tl2.cluster_name = :clusterName " +
                     "ORDER BY tl2.lock_until " +
                     "LIMIT 1" +

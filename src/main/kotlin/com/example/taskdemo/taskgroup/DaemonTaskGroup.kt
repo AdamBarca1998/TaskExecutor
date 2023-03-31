@@ -35,7 +35,7 @@ class DaemonTaskGroup(
                             val entities = daemonTaskService.findAll()
                             // async run
                             entities.forEach { entity ->
-                                savedTasks.find { it.task.javaClass.name == entity.clazzPath }?.let {
+                                savedTasks.find { it.task.id == entity.id }?.let {
                                     it.taskConfig.startDateTime = entity.taskContext.startDateTime
 
                                     val job = launch { startTask(it) }
@@ -64,7 +64,7 @@ class DaemonTaskGroup(
             null
         )
 
-        taskContextService.updateByClazzPath(newContext, taskWithConfig.task.javaClass.name)
+        taskContextService.updateByDaemonId(newContext, taskWithConfig.task.id)
         runningTasks.find { it.taskWithConfig.task.id == taskWithConfig.task.id }?.let {
             taskWithConfig.taskConfig.startDateTime = newContext.startDateTime
             plannedTasks.add(it.taskWithConfig)

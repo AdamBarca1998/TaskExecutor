@@ -19,8 +19,8 @@ interface TaskContextRepository : JpaRepository<TaskContextEntity, Long> {
                 "last_completion = :#{#taskContext.lastCompletion} " +
                 "FROM daemon_task AS dt " +
                 "WHERE dt.task_context_id = tc.id " +
-                "AND dt.clazz_path = :clazzPath",
+                "AND dt.id = :id",
         nativeQuery = true
     )
-    fun updateByClazzPath(taskContext: TaskContextEntity, clazzPath: String): Int
+    fun updateByDaemonId(taskContext: TaskContextEntity, id: Long): Int
 }
