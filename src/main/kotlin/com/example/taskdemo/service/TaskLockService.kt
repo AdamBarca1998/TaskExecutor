@@ -3,6 +3,7 @@ package com.example.taskdemo.service
 import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.repository.TaskLockRepository
+import com.example.taskdemo.taskgroup.CLUSTER_NAME
 import com.example.taskdemo.taskgroup.EXPIRED_LOCK_TIME_M
 import org.springframework.stereotype.Service
 
@@ -11,15 +12,22 @@ class TaskLockService(
     private val taskLockRepository: TaskLockRepository
 ) {
 
-//    fun findExpiredLocks(minutes: Int) = taskLockRepository.findExpiredLocks(minutes)
+    fun createIfNotExists(name: String): TaskLockEntity {
+        val lock = TaskLockEntity()
+        lock.name = name
 
-    fun findByName(name: String): TaskLockEntity = taskLockRepository.findByName(name)
+        taskLockRepository.insertIfNotExists(lock)
+
+        return taskLockRepository.findByNameAndClusterName(name, CLUSTER_NAME)
+    }
+
+    fun findByName(name: String): TaskLockEntity = taskLockRepository.findByNameAndClusterName(name, CLUSTER_NAME)
 
     fun tryRefreshLockByName(name: String, appId: String): Boolean {
-        return taskLockRepository.tryRefreshLockByName(name, EXPIRED_LOCK_TIME_M, appId) > 0
+        return taskLockRepository.tryRefreshLockByNameAndClusterName(name, EXPIRED_LOCK_TIME_M, appId, CLUSTER_NAME) > 0
     }
 
     fun lockOldestExpiredQueueTask(minutes: Int, appId: String, withoutStates: List<QueueTaskState>): Boolean {
-        return taskLockRepository.lockOldestExpiredQueueTask(minutes, appId, withoutStates) > 0
+        return taskLockRepository.lockOldestExpiredQueueTaskByClusterName(minutes, appId, withoutStates, CLUSTER_NAME) > 0
     }
 }

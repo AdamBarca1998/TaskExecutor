@@ -23,6 +23,7 @@ import mu.KotlinLogging
 
 private const val REFRESH_LOCK_TIME_M = 1
 const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
+const val CLUSTER_NAME = "cluster1"
 
 abstract class TaskGroup {
 

@@ -81,6 +81,7 @@ class QueueTaskGroup(
 
     override fun planNextTaskById(id: Long) {
         val task = queueTaskService.findById(id)
+        queueTaskService.refreshLockByTaskId(id)
 
         plannedTasks.add(TaskWithConfig(task, TaskConfig.Builder().build()))
         queueTaskService.updateStateById(task.id, QueueTaskState.PLANNED)

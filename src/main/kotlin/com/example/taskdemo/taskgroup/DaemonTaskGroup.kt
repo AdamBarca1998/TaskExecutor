@@ -19,7 +19,7 @@ class DaemonTaskGroup(
 ) : TaskGroup() {
 
     private val lockName: String = "daemonGroup"
-    private var daemonLock: TaskLockEntity = taskLockService.findByName(lockName)
+    private var daemonLock: TaskLockEntity = taskLockService.createIfNotExists(lockName)
 
     init {
         // locker

@@ -16,7 +16,7 @@ class ScheduleTaskGroup(
 ) : TaskGroup() {
 
     private val lockName: String = "scheduleGroup"
-    private var scheduleLock: TaskLockEntity = taskLockService.findByName(lockName)
+    private var scheduleLock: TaskLockEntity = taskLockService.createIfNotExists(lockName)
 
     init {
         // locker
@@ -42,7 +42,7 @@ class ScheduleTaskGroup(
         }
     }
 
-    override fun isEnable(task: Task) = scheduleTaskService.isEnableByClazzPath(task.javaClass.name)
+    override fun isEnable(task: Task) = scheduleTaskService.isEnableById(task.id)
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         val taskWithConfig = TaskWithConfig(task, taskConfig)

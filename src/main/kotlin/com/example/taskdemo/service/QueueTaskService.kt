@@ -5,6 +5,7 @@ import com.example.taskdemo.enums.QueueTaskState
 import com.example.taskdemo.mappers.QueueTaskMapper
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.repository.QueueTaskRepository
+import com.example.taskdemo.taskgroup.CLUSTER_NAME
 import com.example.taskdemo.taskgroup.EXPIRED_LOCK_TIME_M
 import org.springframework.stereotype.Service
 
@@ -26,7 +27,7 @@ class QueueTaskService(
 
     fun findOldestExpired(appId: String): Task? {
         return if (taskLockService.lockOldestExpiredQueueTask(EXPIRED_LOCK_TIME_M, appId, finishedStates)) {
-            queueTaskMapper.toTask(queueTaskRepository.getNewestLocked(appId))
+            queueTaskMapper.toTask(queueTaskRepository.getNewestLocked(appId, CLUSTER_NAME))
         } else {
             null
         }
@@ -47,7 +48,7 @@ class QueueTaskService(
     fun findById(id: Long) = queueTaskMapper.toTask(queueTaskRepository.findById(id).orElse(null))
 
     fun findAll(): List<QueueTaskDto> {
-        val queueTaskEntities = queueTaskRepository.findAllByStateNotIn(finishedStates)
+        val queueTaskEntities = queueTaskRepository.findAllByStateNotInAndClusterName(finishedStates, CLUSTER_NAME)
 
         return queueTaskEntities.stream()
             .map { queueTaskMapper.toDto(it) }

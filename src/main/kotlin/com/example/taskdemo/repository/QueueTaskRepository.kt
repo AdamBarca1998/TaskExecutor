@@ -11,7 +11,16 @@ import org.springframework.transaction.annotation.Transactional
 @Repository
 interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
 
-    fun findAllByStateNotIn(states: List<QueueTaskState>): List<QueueTaskEntity>
+    @Query(
+        value = "SELECT qt.id, qt.clazz, qt.state, qt.created_at, qt.created_by, qt.owned_by, qt.result, qt.task_lock_id " +
+                "FROM queue_task AS qt " +
+                "LEFT JOIN task_lock AS tl ON tl.id = qt.task_lock_id " +
+                "WHERE tl.cluster_name = :clusterName " +
+                "AND qt.state NOT IN :#{#states.![name()]} " +
+                "ORDER BY tl.lock_until DESC",
+        nativeQuery = true
+    )
+    fun findAllByStateNotInAndClusterName(states: List<QueueTaskState>, clusterName: String): List<QueueTaskEntity>
 
     @Transactional
     @Modifying
@@ -50,10 +59,10 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
         value = "SELECT qt.id, qt.clazz, qt.state, qt.created_at, qt.created_by, qt.owned_by, qt.result, qt.task_lock_id " +
                 "FROM queue_task AS qt " +
                 "LEFT JOIN task_lock AS tl ON tl.id = qt.task_lock_id " +
-                "WHERE tl.locked_by = :appId " +
+                "WHERE tl.locked_by = :appId AND tl.cluster_name = :clusterName " +
                 "ORDER BY tl.lock_until DESC " +
                 "LIMIT 1",
         nativeQuery = true
     )
-    fun getNewestLocked(appId: String): QueueTaskEntity
+    fun getNewestLocked(appId: String, clusterName: String): QueueTaskEntity
 }

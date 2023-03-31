@@ -21,10 +21,10 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
     fun insertIfNotExists(scheduleTaskEntity: ScheduleTaskEntity)
 
     @Query(
-        value = "SELECT enable FROM schedule_task WHERE clazz_path = :clazzPath",
+        value = "SELECT enable FROM schedule_task WHERE id = :id",
         nativeQuery = true
     )
-    fun isEnableByClazzPath(clazzPath: String): Boolean
+    fun isEnableById(id: Long): Boolean
 
     fun findByClazzPath(clazzPath: String): ScheduleTaskEntity
 }

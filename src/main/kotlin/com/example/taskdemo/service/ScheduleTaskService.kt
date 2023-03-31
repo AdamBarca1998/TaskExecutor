@@ -17,5 +17,5 @@ class ScheduleTaskService(
         return scheduleTaskRepository.findByClazzPath(task.javaClass.name).id ?: -1
     }
 
-    fun isEnableByClazzPath(clazzPath: String) = scheduleTaskRepository.isEnableByClazzPath(clazzPath)
+    fun isEnableById(id: Long) = scheduleTaskRepository.isEnableById(id)
 }
