@@ -21,5 +21,5 @@ class ScheduleTaskController(
     fun cancel(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.cancelScheduleById(id))
 
     @PutMapping("/start/{id}")
-    fun start(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.startScheduleById(id))
+    fun runById(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.runScheduleById(id))
 }

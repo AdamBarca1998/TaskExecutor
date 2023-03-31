@@ -83,9 +83,9 @@ abstract class TaskGroup {
         handleCancel(id)
     }
 
-    fun startTaskById(id: Long) {
+    fun runTaskById(id: Long) {
         runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.taskConfig.cancelState.set(CancelState.START)
+            it.taskWithConfig.taskConfig.cancelState.set(CancelState.RUN)
             it.job.cancel()
             return
         }
@@ -97,18 +97,18 @@ abstract class TaskGroup {
         }
 
         planNextTaskById(id)
-        startTaskById(id)
+        runTaskById(id)
     }
 
     protected open fun runNextTask(runType: RunType = RunType.TASK_GROUP) {
         plannedTasks.poll()?.let {
-            val job = scope.launch { runTask(it, runType) }
+            val job = scope.launch { startTask(it, runType) }
 
             runningTasks.add(TaskWithJob(it, job))
         }
     }
 
-    protected suspend fun runTask(taskWithConfig: TaskWithConfig, runType: RunType = RunType.TASK_GROUP) {
+    protected suspend fun startTask(taskWithConfig: TaskWithConfig, runType: RunType = RunType.TASK_GROUP) {
         val task = taskWithConfig.task
         val config = taskWithConfig.taskConfig
         val taskContext = TaskContext(

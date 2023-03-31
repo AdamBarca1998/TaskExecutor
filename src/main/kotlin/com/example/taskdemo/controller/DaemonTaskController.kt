@@ -20,6 +20,6 @@ class DaemonTaskController(
     @PutMapping("/cancel/{id}")
     fun cancel(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.cancelDaemonById(id))
 
-    @PutMapping("/start/{id}")
-    fun start(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.startDaemonById(id))
+    @PutMapping("/run/{id}")
+    fun runById(@PathVariable id: Long) = ResponseEntity.ok(taskGroupService.runDaemonById(id))
 }

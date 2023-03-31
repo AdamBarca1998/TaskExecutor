@@ -38,7 +38,7 @@ class DaemonTaskGroup(
                                 savedTasks.find { it.task.javaClass.name == entity.clazzPath }?.let {
                                     it.taskConfig.startDateTime = entity.taskContext.startDateTime
 
-                                    val job = launch { runTask(it) }
+                                    val job = launch { startTask(it) }
 
                                     runningTasks.add(TaskWithJob(it, job))
                                 }
