@@ -23,4 +23,18 @@ interface TaskContextRepository : JpaRepository<TaskContextEntity, Long> {
         nativeQuery = true
     )
     fun updateByDaemonId(taskContext: TaskContextEntity, id: Long): Int
+
+    @Transactional
+    @Modifying
+    @Query(
+        value = "UPDATE task_context AS tc " +
+                "SET start_date_time = :#{#taskContext.startDateTime}, " +
+                "last_execution = :#{#taskContext.lastExecution}, " +
+                "last_completion = :#{#taskContext.lastCompletion} " +
+                "FROM schedule_task AS st " +
+                "WHERE st.task_context_id = tc.id " +
+                "AND st.id = :id",
+        nativeQuery = true
+    )
+    fun updateByScheduleId(taskContext: TaskContextEntity, id: Long): Int
 }

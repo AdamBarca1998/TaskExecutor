@@ -5,14 +5,17 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.service.ScheduleTaskService
+import com.example.taskdemo.service.TaskContextService
 import com.example.taskdemo.service.TaskLockService
+import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
-    private val scheduleTaskService: ScheduleTaskService
+    private val scheduleTaskService: ScheduleTaskService,
+    private val taskContextService: TaskContextService
 ) : TaskGroup() {
 
     private val lockName: String = "scheduleGroup"
@@ -29,7 +32,15 @@ class ScheduleTaskGroup(
                         }
 
                         if (scheduleLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
-                            plannedTasks.addAll(savedTasks)
+                            val entities = scheduleTaskService.findAll()
+
+                            entities.forEach { entity ->
+                                savedTasks.find { it.task.id == entity.id }?.let {
+                                    it.taskConfig.startDateTime = entity.taskContext.startDateTime
+                                    plannedTasks.add(it)
+                                }
+                            }
+
                             runNextTask()
                         }
                     }
@@ -59,11 +70,17 @@ class ScheduleTaskGroup(
     }
 
     override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+        val newContext = TaskContext(
+            taskWithConfig.taskConfig.nextExecution(taskContext) ?: ZonedDateTime.now().plusDays(1),
+            taskContext.lastExecution,
+            taskContext.lastCompletion,
+            null
+        )
+
+        taskContextService.updateByScheduleId(newContext, taskWithConfig.task.id)
         runningTasks.find { it.taskWithConfig.task.id == taskWithConfig.task.id }?.let {
-            taskWithConfig.taskConfig.nextExecution(taskContext)?.let { nextTime ->
-                taskWithConfig.taskConfig.startDateTime = nextTime
-                plannedTasks.add(TaskWithConfig(taskWithConfig.task, taskWithConfig.taskConfig))
-            }
+            taskWithConfig.taskConfig.startDateTime = newContext.startDateTime
+            plannedTasks.add(it.taskWithConfig)
         }
     }
 }

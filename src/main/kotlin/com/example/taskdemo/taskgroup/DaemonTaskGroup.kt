@@ -54,7 +54,7 @@ class DaemonTaskGroup(
         }
     }
 
-    override fun isEnable(task: Task) = daemonTaskService.isEnableByClazzPath(task.javaClass.name)
+    override fun isEnable(task: Task) = daemonTaskService.isEnableById(task.id)
 
     override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
         val newContext = TaskContext(

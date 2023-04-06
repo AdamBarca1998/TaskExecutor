@@ -31,4 +31,9 @@ open class ScheduleTaskEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "task_lock_id", nullable = false)
     open var taskLockEntity: TaskLockEntity = TaskLockEntity()
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "task_context_id", nullable = false)
+    open var taskContext: TaskContextEntity = TaskContextEntity()
 }

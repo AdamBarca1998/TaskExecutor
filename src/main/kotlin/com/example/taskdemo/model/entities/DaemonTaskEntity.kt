@@ -1,6 +1,5 @@
 package com.example.taskdemo.model.entities
 
-import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -36,7 +35,7 @@ open class DaemonTaskEntity {
     open var taskLockEntity: TaskLockEntity = TaskLockEntity()
 
     @NotNull
-    @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = [CascadeType.PERSIST])
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "task_context_id", nullable = false)
     open var taskContext: TaskContextEntity = TaskContextEntity()
 }

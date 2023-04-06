@@ -14,4 +14,8 @@ class TaskContextService(
     fun updateByDaemonId(taskContext: TaskContext, id: Long): Boolean {
         return taskContextRepository.updateByDaemonId(taskContextMapper.toEntity(taskContext), id) > 0
     }
+
+    fun updateByScheduleId(taskContext: TaskContext, id: Long): Boolean {
+        return taskContextRepository.updateByScheduleId(taskContextMapper.toEntity(taskContext), id) > 0
+    }
 }

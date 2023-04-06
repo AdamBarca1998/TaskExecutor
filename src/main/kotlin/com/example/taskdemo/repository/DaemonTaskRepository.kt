@@ -22,10 +22,19 @@ interface DaemonTaskRepository : JpaRepository<DaemonTaskEntity, Long> {
     fun insertIfNotExists(daemonTaskEntity: DaemonTaskEntity)
 
     @Query(
-        value = "SELECT enable FROM daemon_task WHERE clazz_path = :clazzPath",
+        value = "SELECT enable FROM daemon_task WHERE id = :id",
         nativeQuery = true
     )
-    fun isEnableByClazzPath(clazzPath: String): Boolean
+    fun isEnableById(id: Long): Boolean
 
     fun findByClazzPath(clazzPath: String): DaemonTaskEntity
+
+    @Query(
+        value = "SELECT dt.id, clazz_path, task_lock_id, task_context_id " +
+                "FROM daemon_task AS dt " +
+                "LEFT JOIN task_lock AS tl ON tl.id = dt.task_lock_id " +
+                "WHERE tl.cluster_name = :clusterName ",
+        nativeQuery = true
+    )
+    fun findAllByClusterName(clusterName: String): List<DaemonTaskEntity>
 }

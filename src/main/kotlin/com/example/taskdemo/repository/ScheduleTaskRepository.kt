@@ -13,8 +13,8 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
     @Transactional
     @Modifying
     @Query(
-        value = "INSERT INTO schedule_task(clazz_path, task_lock_id) " +
-                "VALUES(:#{#scheduleTaskEntity.clazzPath}, :#{#scheduleTaskEntity.taskLockEntity.id}) " +
+        value = "INSERT INTO schedule_task(clazz_path, task_lock_id, task_context_id) " +
+                "VALUES(:#{#scheduleTaskEntity.clazzPath}, :#{#scheduleTaskEntity.taskLockEntity.id}, :#{#scheduleTaskEntity.taskContext.id}) " +
                 "ON CONFLICT DO NOTHING",
         nativeQuery = true
     )
@@ -27,4 +27,13 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
     fun isEnableById(id: Long): Boolean
 
     fun findByClazzPath(clazzPath: String): ScheduleTaskEntity
+
+    @Query(
+        value = "SELECT st.id, clazz_path, task_lock_id, task_context_id " +
+                "FROM schedule_task AS st " +
+                "LEFT JOIN task_lock AS tl ON tl.id = st.task_lock_id " +
+                "WHERE tl.cluster_name = :clusterName ",
+        nativeQuery = true
+    )
+    fun findAllByClusterName(clusterName: String): List<ScheduleTaskEntity>
 }

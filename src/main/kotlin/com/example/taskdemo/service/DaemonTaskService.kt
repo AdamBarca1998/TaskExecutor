@@ -6,6 +6,7 @@ import com.example.taskdemo.model.entities.DaemonTaskEntity
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.repository.DaemonTaskRepository
 import com.example.taskdemo.repository.TaskContextRepository
+import com.example.taskdemo.taskgroup.CLUSTER_NAME
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,15 +19,15 @@ open class DaemonTaskService(
 
     @Transactional
     open fun createIfNotExists(task: Task, scheduleLock: TaskLockEntity): Long {
-        val daemonTaskEntity = daemonTaskMapper.toEntity(task, scheduleLock);
+        val daemonTaskEntity = daemonTaskMapper.toEntity(task, scheduleLock)
         daemonTaskEntity.taskContext = taskContextRepository.save(daemonTaskEntity.taskContext)
         daemonTaskRepository.insertIfNotExists(daemonTaskEntity)
         return daemonTaskRepository.findByClazzPath(task.javaClass.name).id ?: -1
     }
 
-    open fun isEnableByClazzPath(clazzPath: String) = daemonTaskRepository.isEnableByClazzPath(clazzPath)
+    open fun isEnableById(id: Long) = daemonTaskRepository.isEnableById(id)
 
     open fun findAll(): List<DaemonTaskEntity> {
-        return daemonTaskRepository.findAll()
+        return daemonTaskRepository.findAllByClusterName(CLUSTER_NAME)
     }
 }
