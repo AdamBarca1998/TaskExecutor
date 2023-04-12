@@ -56,31 +56,31 @@ class ScheduleTaskGroup(
     override fun isEnable(task: Task) = scheduleTaskService.isEnableById(task.id)
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
-        val taskWithConfig = TaskWithConfig(task, taskConfig)
+        val taskStruct = TaskStruct(task, taskConfig)
 
         task.id = scheduleTaskService.createIfNotExists(task, scheduleLock)
 
-        savedTasks.add(taskWithConfig)
+        savedTasks.add(taskStruct)
         if (scheduleLock.lockedBy == port) {
-            plannedTasks.add(taskWithConfig)
+            plannedTasks.add(taskStruct)
             if (runningTasks.isEmpty()) {
                 runNextTask()
             }
         }
     }
 
-    override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+    override suspend fun planNextExecution(taskStruct: TaskStruct, taskContext: TaskContext) {
         val newContext = TaskContext(
-            taskWithConfig.taskConfig.nextExecution(taskContext) ?: ZonedDateTime.now().plusDays(1),
+            taskStruct.taskConfig.nextExecution(taskContext) ?: ZonedDateTime.now().plusDays(1),
             taskContext.lastExecution,
             taskContext.lastCompletion,
             null
         )
 
-        taskContextService.updateByScheduleId(newContext, taskWithConfig.task.id)
-        runningTasks.find { it.taskWithConfig.task.id == taskWithConfig.task.id }?.let {
-            taskWithConfig.taskConfig.startDateTime = newContext.startDateTime
-            plannedTasks.add(it.taskWithConfig)
+        taskContextService.updateByScheduleId(newContext, taskStruct.task.id)
+        runningTasks.find { it.taskStruct.task.id == taskStruct.task.id }?.let {
+            taskStruct.taskConfig.startDateTime = newContext.startDateTime
+            plannedTasks.add(it.taskStruct)
         }
     }
 }

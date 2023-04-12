@@ -47,7 +47,7 @@ class QueueTaskGroup(
         queueTaskService.saveTask(task)
     }
 
-    override suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext) {
+    override suspend fun planNextExecution(taskStruct: TaskStruct, taskContext: TaskContext) {
         planNextTask()
     }
 
@@ -60,7 +60,7 @@ class QueueTaskGroup(
                             planNextTask()
                             runNextTask()
                         } else {
-                            queueTaskService.refreshLockByTaskId(runningTasks.peek().taskWithConfig.task.id)
+                            queueTaskService.refreshLockByTaskId(runningTasks.peek().taskStruct.task.id)
                         }
                     }
                 } catch (e: Exception) {
@@ -74,7 +74,7 @@ class QueueTaskGroup(
 
     private fun planNextTask() {
         queueTaskService.findOldestExpired(port)?.let {
-            plannedTasks.add(TaskWithConfig(it, TaskConfig.Builder().build()))
+            plannedTasks.add(TaskStruct(it, TaskConfig.Builder().build()))
             queueTaskService.updateStateById(it.id, QueueTaskState.PLANNED)
         }
     }
@@ -83,7 +83,7 @@ class QueueTaskGroup(
         val task = queueTaskService.findById(id)
         queueTaskService.refreshLockByTaskId(id)
 
-        plannedTasks.add(TaskWithConfig(task, TaskConfig.Builder().build()))
+        plannedTasks.add(TaskStruct(task, TaskConfig.Builder().build()))
         queueTaskService.updateStateById(task.id, QueueTaskState.PLANNED)
     }
 }

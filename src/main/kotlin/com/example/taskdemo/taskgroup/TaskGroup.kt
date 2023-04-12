@@ -29,8 +29,8 @@ const val CLUSTER_NAME = "cluster1"
 abstract class TaskGroup {
 
     protected val scope = CoroutineScope(Dispatchers.Default)
-    protected val savedTasks: ArrayList<TaskWithConfig> = arrayListOf()
-    protected val plannedTasks = PriorityBlockingQueue<TaskWithConfig>()
+    protected val savedTasks: ArrayList<TaskStruct> = arrayListOf()
+    protected val plannedTasks = PriorityBlockingQueue<TaskStruct>()
     protected val runningTasks = LinkedTransferQueue<TaskWithJob>()
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     protected val logger = KotlinLogging.logger {}
@@ -57,7 +57,7 @@ abstract class TaskGroup {
 
     abstract fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build())
 
-    protected abstract suspend fun planNextExecution(taskWithConfig: TaskWithConfig, taskContext: TaskContext)
+    protected abstract suspend fun planNextExecution(taskStruct: TaskStruct, taskContext: TaskContext)
 
     protected open fun planNextTaskById(id: Long) {
         savedTasks.find { it.task.id == id }?.let {
@@ -77,8 +77,8 @@ abstract class TaskGroup {
 
     fun cancelTaskById(id: Long) {
         plannedTasks.removeIf { it.task.id == id }
-        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.cancelState.set(CancelState.CANCEL)
+        runningTasks.find { it.taskStruct.task.id == id }?.let {
+            it.taskStruct.cancelState.set(CancelState.CANCEL)
             runningTasks.remove(it)
             it.job.cancel()
         }
@@ -86,8 +86,8 @@ abstract class TaskGroup {
     }
 
     fun runTaskById(id: Long) {
-        runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.cancelState.set(CancelState.RUN)
+        runningTasks.find { it.taskStruct.task.id == id }?.let {
+            it.taskStruct.cancelState.set(CancelState.RUN)
             it.job.cancel()
             return
         }
@@ -110,10 +110,10 @@ abstract class TaskGroup {
         }
     }
 
-    protected suspend fun startTask(taskWithConfig: TaskWithConfig, runType: RunType = RunType.TASK_GROUP) {
-        val task = taskWithConfig.task
+    protected suspend fun startTask(taskStruct: TaskStruct, runType: RunType = RunType.TASK_GROUP) {
+        val task = taskStruct.task
         val taskContext = TaskContext(
-            taskWithConfig.taskConfig.startDateTime,
+            taskStruct.taskConfig.startDateTime,
             ZonedDateTime.now(),
             ZonedDateTime.now(),
             null
@@ -122,9 +122,9 @@ abstract class TaskGroup {
         // start
         try {
             try {
-                delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskWithConfig.taskConfig.startDateTime))
+                delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskStruct.taskConfig.startDateTime))
             } catch (e: CancellationException) {
-                if (taskWithConfig.cancelState.get() == CancelState.CANCEL) {
+                if (taskStruct.cancelState.get() == CancelState.CANCEL) {
                     return
                 }
             }
@@ -142,8 +142,8 @@ abstract class TaskGroup {
             taskContext.lastCompletion = ZonedDateTime.now()
 
             // finish
-            planNextExecution(taskWithConfig, taskContext)
-            runningTasks.removeIf { it.taskWithConfig.task.id == taskWithConfig.task.id }
+            planNextExecution(taskStruct, taskContext)
+            runningTasks.removeIf { it.taskStruct.task.id == taskStruct.task.id }
             if (runType != RunType.PARALLEL || runningTasks.isEmpty()) {
                 runNextTask()
             }
@@ -156,14 +156,14 @@ abstract class TaskGroup {
         return Duration.ofSeconds(Random.nextLong(seconds / 2, seconds * 2)).toMillis()
     }
 
-    protected data class TaskWithConfig(
+    protected data class TaskStruct(
         val task: Task,
         val taskConfig: TaskConfig,
         var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL)
-    ) : Comparable<TaskWithConfig> {
+    ) : Comparable<TaskStruct> {
 
         // 1. startDateTime -> 2. priority
-        override fun compareTo(other: TaskWithConfig): Int {
+        override fun compareTo(other: TaskStruct): Int {
             val compareTime = taskConfig.startDateTime.compareTo(other.taskConfig.startDateTime)
 
             return if (compareTime == 0) {
@@ -181,7 +181,7 @@ abstract class TaskGroup {
         }
     }
 
-    protected data class TaskWithJob(val taskWithConfig: TaskWithConfig, val job: Job)
+    protected data class TaskWithJob(val taskStruct: TaskStruct, val job: Job)
 
     protected enum class RunType {
         TASK_GROUP,
