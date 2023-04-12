@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS task_log;
 DROP TABLE IF EXISTS schedule_task;
 DROP TABLE IF EXISTS daemon_task;
 DROP TABLE IF EXISTS queue_task;
@@ -8,6 +9,7 @@ DROP SEQUENCE IF EXISTS daemon_task_id_seq;
 DROP SEQUENCE IF EXISTS task_lock_id_seq;
 DROP SEQUENCE IF EXISTS queue_task_id_seq;
 DROP SEQUENCE IF EXISTS task_context_id_seq;
+DROP SEQUENCE IF EXISTS task_log_id_seq;
 
 CREATE SEQUENCE schedule_task_id_seq
 INCREMENT 1
@@ -26,6 +28,10 @@ INCREMENT 1
 START 1;
 
 CREATE SEQUENCE task_context_id_seq
+INCREMENT 1
+START 1;
+
+CREATE SEQUENCE task_log_id_seq
 INCREMENT 1
 START 1;
 
@@ -72,6 +78,18 @@ CREATE TABLE queue_task (
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     created_by  VARCHAR(1024) NOT NULL, --
     owned_by    VARCHAR(1024) NOT NULL, --
-    result      VARCHAR(1024) NOT NULL, --
     task_lock_id    BIGINT REFERENCES task_lock(id)
 );
+
+CREATE TABLE task_log (
+    id BIGINT PRIMARY KEY DEFAULT nextval('task_log_id_seq'),
+    start_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    finish_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    result TEXT NOT NULL,
+
+    queue_task_id BIGINT NOT NULL REFERENCES queue_task(id),
+    schedule_task_id BIGINT NOT NULL REFERENCES schedule_task(id),
+    daemon_task_id BIGINT NOT NULL REFERENCES daemon_task(id),
+
+    CONSTRAINT check_only_one_task CHECK (num_nonnulls(queue_task_id, schedule_task_id, daemon_task_id) = 1)
+)

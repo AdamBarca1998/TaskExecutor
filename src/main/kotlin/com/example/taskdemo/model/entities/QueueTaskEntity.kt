@@ -47,10 +47,6 @@ open class QueueTaskEntity {
     @Column(name = "owned_by", nullable = false, length = 1024)
     open var ownedBy: String = "all"
 
-    @NotNull
-    @Column(name = "result", nullable = false, length = 1024)
-    open var result: String = ""
-
     @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
     @JoinColumn(name = "task_lock_id")
     open var taskLockEntity: TaskLockEntity = TaskLockEntity()
