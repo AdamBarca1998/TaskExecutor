@@ -13,6 +13,7 @@ import java.util.concurrent.CancellationException
 import java.util.concurrent.LinkedTransferQueue
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -77,7 +78,7 @@ abstract class TaskGroup {
     fun cancelTaskById(id: Long) {
         plannedTasks.removeIf { it.task.id == id }
         runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.taskConfig.cancelState.set(CancelState.CANCEL)
+            it.taskWithConfig.cancelState.set(CancelState.CANCEL)
             runningTasks.remove(it)
             it.job.cancel()
         }
@@ -86,7 +87,7 @@ abstract class TaskGroup {
 
     fun runTaskById(id: Long) {
         runningTasks.find { it.taskWithConfig.task.id == id }?.let {
-            it.taskWithConfig.taskConfig.cancelState.set(CancelState.RUN)
+            it.taskWithConfig.cancelState.set(CancelState.RUN)
             it.job.cancel()
             return
         }
@@ -111,7 +112,6 @@ abstract class TaskGroup {
 
     protected suspend fun startTask(taskWithConfig: TaskWithConfig, runType: RunType = RunType.TASK_GROUP) {
         val task = taskWithConfig.task
-        val config = taskWithConfig.taskConfig
         val taskContext = TaskContext(
             taskWithConfig.taskConfig.startDateTime,
             ZonedDateTime.now(),
@@ -124,7 +124,7 @@ abstract class TaskGroup {
             try {
                 delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskWithConfig.taskConfig.startDateTime))
             } catch (e: CancellationException) {
-                if (config.cancelState.get() == CancelState.CANCEL) {
+                if (taskWithConfig.cancelState.get() == CancelState.CANCEL) {
                     return
                 }
             }
@@ -156,7 +156,11 @@ abstract class TaskGroup {
         return Duration.ofSeconds(Random.nextLong(seconds / 2, seconds * 2)).toMillis()
     }
 
-    protected data class TaskWithConfig(val task: Task, val taskConfig: TaskConfig) : Comparable<TaskWithConfig> {
+    protected data class TaskWithConfig(
+        val task: Task,
+        val taskConfig: TaskConfig,
+        var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL)
+    ) : Comparable<TaskWithConfig> {
 
         // 1. startDateTime -> 2. priority
         override fun compareTo(other: TaskWithConfig): Int {
