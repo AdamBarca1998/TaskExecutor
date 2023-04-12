@@ -4,9 +4,11 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
+import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.DaemonTaskService
 import com.example.taskdemo.service.TaskContextService
 import com.example.taskdemo.service.TaskLockService
+import com.example.taskdemo.service.TaskLogService
 import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -15,8 +17,9 @@ import kotlinx.coroutines.launch
 class DaemonTaskGroup(
     private val taskLockService: TaskLockService,
     private val daemonTaskService: DaemonTaskService,
-    private val taskContextService: TaskContextService
-) : TaskGroup() {
+    private val taskContextService: TaskContextService,
+    taskLogService: TaskLogService
+) : TaskGroup(taskLogService) {
 
     private val lockName: String = "daemonGroup"
     private var daemonLock: TaskLockEntity = taskLockService.createIfNotExists(lockName)
@@ -51,6 +54,12 @@ class DaemonTaskGroup(
                     delay(getNextRefreshMillis())
                 }
             }
+        }
+    }
+
+    override fun createLog(task: Task): TaskLogEntity {
+        return TaskLogEntity().also {
+            it.daemonTaskId = task.id
         }
     }
 

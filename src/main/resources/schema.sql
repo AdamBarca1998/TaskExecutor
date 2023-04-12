@@ -84,12 +84,13 @@ CREATE TABLE queue_task (
 CREATE TABLE task_log (
     id BIGINT PRIMARY KEY DEFAULT nextval('task_log_id_seq'),
     start_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
-    finish_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    finish_date_time TIMESTAMP WITH TIME ZONE,
+    state VARCHAR(16) NOT NULL,
     result TEXT NOT NULL,
 
-    queue_task_id BIGINT NOT NULL REFERENCES queue_task(id),
-    schedule_task_id BIGINT NOT NULL REFERENCES schedule_task(id),
-    daemon_task_id BIGINT NOT NULL REFERENCES daemon_task(id),
+    queue_task_id BIGINT REFERENCES queue_task(id),
+    schedule_task_id BIGINT REFERENCES schedule_task(id),
+    daemon_task_id BIGINT REFERENCES daemon_task(id),
 
-    CONSTRAINT check_only_one_task CHECK (num_nonnulls(queue_task_id, schedule_task_id, daemon_task_id) = 1)
+    CONSTRAINT check_only_one_task CHECK (NUM_NONNULLS(queue_task_id, schedule_task_id, daemon_task_id) = 1)
 )

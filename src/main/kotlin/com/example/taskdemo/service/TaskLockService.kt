@@ -1,6 +1,6 @@
 package com.example.taskdemo.service
 
-import com.example.taskdemo.enums.QueueTaskState
+import com.example.taskdemo.enums.TaskState
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.repository.TaskLockRepository
 import com.example.taskdemo.taskgroup.CLUSTER_NAME
@@ -27,7 +27,7 @@ class TaskLockService(
         return taskLockRepository.tryRefreshLockByNameAndClusterName(name, EXPIRED_LOCK_TIME_M, appId, CLUSTER_NAME) > 0
     }
 
-    fun lockOldestExpiredQueueTask(minutes: Int, appId: String, withoutStates: List<QueueTaskState>): Boolean {
+    fun lockOldestExpiredQueueTask(minutes: Int, appId: String, withoutStates: List<TaskState>): Boolean {
         return taskLockRepository.lockOldestExpiredQueueTaskByClusterName(minutes, appId, withoutStates, CLUSTER_NAME) > 0
     }
 }

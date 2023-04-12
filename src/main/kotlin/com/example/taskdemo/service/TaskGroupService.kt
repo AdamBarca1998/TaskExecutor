@@ -14,13 +14,14 @@ class TaskGroupService(
     private val queueTaskService: QueueTaskService,
     taskLockService: TaskLockService,
     daemonTaskService: DaemonTaskService,
-    taskContextService: TaskContextService
+    taskContextService: TaskContextService,
+    taskLogService: TaskLogService
 ) {
 
-    private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskContextService)
-    private val queueTaskGroup = QueueTaskGroup(queueTaskService)
-    private val daemonTaskGroup = DaemonTaskGroup(taskLockService, daemonTaskService, taskContextService)
-    private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskContextService)
+    private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskContextService, taskLogService)
+    private val queueTaskGroup = QueueTaskGroup(queueTaskService, taskLogService)
+    private val daemonTaskGroup = DaemonTaskGroup(taskLockService, daemonTaskService, taskContextService, taskLogService)
+    private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskContextService, taskLogService)
 
     // add
     fun addQueue(task: Task) {

@@ -1,7 +1,6 @@
 package com.example.taskdemo.repository
 
-import com.example.taskdemo.enums.QueueTaskState
-import com.example.taskdemo.model.entities.DaemonTaskEntity
+import com.example.taskdemo.enums.TaskState
 import com.example.taskdemo.model.entities.TaskLockEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -52,5 +51,5 @@ interface TaskLockRepository : JpaRepository<TaskLockEntity, Long> {
                 ") ",
         nativeQuery = true
     )
-    fun lockOldestExpiredQueueTaskByClusterName(minutes: Int, appId: String, withoutStates: List<QueueTaskState>, clusterName: String): Int
+    fun lockOldestExpiredQueueTaskByClusterName(minutes: Int, appId: String, withoutStates: List<TaskState>, clusterName: String): Int
 }

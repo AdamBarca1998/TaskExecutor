@@ -1,18 +1,21 @@
 package com.example.taskdemo.taskgroup
 
-import com.example.taskdemo.enums.QueueTaskState
+import com.example.taskdemo.enums.TaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.QueueTaskService
+import com.example.taskdemo.service.TaskLogService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class QueueTaskGroup(
-    private val queueTaskService: QueueTaskService
-) : TaskGroup() {
+    private val queueTaskService: QueueTaskService,
+    taskLogService: TaskLogService
+) : TaskGroup(taskLogService) {
 
     private var locker: Job = launchNewLocker()
 
@@ -21,26 +24,32 @@ class QueueTaskGroup(
         locker = launchNewLocker()
     }
 
+    override fun createLog(task: Task): TaskLogEntity {
+        return TaskLogEntity().also {
+            it.queueTaskId = task.id
+        }
+    }
+
     override fun isEnable(task: Task): Boolean = true
 
-    override fun handleRun(task: Task) {
-        super.handleRun(task)
-        queueTaskService.updateStateById(task.id, QueueTaskState.RUNNING)
+    override fun handleRun(task: Task): TaskLogEntity {
+        queueTaskService.updateStateById(task.id, TaskState.RUNNING)
+        return super.handleRun(task)
     }
 
-    override fun handleError(task: Task, e: Exception) {
-        super.handleError(task, e)
-        queueTaskService.updateStateAndResultById(task.id, QueueTaskState.ERROR, e.message ?: "Default value: handleError()")
+    override fun handleError(task: Task, taskLogEntity: TaskLogEntity?, e: Exception) {
+        super.handleError(task, taskLogEntity, e)
+        queueTaskService.updateStateById(task.id, TaskState.ERROR)
     }
 
-    override fun handleFinish(task: Task) {
-        super.handleFinish(task)
-        queueTaskService.updateStateById(task.id, QueueTaskState.FINISHED)
+    override fun handleFinish(task: Task, taskLogEntity: TaskLogEntity?) {
+        super.handleFinish(task, taskLogEntity)
+        queueTaskService.updateStateById(task.id, TaskState.FINISHED)
     }
 
-    override fun handleCancel(id: Long) {
-        super.handleCancel(id)
-        queueTaskService.updateStateById(id, QueueTaskState.CANCELED)
+    override fun handleCancel(task: Task, taskLogEntity: TaskLogEntity?) {
+        super.handleCancel(task, taskLogEntity)
+        queueTaskService.updateStateById(task.id, TaskState.CANCELED)
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
@@ -75,7 +84,7 @@ class QueueTaskGroup(
     private fun planNextTask() {
         queueTaskService.findOldestExpired(port)?.let {
             plannedTasks.add(TaskStruct(it, TaskConfig.Builder().build()))
-            queueTaskService.updateStateById(it.id, QueueTaskState.PLANNED)
+            queueTaskService.updateStateById(it.id, TaskState.PLANNED)
         }
     }
 
@@ -84,6 +93,6 @@ class QueueTaskGroup(
         queueTaskService.refreshLockByTaskId(id)
 
         plannedTasks.add(TaskStruct(task, TaskConfig.Builder().build()))
-        queueTaskService.updateStateById(task.id, QueueTaskState.PLANNED)
+        queueTaskService.updateStateById(task.id, TaskState.PLANNED)
     }
 }

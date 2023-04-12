@@ -1,6 +1,6 @@
 package com.example.taskdemo.enums
 
-enum class QueueTaskState {
+enum class TaskState {
 
     CREATED,
     PLANNED,

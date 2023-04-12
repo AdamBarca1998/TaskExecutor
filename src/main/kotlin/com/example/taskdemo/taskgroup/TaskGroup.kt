@@ -1,9 +1,12 @@
 package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.enums.CancelState
+import com.example.taskdemo.enums.TaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.model.entities.TaskLogEntity
+import com.example.taskdemo.service.TaskLogService
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -26,7 +29,9 @@ private const val REFRESH_LOCK_TIME_M = 1
 const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
 const val CLUSTER_NAME = "cluster1"
 
-abstract class TaskGroup {
+abstract class TaskGroup(
+    private val taskLogService: TaskLogService
+) {
 
     protected val scope = CoroutineScope(Dispatchers.Default)
     protected val savedTasks: ArrayList<TaskStruct> = arrayListOf()
@@ -35,24 +40,44 @@ abstract class TaskGroup {
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     protected val logger = KotlinLogging.logger {}
 
-    protected val port = "8081" //TODO:DELETE
+    protected val port = "8080" //TODO:DELETE
 
     protected abstract fun isEnable(task: Task): Boolean
 
-    protected open fun handleRun(task: Task) {
-        logger.debug { "$task started." }
+    protected abstract fun createLog(task: Task): TaskLogEntity
+
+    protected open fun handleRun(task: Task): TaskLogEntity {
+        val log = createLog(task)
+
+        return taskLogService.save(log)
     }
 
-    protected open fun handleError(task: Task, e: Exception) {
-        logger.error { "$task $e" }
+    protected open fun handleError(task: Task, taskLogEntity: TaskLogEntity?, e: Exception) {
+        val log = taskLogEntity ?: createLog(task)
+
+        log.finishDateTime = ZonedDateTime.now()
+        log.state = TaskState.ERROR
+        log.result = e.stackTraceToString()
+
+        taskLogService.save(log)
     }
 
-    protected open fun handleFinish(task: Task) {
-        logger.debug { "$task ended." }
+    protected open fun handleFinish(task: Task, taskLogEntity: TaskLogEntity?) {
+        val log = taskLogEntity ?: createLog(task)
+
+        log.finishDateTime = ZonedDateTime.now()
+        log.state = TaskState.FINISHED
+
+        taskLogService.save(log)
     }
 
-    protected open fun handleCancel(id: Long) {
-        logger.debug { "task canceled with id: $id." }
+    protected open fun handleCancel(task: Task, taskLogEntity: TaskLogEntity?) {
+        val log = taskLogEntity ?: createLog(task)
+
+        log.finishDateTime = ZonedDateTime.now()
+        log.state = TaskState.CANCELED
+
+        taskLogService.save(log)
     }
 
     abstract fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build())
@@ -82,7 +107,6 @@ abstract class TaskGroup {
             runningTasks.remove(it)
             it.job.cancel()
         }
-        handleCancel(id)
     }
 
     fun runTaskById(id: Long) {
@@ -118,6 +142,7 @@ abstract class TaskGroup {
             ZonedDateTime.now(),
             null
         )
+        var taskLog: TaskLogEntity? = null
 
         // start
         try {
@@ -125,19 +150,20 @@ abstract class TaskGroup {
                 delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskStruct.taskConfig.startDateTime))
             } catch (e: CancellationException) {
                 if (taskStruct.cancelState.get() == CancelState.CANCEL) {
+                    handleCancel(task, taskLog)
                     return
                 }
             }
 
             if (!isLocked.get() && isEnable(task)) {
-                handleRun(task)
+                taskLog = handleRun(task)
 
                 task.run(taskContext)
 
-                handleFinish(task)
+                handleFinish(task, taskLog)
             }
         } catch (e: Exception) {
-            handleError(task, e)
+            handleError(task, taskLog, e)
         } finally {
             taskContext.lastCompletion = ZonedDateTime.now()
 

@@ -1,6 +1,6 @@
 package com.example.taskdemo.model.entities
 
-import com.example.taskdemo.enums.QueueTaskState
+import com.example.taskdemo.enums.TaskState
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -33,7 +33,7 @@ open class QueueTaskEntity {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "state", nullable = false, length = 16)
-    open var state: QueueTaskState = QueueTaskState.CREATED
+    open var state: TaskState = TaskState.CREATED
 
     @NotNull
     @Column(name = "created_at", nullable = false)
