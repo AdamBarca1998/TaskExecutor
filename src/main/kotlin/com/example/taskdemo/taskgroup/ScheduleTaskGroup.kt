@@ -29,6 +29,9 @@ class ScheduleTaskGroup(
                     if (!isLocked.get()) {
                         if (taskLockService.tryRefreshLockByName(lockName, port)) {
                             scheduleLock = taskLockService.findByName(lockName)
+                        } else {
+                            runningTasks.clear()
+                            plannedTasks.clear()
                         }
 
                         if (scheduleLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {

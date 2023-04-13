@@ -29,6 +29,9 @@ class DaemonTaskGroup(
                     if (!isLocked.get()) {
                         if (taskLockService.tryRefreshLockByName(lockName, port)) {
                             daemonLock = taskLockService.findByName(lockName)
+                        } else {
+                            runningTasks.clear()
+                            plannedTasks.clear()
                         }
 
                         if (daemonLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
