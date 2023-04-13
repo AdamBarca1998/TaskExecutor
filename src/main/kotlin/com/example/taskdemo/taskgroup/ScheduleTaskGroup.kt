@@ -2,11 +2,9 @@ package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
-import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.ScheduleTaskService
-import com.example.taskdemo.service.TaskContextService
 import com.example.taskdemo.service.TaskLockService
 import com.example.taskdemo.service.TaskLogService
 import java.time.ZonedDateTime
@@ -17,7 +15,6 @@ import kotlinx.coroutines.launch
 class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
     private val scheduleTaskService: ScheduleTaskService,
-    private val taskContextService: TaskContextService,
     taskLogService: TaskLogService
 ) : TaskGroup(taskLogService) {
 
@@ -39,7 +36,7 @@ class ScheduleTaskGroup(
 
                             entities.forEach { entity ->
                                 savedTasks.find { it.task.id == entity.id }?.let {
-                                    it.taskConfig.startDateTime = entity.taskContext.startDateTime
+                                    it.taskContext = entity.taskContext
                                     plannedTasks.add(it)
                                 }
                             }
@@ -79,17 +76,11 @@ class ScheduleTaskGroup(
         }
     }
 
-    override suspend fun planNextExecution(taskStruct: TaskStruct, taskContext: TaskContext) {
-        val newContext = TaskContext(
-            taskStruct.taskConfig.nextExecution(taskContext) ?: ZonedDateTime.now().plusDays(1),
-            taskContext.lastExecution,
-            taskContext.lastCompletion,
-            null
-        )
+    override suspend fun planNextExecution(taskStruct: TaskStruct) {
+        taskStruct.taskContext.nextExecution = taskStruct.taskConfig.nextExecution(taskStruct.taskContext) ?: ZonedDateTime.now().plusDays(1)
 
-        taskContextService.updateByScheduleId(newContext, taskStruct.task.id)
+        scheduleTaskService.updateContextById(taskStruct.task.id, taskStruct.taskContext)
         runningTasks.find { it.taskStruct.task.id == taskStruct.task.id }?.let {
-            taskStruct.taskConfig.startDateTime = newContext.startDateTime
             plannedTasks.add(it.taskStruct)
         }
     }

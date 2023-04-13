@@ -33,7 +33,6 @@ interface QueueTaskMapper {
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "ownedBy", ignore = true)
-    @Mapping(target = "result", ignore = true)
     fun toEntity(task: Task): QueueTaskEntity
 
     fun toTask(queueTaskEntity: QueueTaskEntity): Task {

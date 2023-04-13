@@ -1,8 +1,7 @@
 package com.example.taskdemo.abstractschedule
 
-import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.model.entities.TaskContext
 import java.time.Duration
-import java.time.Instant
 import java.time.ZonedDateTime
 
 class DelayAbstractSchedule(private val fixedDelay: Duration) : AbstractSchedule() {

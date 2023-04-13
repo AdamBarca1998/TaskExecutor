@@ -15,6 +15,7 @@ interface TaskLockMapper {
     @Mapping(target = "lockUntil", ignore = true)
     @Mapping(target = "lockedAt", ignore = true)
     @Mapping(target = "lockedBy", ignore = true)
+    @Mapping(target = "clusterName", ignore = true)
     fun toEntity(task: Task): TaskLockEntity
 
     companion object {

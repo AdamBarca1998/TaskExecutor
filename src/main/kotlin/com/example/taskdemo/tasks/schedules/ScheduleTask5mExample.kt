@@ -1,7 +1,7 @@
 package com.example.taskdemo.tasks.schedules
 
 import com.example.taskdemo.model.Task
-import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.model.entities.TaskContext
 import java.time.Duration
 import java.time.LocalDateTime
 

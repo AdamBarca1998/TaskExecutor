@@ -2,11 +2,9 @@ package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
-import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.DaemonTaskService
-import com.example.taskdemo.service.TaskContextService
 import com.example.taskdemo.service.TaskLockService
 import com.example.taskdemo.service.TaskLogService
 import java.time.ZonedDateTime
@@ -17,7 +15,6 @@ import kotlinx.coroutines.launch
 class DaemonTaskGroup(
     private val taskLockService: TaskLockService,
     private val daemonTaskService: DaemonTaskService,
-    private val taskContextService: TaskContextService,
     taskLogService: TaskLogService
 ) : TaskGroup(taskLogService) {
 
@@ -39,7 +36,7 @@ class DaemonTaskGroup(
                             // async run
                             entities.forEach { entity ->
                                 savedTasks.find { it.task.id == entity.id }?.let {
-                                    it.taskConfig.startDateTime = entity.taskContext.startDateTime
+                                    it.taskContext = entity.taskContext
 
                                     val job = launch { startTask(it) }
 
@@ -65,17 +62,13 @@ class DaemonTaskGroup(
 
     override fun isEnable(task: Task) = daemonTaskService.isEnableById(task.id)
 
-    override suspend fun planNextExecution(taskStruct: TaskStruct, taskContext: TaskContext) {
-        val newContext = TaskContext(
-            taskContext.nextExecution ?: ZonedDateTime.now().plusDays(1),
-            taskContext.lastExecution,
-            taskContext.lastCompletion,
-            null
-        )
+    override suspend fun planNextExecution(taskStruct: TaskStruct) {
+        if (taskStruct.taskContext.nextExecution == null) {
+            taskStruct.taskContext.nextExecution = ZonedDateTime.now().plusDays(1)
+        }
 
-        taskContextService.updateByDaemonId(newContext, taskStruct.task.id)
+        daemonTaskService.updateContextById(taskStruct.task.id, taskStruct.taskContext)
         runningTasks.find { it.taskStruct.task.id == taskStruct.task.id }?.let {
-            taskStruct.taskConfig.startDateTime = newContext.startDateTime
             plannedTasks.add(it.taskStruct)
         }
     }

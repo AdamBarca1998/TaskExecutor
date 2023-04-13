@@ -1,6 +1,7 @@
 package com.example.taskdemo.model
 
 import com.example.taskdemo.abstractschedule.AbstractSchedule
+import com.example.taskdemo.model.entities.TaskContext
 import java.time.ZonedDateTime
 
 class TaskConfig private constructor(
@@ -11,7 +12,7 @@ class TaskConfig private constructor(
 
     val heavy: Boolean,
 
-    var startDateTime: ZonedDateTime,
+    val startDateTime: ZonedDateTime,
 ) {
 
     fun nextExecution(taskContext: TaskContext): ZonedDateTime? {

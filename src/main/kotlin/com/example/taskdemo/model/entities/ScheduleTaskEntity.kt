@@ -1,6 +1,7 @@
 package com.example.taskdemo.model.entities
 
 import jakarta.persistence.Column
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
@@ -32,8 +33,6 @@ open class ScheduleTaskEntity {
     @JoinColumn(name = "task_lock_id", nullable = false)
     open var taskLockEntity: TaskLockEntity = TaskLockEntity()
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "task_context_id", nullable = false)
-    open var taskContext: TaskContextEntity = TaskContextEntity()
+    @Embedded
+    open var taskContext: TaskContext = TaskContext()
 }

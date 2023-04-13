@@ -3,7 +3,6 @@ package com.example.taskdemo.taskgroup
 import com.example.taskdemo.enums.TaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
-import com.example.taskdemo.model.TaskContext
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.QueueTaskService
 import com.example.taskdemo.service.TaskLogService
@@ -42,7 +41,7 @@ class QueueTaskGroup(
         queueTaskService.updateStateById(task.id, TaskState.ERROR)
     }
 
-    override fun handleFinish(task: Task, taskLogEntity: TaskLogEntity?) {
+    override fun handleFinish(task: Task, taskLogEntity: TaskLogEntity) {
         super.handleFinish(task, taskLogEntity)
         queueTaskService.updateStateById(task.id, TaskState.FINISHED)
     }
@@ -56,7 +55,7 @@ class QueueTaskGroup(
         queueTaskService.saveTask(task)
     }
 
-    override suspend fun planNextExecution(taskStruct: TaskStruct, taskContext: TaskContext) {
+    override suspend fun planNextExecution(taskStruct: TaskStruct) {
         planNextTask()
     }
 

@@ -1,6 +1,6 @@
 package com.example.taskdemo.abstractschedule
 
-import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.model.entities.TaskContext
 import java.time.Duration
 import java.time.ZonedDateTime
 import org.springframework.scheduling.support.CronExpression

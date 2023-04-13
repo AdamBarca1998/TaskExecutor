@@ -4,7 +4,7 @@ import com.example.taskdemo.enums.CancelState
 import com.example.taskdemo.enums.TaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
-import com.example.taskdemo.model.TaskContext
+import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.TaskLogService
 import java.time.Duration
@@ -62,13 +62,11 @@ abstract class TaskGroup(
         taskLogService.save(log)
     }
 
-    protected open fun handleFinish(task: Task, taskLogEntity: TaskLogEntity?) {
-        val log = taskLogEntity ?: createLog(task)
+    protected open fun handleFinish(task: Task, taskLogEntity: TaskLogEntity) {
+        taskLogEntity.finishDateTime = ZonedDateTime.now()
+        taskLogEntity.state = TaskState.FINISHED
 
-        log.finishDateTime = ZonedDateTime.now()
-        log.state = TaskState.FINISHED
-
-        taskLogService.save(log)
+        taskLogService.save(taskLogEntity)
     }
 
     protected open fun handleCancel(task: Task, taskLogEntity: TaskLogEntity?) {
@@ -82,7 +80,7 @@ abstract class TaskGroup(
 
     abstract fun addTask(task: Task, taskConfig: TaskConfig = TaskConfig.Builder().build())
 
-    protected abstract suspend fun planNextExecution(taskStruct: TaskStruct, taskContext: TaskContext)
+    protected abstract suspend fun planNextExecution(taskStruct: TaskStruct)
 
     protected open fun planNextTaskById(id: Long) {
         savedTasks.find { it.task.id == id }?.let {
@@ -117,7 +115,7 @@ abstract class TaskGroup(
         }
 
         plannedTasks.find { it.task.id == id }?.let {
-            it.taskConfig.startDateTime = Instant.EPOCH.atZone(ZoneId.systemDefault())
+            it.taskContext.nextExecution = Instant.EPOCH.atZone(ZoneId.systemDefault())
             runNextTask(RunType.PARALLEL)
             return
         }
@@ -136,39 +134,35 @@ abstract class TaskGroup(
 
     protected suspend fun startTask(taskStruct: TaskStruct, runType: RunType = RunType.TASK_GROUP) {
         val task = taskStruct.task
-        val taskContext = TaskContext(
-            taskStruct.taskConfig.startDateTime,
-            ZonedDateTime.now(),
-            ZonedDateTime.now(),
-            null
-        )
         var taskLog: TaskLogEntity? = null
 
         // start
         try {
             try {
-                delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskStruct.taskConfig.startDateTime))
+                delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskStruct.taskContext.nextExecution))
             } catch (e: CancellationException) {
                 if (taskStruct.cancelState.get() == CancelState.CANCEL) {
                     handleCancel(task, taskLog)
                     return
                 }
+            } finally {
+                taskStruct.taskContext.lastExecution = ZonedDateTime.now()
             }
 
             if (!isLocked.get() && isEnable(task)) {
                 taskLog = handleRun(task)
 
-                task.run(taskContext)
+                task.run(taskStruct.taskContext)
 
                 handleFinish(task, taskLog)
             }
         } catch (e: Exception) {
             handleError(task, taskLog, e)
         } finally {
-            taskContext.lastCompletion = ZonedDateTime.now()
+            taskStruct.taskContext.lastCompletion = ZonedDateTime.now()
 
             // finish
-            planNextExecution(taskStruct, taskContext)
+            planNextExecution(taskStruct)
             runningTasks.removeIf { it.taskStruct.task.id == taskStruct.task.id }
             if (runType != RunType.PARALLEL || runningTasks.isEmpty()) {
                 runNextTask()
@@ -185,7 +179,8 @@ abstract class TaskGroup(
     protected data class TaskStruct(
         val task: Task,
         val taskConfig: TaskConfig,
-        var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL)
+        var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL),
+        var taskContext: TaskContext = TaskContext(taskConfig.startDateTime, ZonedDateTime.now(), ZonedDateTime.now(), taskConfig.startDateTime)
     ) : Comparable<TaskStruct> {
 
         // 1. startDateTime -> 2. priority

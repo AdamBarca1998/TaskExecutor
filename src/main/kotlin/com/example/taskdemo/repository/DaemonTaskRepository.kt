@@ -2,6 +2,7 @@ package com.example.taskdemo.repository
 
 import com.example.taskdemo.model.entities.DaemonTaskEntity
 import com.example.taskdemo.model.entities.ScheduleTaskEntity
+import com.example.taskdemo.model.entities.TaskContext
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -14,8 +15,10 @@ interface DaemonTaskRepository : JpaRepository<DaemonTaskEntity, Long> {
     @Transactional
     @Modifying
     @Query(
-        value = "INSERT INTO daemon_task(clazz_path, task_lock_id, task_context_id) " +
-                "VALUES(:#{#daemonTaskEntity.clazzPath}, :#{#daemonTaskEntity.taskLockEntity.id}, :#{#daemonTaskEntity.taskContext.id})" +
+        value = "INSERT INTO daemon_task(clazz_path, enable, task_lock_id, start_date_time, last_execution, last_completion, next_execution) " +
+                "VALUES(:#{#daemonTaskEntity.clazzPath}, true, :#{#daemonTaskEntity.taskLockEntity.id}, " +
+                ":#{#daemonTaskEntity.taskContext.startDateTime}, :#{#daemonTaskEntity.taskContext.lastExecution}, " +
+                ":#{#daemonTaskEntity.taskContext.lastCompletion}, :#{#daemonTaskEntity.taskContext.nextExecution})" +
                 "ON CONFLICT DO NOTHING",
         nativeQuery = true
     )
@@ -30,11 +33,22 @@ interface DaemonTaskRepository : JpaRepository<DaemonTaskEntity, Long> {
     fun findByClazzPath(clazzPath: String): DaemonTaskEntity
 
     @Query(
-        value = "SELECT dt.id, clazz_path, task_lock_id, task_context_id " +
+        value = "SELECT dt.id, clazz_path, enable, task_lock_id, start_date_time, last_execution, last_completion, next_execution " +
                 "FROM daemon_task AS dt " +
                 "LEFT JOIN task_lock AS tl ON tl.id = dt.task_lock_id " +
                 "WHERE tl.cluster_name = :clusterName ",
         nativeQuery = true
     )
     fun findAllByClusterName(clusterName: String): List<DaemonTaskEntity>
+
+    @Transactional
+    @Modifying
+    @Query(
+        value = "UPDATE daemon_task " +
+                "SET start_date_time = :#{#context.startDateTime}, last_execution = :#{#context.lastExecution}, " +
+                "last_completion = :#{#context.lastCompletion}, next_execution = :#{#context.nextExecution} " +
+                "WHERE daemon_task.id = :id",
+        nativeQuery = true
+    )
+    fun updateContextById(id: Long, context: TaskContext): Int
 }
