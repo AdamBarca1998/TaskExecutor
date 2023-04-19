@@ -12,18 +12,17 @@ open class TaskContext(
     @Column(name = "start_date_time", nullable = false)
     open var startDateTime: ZonedDateTime,
 
-    @NotNull
-    @Column(name = "last_execution", nullable = false)
-    open var lastExecution: ZonedDateTime,
+    @Column(name = "last_execution")
+    open var lastExecution: ZonedDateTime?,
+
+    @Column(name = "last_completion")
+    open var lastCompletion: ZonedDateTime?,
 
     @NotNull
-    @Column(name = "last_completion", nullable = false)
-    open var lastCompletion: ZonedDateTime,
-
-    @Column(name = "next_execution")
-    open var nextExecution: ZonedDateTime?
+    @Column(name = "next_execution", nullable = false)
+    open var nextExecution: ZonedDateTime
 ) {
-    constructor() : this(ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now(), ZonedDateTime.now()) {
+    constructor() : this(ZonedDateTime.now(), null, null, ZonedDateTime.now()) {
 
     }
 

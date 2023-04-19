@@ -5,7 +5,6 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.taskgroup.DaemonTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
 import com.example.taskdemo.taskgroup.ScheduleTaskGroup
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
@@ -40,7 +39,7 @@ class TaskGroupService(
     }
 
     // get all
-    fun getAllQueues() = ResponseEntity.ok(queueTaskService.findAll())
+    fun getAllQueues() = queueTaskService.findAll()
 
     fun getAllSchedules() = scheduledTaskGroup.getAll() + heavyScheduledTaskGroup.getAll()
 

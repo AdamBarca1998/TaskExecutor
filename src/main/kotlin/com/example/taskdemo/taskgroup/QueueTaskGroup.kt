@@ -3,6 +3,7 @@ package com.example.taskdemo.taskgroup
 import com.example.taskdemo.enums.TaskState
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
+import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.QueueTaskService
 import com.example.taskdemo.service.TaskLogService
@@ -82,7 +83,7 @@ class QueueTaskGroup(
 
     private fun planNextTask() {
         queueTaskService.findOldestExpired(port)?.let {
-            plannedTasks.add(TaskStruct(it, TaskConfig.Builder().build()))
+            plannedTasks.add(TaskStruct(it, TaskConfig.Builder().build(), TaskContext()))
             queueTaskService.updateStateById(it.id, TaskState.PLANNED)
         }
     }
@@ -91,7 +92,7 @@ class QueueTaskGroup(
         val task = queueTaskService.findById(id)
         queueTaskService.refreshLockByTaskId(id)
 
-        plannedTasks.add(TaskStruct(task, TaskConfig.Builder().build()))
+        plannedTasks.add(TaskStruct(task, TaskConfig.Builder().build(), TaskContext()))
         queueTaskService.updateStateById(task.id, TaskState.PLANNED)
     }
 }

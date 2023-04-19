@@ -15,8 +15,8 @@ class ScheduleTaskService(
     private val scheduleTaskMapper: ScheduleTaskMapper
 ) {
 
-    fun createIfNotExists(task: Task, scheduleLock: TaskLockEntity): Long {
-        scheduleTaskRepository.insertIfNotExists(scheduleTaskMapper.toEntity(task, scheduleLock))
+    fun createIfNotExists(task: Task, scheduleLock: TaskLockEntity, taskContext: TaskContext): Long {
+        scheduleTaskRepository.insertIfNotExists(scheduleTaskMapper.toEntity(task, scheduleLock, taskContext))
         return scheduleTaskRepository.findByClazzPath(task.javaClass.name).id ?: -1
     }
 

@@ -2,6 +2,7 @@ package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
+import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.ScheduleTaskService
@@ -30,8 +31,9 @@ class ScheduleTaskGroup(
                         if (taskLockService.tryRefreshLockByName(lockName, port)) {
                             scheduleLock = taskLockService.findByName(lockName)
                         } else {
-                            runningTasks.clear()
-                            plannedTasks.clear()
+                            savedTasks.forEach {
+                                cancelTaskById(it.task.id)
+                            }
                         }
 
                         if (scheduleLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
@@ -66,9 +68,11 @@ class ScheduleTaskGroup(
     override fun isEnable(task: Task) = scheduleTaskService.isEnableById(task.id)
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
-        val taskStruct = TaskStruct(task, taskConfig)
+        val taskStruct = TaskStruct(task, taskConfig,
+            TaskContext(taskConfig.startDateTime, null, null, taskConfig.startDateTime)
+        )
 
-        task.id = scheduleTaskService.createIfNotExists(task, scheduleLock)
+        task.id = scheduleTaskService.createIfNotExists(task, scheduleLock, taskStruct.taskContext)
 
         savedTasks.add(taskStruct)
         if (scheduleLock.lockedBy == port) {

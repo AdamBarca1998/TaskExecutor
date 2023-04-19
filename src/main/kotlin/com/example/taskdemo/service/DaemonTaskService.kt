@@ -15,8 +15,8 @@ class DaemonTaskService(
     private val daemonTaskMapper: DaemonTaskMapper
 ) {
 
-    fun createIfNotExists(task: Task, scheduleLock: TaskLockEntity): Long {
-        daemonTaskRepository.insertIfNotExists(daemonTaskMapper.toEntity(task, scheduleLock))
+    fun createIfNotExists(task: Task, scheduleLock: TaskLockEntity, taskContext: TaskContext): Long {
+        daemonTaskRepository.insertIfNotExists(daemonTaskMapper.toEntity(task, scheduleLock, taskContext))
         return daemonTaskRepository.findByClazzPath(task.javaClass.name).id ?: -1
     }
 

@@ -46,8 +46,8 @@ CREATE TABLE schedule_task (
 
     -- context
     start_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
-    last_execution TIMESTAMP WITH TIME ZONE NOT NULL,
-    last_completion TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_execution TIMESTAMP WITH TIME ZONE,
+    last_completion TIMESTAMP WITH TIME ZONE,
     next_execution TIMESTAMP WITH TIME ZONE NOT NULL,
 
     UNIQUE (clazz_path, task_lock_id)
@@ -61,8 +61,8 @@ CREATE TABLE daemon_task (
 
     -- context
     start_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
-    last_execution TIMESTAMP WITH TIME ZONE NOT NULL,
-    last_completion TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_execution TIMESTAMP WITH TIME ZONE,
+    last_completion TIMESTAMP WITH TIME ZONE,
     next_execution TIMESTAMP WITH TIME ZONE NOT NULL,
 
     UNIQUE (clazz_path, task_lock_id)

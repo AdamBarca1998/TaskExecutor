@@ -179,8 +179,8 @@ abstract class TaskGroup(
     protected data class TaskStruct(
         val task: Task,
         val taskConfig: TaskConfig,
+        var taskContext: TaskContext,
         var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL),
-        var taskContext: TaskContext = TaskContext(taskConfig.startDateTime, ZonedDateTime.now(), ZonedDateTime.now(), taskConfig.startDateTime)
     ) : Comparable<TaskStruct> {
 
         // 1. startDateTime -> 2. priority

@@ -2,12 +2,12 @@ package com.example.taskdemo.taskgroup
 
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
+import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.DaemonTaskService
 import com.example.taskdemo.service.TaskLockService
 import com.example.taskdemo.service.TaskLogService
-import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,8 +30,9 @@ class DaemonTaskGroup(
                         if (taskLockService.tryRefreshLockByName(lockName, port)) {
                             daemonLock = taskLockService.findByName(lockName)
                         } else {
-                            runningTasks.clear()
-                            plannedTasks.clear()
+                            savedTasks.forEach {
+                                cancelTaskById(it.task.id)
+                            }
                         }
 
                         if (daemonLock.lockedBy == port && plannedTasks.isEmpty() && runningTasks.isEmpty()) {
@@ -66,10 +67,6 @@ class DaemonTaskGroup(
     override fun isEnable(task: Task) = daemonTaskService.isEnableById(task.id)
 
     override suspend fun planNextExecution(taskStruct: TaskStruct) {
-        if (taskStruct.taskContext.nextExecution == null) {
-            taskStruct.taskContext.nextExecution = ZonedDateTime.now().plusDays(1)
-        }
-
         daemonTaskService.updateContextById(taskStruct.task.id, taskStruct.taskContext)
         runningTasks.find { it.taskStruct.task.id == taskStruct.task.id }?.let {
             plannedTasks.add(it.taskStruct)
@@ -77,9 +74,11 @@ class DaemonTaskGroup(
     }
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
-        val taskStruct = TaskStruct(task, taskConfig)
+        val taskStruct = TaskStruct(task, taskConfig,
+            TaskContext(taskConfig.startDateTime, null, null, taskConfig.startDateTime)
+        )
 
-        task.id = daemonTaskService.createIfNotExists(task, daemonLock)
+        task.id = daemonTaskService.createIfNotExists(task, daemonLock, taskStruct.taskContext)
 
         savedTasks.add(taskStruct)
         if (daemonLock.lockedBy == port) {
