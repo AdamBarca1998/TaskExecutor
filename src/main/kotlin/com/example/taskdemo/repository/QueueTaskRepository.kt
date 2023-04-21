@@ -38,7 +38,8 @@ interface QueueTaskRepository : JpaRepository<QueueTaskEntity, Long> {
     @Modifying
     @Query(
         value = "UPDATE queue_task " +
-                "SET state = :#{#state.name()} " +
+                "SET state = :#{#state.name()}, " +
+                "number_of_trials = CASE WHEN :#{#state.name()} = 'ERROR' THEN number_of_trials - 1 ELSE number_of_trials END " +
                 "WHERE id = :id " +
                 "AND state NOT IN :#{#finishedStates.![name()]} ",
         nativeQuery = true

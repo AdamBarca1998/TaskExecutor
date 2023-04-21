@@ -45,11 +45,12 @@ interface TaskLockRepository : JpaRepository<TaskLockEntity, Long> {
                     "FROM queue_task AS qt2 " +
                     "LEFT JOIN task_lock AS tl2 ON tl2.id = qt2.task_lock_id " +
                     "WHERE tl2.lock_until < NOW()" +
-                    "AND qt2.state NOT IN :#{#withoutStates.![name()]} AND tl2.cluster_name = :clusterName " +
+                    "AND qt2.state NOT IN :#{#finishedStates.![name()]} AND tl2.cluster_name = :clusterName " +
+                    "AND qt2.number_of_trials != 0 " +
                     "ORDER BY tl2.lock_until " +
                     "LIMIT 1" +
                 ") ",
         nativeQuery = true
     )
-    fun lockOldestExpiredQueueTaskByClusterName(minutes: Int, appId: String, withoutStates: List<TaskState>, clusterName: String): Int
+    fun lockOldestExpiredQueueTaskByClusterName(minutes: Int, appId: String, finishedStates: List<TaskState>, clusterName: String): Int
 }
