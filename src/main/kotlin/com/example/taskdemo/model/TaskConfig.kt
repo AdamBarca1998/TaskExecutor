@@ -2,6 +2,7 @@ package com.example.taskdemo.model
 
 import com.example.taskdemo.abstractschedule.AbstractSchedule
 import com.example.taskdemo.model.entities.TaskContext
+import java.time.Duration
 import java.time.ZonedDateTime
 
 class TaskConfig private constructor(
@@ -13,6 +14,8 @@ class TaskConfig private constructor(
     val heavy: Boolean,
 
     val startDateTime: ZonedDateTime,
+
+    val maxWaitDuration: Duration
 ) {
 
     fun nextExecution(taskContext: TaskContext): ZonedDateTime? {
@@ -28,6 +31,7 @@ class TaskConfig private constructor(
         var priority: Int = Int.MIN_VALUE,
         var heavy: Boolean = false,
         var startDateTime: ZonedDateTime = ZonedDateTime.now(),
+        var maxWaitDuration: Duration = Duration.ZERO
     ) {
         fun addSchedule(schedules: AbstractSchedule) = apply {
             this.schedules.add(schedules)
@@ -45,6 +49,10 @@ class TaskConfig private constructor(
             this.startDateTime = startDateTime
         }
 
-        fun build() = TaskConfig(schedules, priority, heavy, startDateTime)
+        fun withMaxWaitDuration(maxWaitDuration: Duration) = apply {
+            this.maxWaitDuration = maxWaitDuration
+        }
+
+        fun build() = TaskConfig(schedules, priority, heavy, startDateTime, maxWaitDuration)
     }
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime
     schedules = [
         Schedule(second = "0")
     ],
-    startDateTime = "2023-02-09T16:22:00Z"
+    maxWaitDuration = "PT30S"
 )
 class ScheduleTask1mExample : Task {
 

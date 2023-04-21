@@ -11,7 +11,6 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
 import java.util.concurrent.CancellationException
 import java.util.concurrent.LinkedTransferQueue
 import java.util.concurrent.PriorityBlockingQueue
@@ -139,7 +138,13 @@ abstract class TaskGroup(
         // start
         try {
             try {
-                delay(ChronoUnit.MILLIS.between(ZonedDateTime.now(), taskStruct.taskContext.nextExecution))
+                val waitTime = Duration.between(taskStruct.taskContext.nextExecution, ZonedDateTime.now())
+
+                if (waitTime < taskStruct.taskConfig.maxWaitDuration) {
+                    delay(waitTime.toMillis() * -1)
+                } else {
+                    return
+                }
             } catch (e: CancellationException) {
                 if (taskStruct.cancelState.get() == CancelState.CANCEL) {
                     handleCancel(task, taskLog)

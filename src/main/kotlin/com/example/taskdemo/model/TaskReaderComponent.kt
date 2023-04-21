@@ -44,7 +44,13 @@ class TaskReaderComponent(
                     }
                     taskConfig.withPriority(annotation.priority)
                     taskConfig.withHeavy(annotation.heavy)
-                    taskConfig.withStartDateTime(ZonedDateTime.parse(annotation.startDateTime))
+                    taskConfig.withStartDateTime(
+                        if (annotation.startDateTime == "NOW")
+                            ZonedDateTime.now()
+                        else
+                            ZonedDateTime.parse(annotation.startDateTime)
+                    )
+                    taskConfig.withMaxWaitDuration(Duration.parse(annotation.maxWaitDuration))
                 }
             }
 
