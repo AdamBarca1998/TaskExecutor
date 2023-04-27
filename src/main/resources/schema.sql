@@ -45,7 +45,6 @@ CREATE TABLE schedule_task (
     task_lock_id    BIGINT NOT NULL REFERENCES task_lock(id),
 
     -- context
-    start_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
     last_execution TIMESTAMP WITH TIME ZONE,
     last_completion TIMESTAMP WITH TIME ZONE,
     next_execution TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -60,7 +59,6 @@ CREATE TABLE daemon_task (
     task_lock_id    BIGINT NOT NULL REFERENCES task_lock(id),
 
     -- context
-    start_date_time TIMESTAMP WITH TIME ZONE NOT NULL,
     last_execution TIMESTAMP WITH TIME ZONE,
     last_completion TIMESTAMP WITH TIME ZONE,
     next_execution TIMESTAMP WITH TIME ZONE NOT NULL,

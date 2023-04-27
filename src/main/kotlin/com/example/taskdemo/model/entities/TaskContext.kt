@@ -8,10 +8,6 @@ import java.time.ZonedDateTime
 @Embeddable
 open class TaskContext(
 
-    @NotNull
-    @Column(name = "start_date_time", nullable = false)
-    open var startDateTime: ZonedDateTime,
-
     @Column(name = "last_execution")
     open var lastExecution: ZonedDateTime?,
 
@@ -22,7 +18,7 @@ open class TaskContext(
     @Column(name = "next_execution", nullable = false)
     open var nextExecution: ZonedDateTime
 ) {
-    constructor() : this(ZonedDateTime.now(), null, null, ZonedDateTime.now()) {
+    constructor() : this(null, null, ZonedDateTime.now()) {
 
     }
 

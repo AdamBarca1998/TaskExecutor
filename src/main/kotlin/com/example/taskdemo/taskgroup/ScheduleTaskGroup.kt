@@ -69,7 +69,7 @@ class ScheduleTaskGroup(
 
     override fun addTask(task: Task, taskConfig: TaskConfig) {
         val taskStruct = TaskStruct(task, taskConfig,
-            TaskContext(taskConfig.startDateTime, null, null, taskConfig.startDateTime)
+            TaskContext(null, null, taskConfig.startDateTime)
         )
 
         task.id = scheduleTaskService.createIfNotExists(task, scheduleLock, taskStruct.taskContext)

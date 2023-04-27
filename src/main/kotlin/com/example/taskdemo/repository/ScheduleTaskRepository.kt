@@ -14,9 +14,9 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
     @Transactional
     @Modifying
     @Query(
-        value = "INSERT INTO schedule_task(clazz_path, enable, task_lock_id, start_date_time, last_execution, last_completion, next_execution) " +
+        value = "INSERT INTO schedule_task(clazz_path, enable, task_lock_id, last_execution, last_completion, next_execution) " +
                 "VALUES(:#{#scheduleTaskEntity.clazzPath}, true, :#{#scheduleTaskEntity.taskLockEntity.id}, " +
-                ":#{#scheduleTaskEntity.taskContext.startDateTime}, :#{#scheduleTaskEntity.taskContext.lastExecution}, " +
+                ":#{#scheduleTaskEntity.taskContext.lastExecution}, " +
                 ":#{#scheduleTaskEntity.taskContext.lastCompletion}, :#{#scheduleTaskEntity.taskContext.nextExecution}) " +
                 "ON CONFLICT DO NOTHING",
         nativeQuery = true
@@ -32,7 +32,7 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
     fun findByClazzPath(clazzPath: String): ScheduleTaskEntity
 
     @Query(
-        value = "SELECT st.id, clazz_path, enable, task_lock_id, start_date_time, last_execution, last_completion, next_execution " +
+        value = "SELECT st.id, clazz_path, enable, task_lock_id, last_execution, last_completion, next_execution " +
                 "FROM schedule_task AS st " +
                 "LEFT JOIN task_lock AS tl ON tl.id = st.task_lock_id " +
                 "WHERE tl.cluster_name = :clusterName ",
@@ -44,7 +44,7 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
     @Modifying
     @Query(
         value = "UPDATE schedule_task " +
-                "SET start_date_time = :#{#context.startDateTime}, last_execution = :#{#context.lastExecution}, " +
+                "SET last_execution = :#{#context.lastExecution}, " +
                 "last_completion = :#{#context.lastCompletion}, next_execution = :#{#context.nextExecution} " +
                 "WHERE schedule_task.id = :id",
         nativeQuery = true

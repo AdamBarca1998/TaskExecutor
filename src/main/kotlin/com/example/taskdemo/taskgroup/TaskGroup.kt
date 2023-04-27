@@ -188,9 +188,9 @@ abstract class TaskGroup(
         var cancelState: AtomicReference<CancelState> = AtomicReference(CancelState.CANCEL),
     ) : Comparable<TaskStruct> {
 
-        // 1. startDateTime -> 2. priority
+        // 1. nextExecution -> 2. priority
         override fun compareTo(other: TaskStruct): Int {
-            val compareTime = taskConfig.startDateTime.compareTo(other.taskConfig.startDateTime)
+            val compareTime = taskContext.nextExecution.compareTo(other.taskContext.nextExecution)
 
             return if (compareTime == 0) {
                 val comparePriority = other.taskConfig.priority.compareTo(taskConfig.priority)
