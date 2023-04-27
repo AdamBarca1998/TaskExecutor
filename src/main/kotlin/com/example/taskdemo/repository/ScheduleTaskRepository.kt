@@ -50,4 +50,8 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
         nativeQuery = true
     )
     fun updateContextById(id: Long, context: TaskContext): Int
+
+    @Transactional
+    @Modifying
+    fun deleteByClazzPathNotIn(clazzPaths: List<String>): Int
 }

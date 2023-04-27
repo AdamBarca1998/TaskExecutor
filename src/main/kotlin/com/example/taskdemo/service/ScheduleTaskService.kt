@@ -29,4 +29,8 @@ class ScheduleTaskService(
     fun updateContextById(id: Long, context: TaskContext): Boolean {
         return scheduleTaskRepository.updateContextById(id, context) == 1
     }
+
+    fun deleteAllByClazzPathNotIn(clazzPaths: List<String>): Int {
+        return scheduleTaskRepository.deleteByClazzPathNotIn(clazzPaths)
+    }
 }

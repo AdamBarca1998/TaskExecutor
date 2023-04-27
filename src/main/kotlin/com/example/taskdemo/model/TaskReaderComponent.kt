@@ -14,15 +14,23 @@ import org.springframework.scheduling.support.CronExpression
 import org.springframework.stereotype.Component
 
 private const val TASKS_PATH = "com.example.taskdemo.tasks"
+private const val SCHEDULES_PATH = ".schedules."
 
 @Component
 class TaskReaderComponent(
-    private val taskGroupService: TaskGroupService
+    private val taskGroupService: TaskGroupService,
 ) {
 
     private val reflections = Reflections(TASKS_PATH)
     private val scheduleTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(ScheduleTask::class.java).asClass<Any>()].stream()
-        .map { Class.forName(it.name).getDeclaredConstructor().newInstance() }
+        .map {
+            when(it.name) {
+                TASKS_PATH + SCHEDULES_PATH + "EraserUselessTasksST" -> {
+                    Class.forName(it.name).getDeclaredConstructor(TaskGroupService::class.java).newInstance(taskGroupService)
+                }
+                else -> Class.forName(it.name).getDeclaredConstructor().newInstance()
+            }
+        }
         .filter { it is Task }
         .map { it as Task }
         .toList()

@@ -29,4 +29,8 @@ class DaemonTaskService(
     fun updateContextById(id: Long, context: TaskContext): Boolean {
         return daemonTaskRepository.updateContextById(id, context) == 1
     }
+
+    fun deleteAllByClazzPathNotIn(clazzPaths: List<String>): Int {
+        return daemonTaskRepository.deleteByClazzPathNotIn(clazzPaths)
+    }
 }

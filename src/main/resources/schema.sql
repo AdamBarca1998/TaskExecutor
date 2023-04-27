@@ -84,9 +84,9 @@ CREATE TABLE task_log (
     state VARCHAR(16) NOT NULL,
     result TEXT NOT NULL,
 
-    queue_task_id BIGINT REFERENCES queue_task(id),
-    schedule_task_id BIGINT REFERENCES schedule_task(id),
-    daemon_task_id BIGINT REFERENCES daemon_task(id),
+    queue_task_id BIGINT REFERENCES queue_task(id) ON DELETE CASCADE,
+    schedule_task_id BIGINT REFERENCES schedule_task(id) ON DELETE CASCADE,
+    daemon_task_id BIGINT REFERENCES daemon_task(id) ON DELETE CASCADE,
 
     CONSTRAINT check_only_one_task CHECK (NUM_NONNULLS(queue_task_id, schedule_task_id, daemon_task_id) = 1)
 )

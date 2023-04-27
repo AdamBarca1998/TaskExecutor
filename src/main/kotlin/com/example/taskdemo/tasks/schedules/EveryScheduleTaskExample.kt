@@ -8,13 +8,13 @@ import com.example.taskdemo.model.entities.TaskContext
 import java.time.Duration
 import java.time.LocalDateTime
 
-@ScheduleTask(
-    schedules = [
-        Schedule(second = "*/15")
-    ],
-    startDateTime = "2023-02-09T16:22:00Z",
-    type = ScheduleTaskType.EVERY
-)
+//@ScheduleTask(
+//    schedules = [
+//        Schedule(second = "*/15")
+//    ],
+//    startDateTime = "2023-02-09T16:22:00Z",
+//    type = ScheduleTaskType.EVERY
+//)
 class EveryScheduleTaskExample : Task {
 
     override var id = -1L

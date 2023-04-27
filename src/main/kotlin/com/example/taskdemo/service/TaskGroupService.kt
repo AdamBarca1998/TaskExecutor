@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class TaskGroupService(
-    scheduleTaskService: ScheduleTaskService,
+    private val scheduleTaskService: ScheduleTaskService,
     private val queueTaskService: QueueTaskService,
     taskLockService: TaskLockService,
-    daemonTaskService: DaemonTaskService,
+    private val daemonTaskService: DaemonTaskService,
     taskLogService: TaskLogService
 ) {
 
@@ -70,7 +70,6 @@ class TaskGroupService(
     fun cancelDaemonById(id: Long) = daemonTaskGroup.cancelTaskById(id)
 
     // stop
-
     fun stopQueue() {
         queueTaskGroup.stopGroup()
     }
@@ -84,7 +83,15 @@ class TaskGroupService(
         daemonTaskGroup.stopGroup()
     }
 
-    //
-
+    // restart
     fun restart() = queueTaskGroup.restart()
+
+    fun eraserUselessTasks() {
+        scheduleTaskService.deleteAllByClazzPathNotIn(getAllSchedules().stream()
+            .map { it.second }
+            .toList())
+        daemonTaskService.deleteAllByClazzPathNotIn(getAllDaemons().stream()
+            .map { it.second }
+            .toList())
+    }
 }
