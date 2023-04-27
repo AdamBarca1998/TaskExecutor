@@ -1,8 +1,10 @@
 package com.example.taskdemo.service
 
+import com.example.taskdemo.enums.ScheduleTaskType
 import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.taskgroup.DaemonTaskGroup
+import com.example.taskdemo.taskgroup.EveryScheduleTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
 import com.example.taskdemo.taskgroup.ScheduleTaskGroup
 import org.springframework.stereotype.Service
@@ -20,6 +22,7 @@ class TaskGroupService(
     private val queueTaskGroup = QueueTaskGroup(queueTaskService, taskLogService)
     private val daemonTaskGroup = DaemonTaskGroup(taskLockService, daemonTaskService, taskLogService)
     private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskLogService)
+    private val everyScheduleTaskGroup = EveryScheduleTaskGroup(taskLogService)
 
     // add
     fun addQueue(task: Task) {
@@ -27,10 +30,11 @@ class TaskGroupService(
     }
 
     fun addSchedule(task: Task, config: TaskConfig) {
-        if (config.heavy) {
-            heavyScheduledTaskGroup.addTask(task, config)
-        } else {
-            scheduledTaskGroup.addTask(task, config)
+        when(config.type) {
+            ScheduleTaskType.HEAVY -> heavyScheduledTaskGroup.addTask(task, config)
+            ScheduleTaskType.EVERY -> everyScheduleTaskGroup.addTask(task, config)
+            ScheduleTaskType.NORMAL -> scheduledTaskGroup.addTask(task, config)
+            else -> throw IllegalStateException("${config.type} not defined!")
         }
     }
 

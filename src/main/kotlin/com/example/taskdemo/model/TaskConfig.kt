@@ -1,6 +1,7 @@
 package com.example.taskdemo.model
 
 import com.example.taskdemo.abstractschedule.AbstractSchedule
+import com.example.taskdemo.enums.ScheduleTaskType
 import com.example.taskdemo.model.entities.TaskContext
 import java.time.Duration
 import java.time.ZonedDateTime
@@ -11,7 +12,7 @@ class TaskConfig private constructor(
 
     val priority: Int,
 
-    val heavy: Boolean,
+    val type: ScheduleTaskType,
 
     val startDateTime: ZonedDateTime,
 
@@ -29,9 +30,9 @@ class TaskConfig private constructor(
     data class Builder(
         var schedules: ArrayList<AbstractSchedule> = ArrayList(),
         var priority: Int = Int.MIN_VALUE,
-        var heavy: Boolean = false,
+        var type: ScheduleTaskType = ScheduleTaskType.NORMAL,
         var startDateTime: ZonedDateTime = ZonedDateTime.now(),
-        var maxWaitDuration: Duration = Duration.ZERO
+        var maxWaitDuration: Duration = Duration.ofDays(1)
     ) {
         fun addSchedule(schedules: AbstractSchedule) = apply {
             this.schedules.add(schedules)
@@ -41,8 +42,8 @@ class TaskConfig private constructor(
             this.priority = priority
         }
 
-        fun withHeavy(heavy: Boolean) = apply {
-            this.heavy = heavy
+        fun withType(type: ScheduleTaskType) = apply {
+            this.type = type
         }
 
         fun withStartDateTime(startDateTime: ZonedDateTime) = apply {
@@ -53,6 +54,6 @@ class TaskConfig private constructor(
             this.maxWaitDuration = maxWaitDuration
         }
 
-        fun build() = TaskConfig(schedules, priority, heavy, startDateTime, maxWaitDuration)
+        fun build() = TaskConfig(schedules, priority, type, startDateTime, maxWaitDuration)
     }
 }

@@ -2,9 +2,9 @@ package com.example.taskdemo.model
 
 import com.example.taskdemo.abstractschedule.AbstractSchedule
 import com.example.taskdemo.annotations.DEFAULT_FIXED_RATE_OR_DELAY
+import com.example.taskdemo.annotations.DaemonTask
 import com.example.taskdemo.annotations.Schedule
-import com.example.taskdemo.annotations.TaskDaemon
-import com.example.taskdemo.annotations.TaskSchedule
+import com.example.taskdemo.annotations.ScheduleTask
 import com.example.taskdemo.service.TaskGroupService
 import java.time.Duration
 import java.time.ZonedDateTime
@@ -21,12 +21,12 @@ class TaskReaderComponent(
 ) {
 
     private val reflections = Reflections(TASKS_PATH)
-    private val scheduleTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(TaskSchedule::class.java).asClass<Any>()].stream()
+    private val scheduleTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(ScheduleTask::class.java).asClass<Any>()].stream()
         .map { Class.forName(it.name).getDeclaredConstructor().newInstance() }
         .filter { it is Task }
         .map { it as Task }
         .toList()
-    private val daemonTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(TaskDaemon::class.java).asClass<Any>()].stream()
+    private val daemonTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(DaemonTask::class.java).asClass<Any>()].stream()
         .map { Class.forName(it.name).getDeclaredConstructor().newInstance() }
         .filter { it is Task }
         .map { it as Task }
@@ -38,12 +38,12 @@ class TaskReaderComponent(
             val taskConfig = TaskConfig.Builder()
 
             annotations.forEach { annotation ->
-                if (annotation is TaskSchedule) {
+                if (annotation is ScheduleTask) {
                     annotation.schedules.forEach { schedule ->
                         taskConfig.addSchedule(convertAnnotationToSchedule(schedule))
                     }
                     taskConfig.withPriority(annotation.priority)
-                    taskConfig.withHeavy(annotation.heavy)
+                    taskConfig.withType(annotation.type)
                     taskConfig.withStartDateTime(
                         if (annotation.startDateTime == "NOW")
                             ZonedDateTime.now()

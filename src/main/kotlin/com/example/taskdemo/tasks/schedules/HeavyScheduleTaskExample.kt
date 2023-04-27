@@ -5,11 +5,12 @@ import com.example.taskdemo.model.entities.TaskContext
 import java.time.Duration
 import java.time.LocalDateTime
 
-//@TaskSchedule(
+//@ScheduleTask(
 //    schedules = [
 //        Schedule(second = "*/15")
 //    ],
-//    startDateTime = "2023-02-09T16:22:00Z"
+//    startDateTime = "2023-02-09T16:22:00Z",
+//    type = ScheduleTaskType.HEAVY
 //)
 class HeavyScheduleTaskExample : Task {
 
