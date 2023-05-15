@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://prospero-c.dis.ics.muni.cz:5432/inet2
+    username: barca
+    password: lepsieheslo
+    driverClassName: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+  sql:
+    init:
+      mode: always
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics,prometheus

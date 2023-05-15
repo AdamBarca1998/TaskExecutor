@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  task-demo:
+    build: .
+    image: task-demo:latest
+    ports:
+      - "8080:8080"
+
+  prometheus:
+    image: prom/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
