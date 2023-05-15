@@ -6,7 +6,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
-//@TaskDaemon
+//@DaemonTask
 class Daemon2TaskExample : Task {
 
     override var id = -1L

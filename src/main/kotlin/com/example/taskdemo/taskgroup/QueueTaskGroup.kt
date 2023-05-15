@@ -5,6 +5,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLogEntity
+import com.example.taskdemo.service.MetricService
 import com.example.taskdemo.service.QueueTaskService
 import com.example.taskdemo.service.TaskLogService
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +15,9 @@ import kotlinx.coroutines.launch
 
 class QueueTaskGroup(
     private val queueTaskService: QueueTaskService,
-    taskLogService: TaskLogService
-) : TaskGroup(taskLogService) {
+    taskLogService: TaskLogService,
+    metricService: MetricService
+) : TaskGroup(taskLogService, metricService) {
 
     private var locker: Job = launchNewLocker()
 

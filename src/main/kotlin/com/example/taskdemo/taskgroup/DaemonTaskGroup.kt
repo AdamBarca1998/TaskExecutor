@@ -6,6 +6,7 @@ import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.DaemonTaskService
+import com.example.taskdemo.service.MetricService
 import com.example.taskdemo.service.TaskLockService
 import com.example.taskdemo.service.TaskLogService
 import kotlinx.coroutines.Dispatchers
@@ -15,8 +16,9 @@ import kotlinx.coroutines.launch
 class DaemonTaskGroup(
     private val taskLockService: TaskLockService,
     private val daemonTaskService: DaemonTaskService,
-    taskLogService: TaskLogService
-) : TaskGroup(taskLogService) {
+    taskLogService: TaskLogService,
+    metricService: MetricService
+) : TaskGroup(taskLogService, metricService) {
 
     private val lockName: String = "daemonGroup"
     private var daemonLock: TaskLockEntity = taskLockService.createIfNotExists(lockName)

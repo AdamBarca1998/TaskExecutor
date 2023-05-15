@@ -6,6 +6,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLogEntity
+import com.example.taskdemo.service.MetricService
 import com.example.taskdemo.service.TaskLogService
 import java.time.Duration
 import java.time.Instant
@@ -29,7 +30,8 @@ const val EXPIRED_LOCK_TIME_M = REFRESH_LOCK_TIME_M * 3
 const val CLUSTER_NAME = "cluster1"
 
 abstract class TaskGroup(
-    private val taskLogService: TaskLogService
+    private val taskLogService: TaskLogService,
+    private val metricService: MetricService
 ) {
 
     protected val scope = CoroutineScope(Dispatchers.Default)
@@ -39,7 +41,7 @@ abstract class TaskGroup(
     protected var isLocked: AtomicBoolean = AtomicBoolean(false)
     protected val logger = KotlinLogging.logger {}
 
-    protected val port = "8081" //TODO:DELETE
+    protected val port = "8080" //TODO:DELETE
 
     protected abstract fun isEnable(task: Task): Boolean
 
@@ -47,6 +49,8 @@ abstract class TaskGroup(
 
     protected open fun handleRun(task: Task): TaskLogEntity {
         val log = createLog(task)
+
+        metricService.inc()
 
         return taskLogService.save(log)
     }

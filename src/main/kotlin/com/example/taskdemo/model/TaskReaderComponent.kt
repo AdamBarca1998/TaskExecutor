@@ -10,6 +10,8 @@ import java.time.Duration
 import java.time.ZonedDateTime
 import org.reflections.Reflections
 import org.reflections.scanners.Scanners
+import org.reflections.util.ClasspathHelper
+import org.reflections.util.ConfigurationBuilder
 import org.springframework.scheduling.support.CronExpression
 import org.springframework.stereotype.Component
 
@@ -21,7 +23,10 @@ class TaskReaderComponent(
     private val taskGroupService: TaskGroupService,
 ) {
 
-    private val reflections = Reflections(TASKS_PATH)
+    private val reflections = Reflections(
+        ConfigurationBuilder()
+            .addUrls(ClasspathHelper.forPackage(TASKS_PATH))
+    )
     private val scheduleTasks: List<Task> = reflections[Scanners.TypesAnnotated.with(ScheduleTask::class.java).asClass<Any>()].stream()
         .map {
             when(it.name) {

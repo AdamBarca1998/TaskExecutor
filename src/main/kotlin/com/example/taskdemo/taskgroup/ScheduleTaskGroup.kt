@@ -5,6 +5,7 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.model.entities.TaskLogEntity
+import com.example.taskdemo.service.MetricService
 import com.example.taskdemo.service.ScheduleTaskService
 import com.example.taskdemo.service.TaskLockService
 import com.example.taskdemo.service.TaskLogService
@@ -16,8 +17,9 @@ import kotlinx.coroutines.launch
 class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
     private val scheduleTaskService: ScheduleTaskService,
-    taskLogService: TaskLogService
-) : TaskGroup(taskLogService) {
+    taskLogService: TaskLogService,
+    metricService: MetricService
+) : TaskGroup(taskLogService, metricService) {
 
     private val lockName: String = "scheduleGroup"
     private var scheduleLock: TaskLockEntity = taskLockService.createIfNotExists(lockName)
