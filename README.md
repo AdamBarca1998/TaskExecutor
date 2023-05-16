@@ -7,6 +7,13 @@
       - targets: ['147.251.18.156:8080']
    ```
 
+## datasource-prometheus.yml
+   ```
+   datasources:
+      # my local IP address
+      url: http://147.251.18.156:9090
+   ```
+
 ## Docker
 
 1. Check docker version

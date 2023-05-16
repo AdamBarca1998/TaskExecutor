@@ -21,5 +21,7 @@ services:
   grafana:
     container_name: grafana-c
     image: grafana/grafana
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning
     ports:
       - "3000:3000"
