@@ -152,18 +152,18 @@ abstract class TaskGroup(
 
                 if (waitTime < taskStruct.taskConfig.maxWaitDuration) {
                     delay(waitTime.toMillis() * -1)
-//                    observation.event() sleep event
+                    observation.event(Observation.Event.of("sleep",))
                 } else {
-//                    observation.event() not wait event
+                    observation.event(Observation.Event.of("notWait"))
                     return
                 }
             } catch (e: CancellationException) {
                 if (taskStruct.cancelState.get() == CancelState.CANCEL) {
                     handleCancel(task, taskLog)
-//                    observation.event() cancel event
+                    observation.event(Observation.Event.of("cancel"))
                     return
                 }
-//                observation.error(e)
+                observation.error(e)
             } finally {
                 taskStruct.taskContext.lastExecution = ZonedDateTime.now()
             }
@@ -171,30 +171,18 @@ abstract class TaskGroup(
             val isEnable = isEnable(task)
             if (!isLocked.get() && isEnable) {
                 taskLog = handleRun(task)
-//                observation.event(
-//                    Observation.Event.of(
-//                        "Task running",
-//                        "Task: $taskName"
-//                    )
-//                )
+                observation.event(Observation.Event.of("run"))
 
                 task.run(taskStruct.taskContext)
 
                 handleFinish(task, taskLog)
-//                observation.event(
-//                    Observation.Event.of(
-//                        "Task finish",
-//                        "Task: $taskName"
-//                    )
-//                )
+                observation.event(Observation.Event.of("finish"))
             } else {
-//                observation.event(Observation.Event.of("Task not running",
-//                    "Task: $taskName, isEnable: $isEnable ,Locked: $isLocked"
-//                ))
+                observation.event(Observation.Event.of("locked"))
             }
         } catch (e: Exception) {
             handleError(task, taskLog, e)
-//            observation.error(e)
+            observation.error(e)
         } finally {
             taskStruct.taskContext.lastCompletion = ZonedDateTime.now()
 
