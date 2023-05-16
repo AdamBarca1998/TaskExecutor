@@ -1,5 +1,12 @@
 # Task Framework
 
+## Prometheus.yml
+   ```
+   static_configs:
+      # my local IP address
+      - targets: ['147.251.18.156:8080']
+   ```
+
 ## Docker
 
 1. Check docker version
@@ -7,7 +14,7 @@
    docker --version
    ```
    
-2. Build image
+2. Run task-demo App
     ```bash 
     docker build -t task-demo .
     ```
@@ -19,7 +26,7 @@
    docker-compose --version
    ```
 
-2. Run containers
+2. Run containers (run Prometheus and Grafana)
    ```bash
    docker-compose up -d
    ```

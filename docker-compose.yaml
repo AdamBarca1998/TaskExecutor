@@ -1,13 +1,15 @@
 version: '3'
 
 services:
-  task-demo:
-    build: .
-    image: task-demo:latest
-    ports:
-      - "8080:8080"
+#  task-demo:
+#    container_name: task-demo-c
+#    build: .
+#    image: task-demo:latest
+#    ports:
+#      - "8080:8080"
 
   prometheus:
+    container_name: prometheus-c
     image: prom/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
@@ -17,6 +19,7 @@ services:
       - "9090:9090"
 
   grafana:
+    container_name: grafana-c
     image: grafana/grafana
     ports:
       - "3000:3000"
