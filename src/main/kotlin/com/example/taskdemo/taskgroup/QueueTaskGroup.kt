@@ -5,9 +5,9 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLogEntity
-import com.example.taskdemo.service.MetricService
 import com.example.taskdemo.service.QueueTaskService
 import com.example.taskdemo.service.TaskLogService
+import io.micrometer.observation.ObservationRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,9 +16,10 @@ import kotlinx.coroutines.launch
 class QueueTaskGroup(
     private val queueTaskService: QueueTaskService,
     taskLogService: TaskLogService,
-    metricService: MetricService
-) : TaskGroup(taskLogService, metricService) {
+    observationRegistry: ObservationRegistry
+) : TaskGroup(taskLogService, observationRegistry) {
 
+    override val groupName: String = "QueueGroup"
     private var locker: Job = launchNewLocker()
 
     fun restart() {

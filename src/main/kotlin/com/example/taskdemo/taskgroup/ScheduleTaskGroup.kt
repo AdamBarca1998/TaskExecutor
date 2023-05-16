@@ -5,10 +5,10 @@ import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.model.entities.TaskLogEntity
-import com.example.taskdemo.service.MetricService
 import com.example.taskdemo.service.ScheduleTaskService
 import com.example.taskdemo.service.TaskLockService
 import com.example.taskdemo.service.TaskLogService
+import io.micrometer.observation.ObservationRegistry
 import java.time.ZonedDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -18,11 +18,11 @@ class ScheduleTaskGroup(
     private val taskLockService: TaskLockService,
     private val scheduleTaskService: ScheduleTaskService,
     taskLogService: TaskLogService,
-    metricService: MetricService
-) : TaskGroup(taskLogService, metricService) {
+    observationRegistry: ObservationRegistry
+) : TaskGroup(taskLogService, observationRegistry) {
 
-    private val lockName: String = "scheduleGroup"
-    private var scheduleLock: TaskLockEntity = taskLockService.createIfNotExists(lockName)
+    override val groupName: String = "ScheduleGroup"
+    private var scheduleLock: TaskLockEntity = taskLockService.createIfNotExists(groupName)
 
     init {
         // locker
@@ -30,8 +30,8 @@ class ScheduleTaskGroup(
             while (true) {
                 try {
                     if (!isLocked.get()) {
-                        if (taskLockService.tryRefreshLockByName(lockName, port)) {
-                            scheduleLock = taskLockService.findByName(lockName)
+                        if (taskLockService.tryRefreshLockByName(groupName, port)) {
+                            scheduleLock = taskLockService.findByName(groupName)
                         } else {
                             savedTasks.forEach {
                                 cancelTaskById(it.task.id)

@@ -6,9 +6,9 @@ import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.DaemonTaskService
-import com.example.taskdemo.service.MetricService
 import com.example.taskdemo.service.TaskLockService
 import com.example.taskdemo.service.TaskLogService
+import io.micrometer.observation.ObservationRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -17,11 +17,11 @@ class DaemonTaskGroup(
     private val taskLockService: TaskLockService,
     private val daemonTaskService: DaemonTaskService,
     taskLogService: TaskLogService,
-    metricService: MetricService
-) : TaskGroup(taskLogService, metricService) {
+    observationRegistry: ObservationRegistry
+) : TaskGroup(taskLogService, observationRegistry) {
 
-    private val lockName: String = "daemonGroup"
-    private var daemonLock: TaskLockEntity = taskLockService.createIfNotExists(lockName)
+    override val groupName: String = "DaemonGroup"
+    private var daemonLock: TaskLockEntity = taskLockService.createIfNotExists(groupName)
 
     init {
         // locker
@@ -29,8 +29,8 @@ class DaemonTaskGroup(
             while (true) {
                 try {
                     if (!isLocked.get()) {
-                        if (taskLockService.tryRefreshLockByName(lockName, port)) {
-                            daemonLock = taskLockService.findByName(lockName)
+                        if (taskLockService.tryRefreshLockByName(groupName, port)) {
+                            daemonLock = taskLockService.findByName(groupName)
                         } else {
                             savedTasks.forEach {
                                 cancelTaskById(it.task.id)

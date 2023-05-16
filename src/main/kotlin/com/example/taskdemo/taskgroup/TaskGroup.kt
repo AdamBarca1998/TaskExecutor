@@ -6,8 +6,9 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.TaskConfig
 import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.model.entities.TaskLogEntity
-import com.example.taskdemo.service.MetricService
 import com.example.taskdemo.service.TaskLogService
+import io.micrometer.observation.Observation
+import io.micrometer.observation.ObservationRegistry
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -31,9 +32,10 @@ const val CLUSTER_NAME = "cluster1"
 
 abstract class TaskGroup(
     private val taskLogService: TaskLogService,
-    private val metricService: MetricService
+    private val observationRegistry: ObservationRegistry
 ) {
 
+    abstract val groupName: String
     protected val scope = CoroutineScope(Dispatchers.Default)
     protected val savedTasks: ArrayList<TaskStruct> = arrayListOf()
     protected val plannedTasks = PriorityBlockingQueue<TaskStruct>()
@@ -49,8 +51,6 @@ abstract class TaskGroup(
 
     protected open fun handleRun(task: Task): TaskLogEntity {
         val log = createLog(task)
-
-        metricService.inc()
 
         return taskLogService.save(log)
     }
@@ -137,7 +137,13 @@ abstract class TaskGroup(
 
     protected suspend fun startTask(taskStruct: TaskStruct, runType: RunType = RunType.TASK_GROUP) {
         val task = taskStruct.task
+        val taskName = task.javaClass.name
         var taskLog: TaskLogEntity? = null
+        val observation = Observation.start("tasks", observationRegistry)
+            .lowCardinalityKeyValue("class", taskName)
+            .lowCardinalityKeyValue("group", groupName)
+            .lowCardinalityKeyValue("type", taskStruct.taskConfig.type.name)
+            .lowCardinalityKeyValue("priority", taskStruct.taskConfig.priority.toString())
 
         // start
         try {
@@ -146,27 +152,49 @@ abstract class TaskGroup(
 
                 if (waitTime < taskStruct.taskConfig.maxWaitDuration) {
                     delay(waitTime.toMillis() * -1)
+//                    observation.event() sleep event
                 } else {
+//                    observation.event() not wait event
                     return
                 }
             } catch (e: CancellationException) {
                 if (taskStruct.cancelState.get() == CancelState.CANCEL) {
                     handleCancel(task, taskLog)
+//                    observation.event() cancel event
                     return
                 }
+//                observation.error(e)
             } finally {
                 taskStruct.taskContext.lastExecution = ZonedDateTime.now()
             }
 
-            if (!isLocked.get() && isEnable(task)) {
+            val isEnable = isEnable(task)
+            if (!isLocked.get() && isEnable) {
                 taskLog = handleRun(task)
+//                observation.event(
+//                    Observation.Event.of(
+//                        "Task running",
+//                        "Task: $taskName"
+//                    )
+//                )
 
                 task.run(taskStruct.taskContext)
 
                 handleFinish(task, taskLog)
+//                observation.event(
+//                    Observation.Event.of(
+//                        "Task finish",
+//                        "Task: $taskName"
+//                    )
+//                )
+            } else {
+//                observation.event(Observation.Event.of("Task not running",
+//                    "Task: $taskName, isEnable: $isEnable ,Locked: $isLocked"
+//                ))
             }
         } catch (e: Exception) {
             handleError(task, taskLog, e)
+//            observation.error(e)
         } finally {
             taskStruct.taskContext.lastCompletion = ZonedDateTime.now()
 
@@ -176,6 +204,8 @@ abstract class TaskGroup(
             if (runType != RunType.PARALLEL || runningTasks.isEmpty()) {
                 runNextTask()
             }
+
+            observation.stop()
         }
     }
 

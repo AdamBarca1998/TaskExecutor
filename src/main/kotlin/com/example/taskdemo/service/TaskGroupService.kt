@@ -7,6 +7,7 @@ import com.example.taskdemo.taskgroup.DaemonTaskGroup
 import com.example.taskdemo.taskgroup.EveryScheduleTaskGroup
 import com.example.taskdemo.taskgroup.QueueTaskGroup
 import com.example.taskdemo.taskgroup.ScheduleTaskGroup
+import io.micrometer.observation.ObservationRegistry
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,14 +17,14 @@ class TaskGroupService(
     taskLockService: TaskLockService,
     private val daemonTaskService: DaemonTaskService,
     taskLogService: TaskLogService,
-    metricService: MetricService
+    observationRegistry: ObservationRegistry
 ) {
 
-    private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskLogService, metricService)
-    private val queueTaskGroup = QueueTaskGroup(queueTaskService, taskLogService, metricService)
-    private val daemonTaskGroup = DaemonTaskGroup(taskLockService, daemonTaskService, taskLogService, metricService)
-    private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskLogService, metricService)
-    private val everyScheduleTaskGroup = EveryScheduleTaskGroup(taskLogService, metricService)
+    private val scheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskLogService, observationRegistry)
+    private val queueTaskGroup = QueueTaskGroup(queueTaskService, taskLogService, observationRegistry)
+    private val daemonTaskGroup = DaemonTaskGroup(taskLockService, daemonTaskService, taskLogService, observationRegistry)
+    private val heavyScheduledTaskGroup = ScheduleTaskGroup(taskLockService, scheduleTaskService, taskLogService, observationRegistry)
+    private val everyScheduleTaskGroup = EveryScheduleTaskGroup(taskLogService, observationRegistry)
 
     // add
     fun addQueue(task: Task) {
