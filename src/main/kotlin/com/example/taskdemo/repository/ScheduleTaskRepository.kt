@@ -53,5 +53,13 @@ interface ScheduleTaskRepository : JpaRepository<ScheduleTaskEntity, Long> {
 
     @Transactional
     @Modifying
-    fun deleteByClazzPathNotIn(clazzPaths: List<String>): Int
+    @Query(
+        value = "DELETE FROM schedule_task st " +
+                "USING task_lock tl " +
+                "WHERE st.task_lock_id = tl.id " +
+                "AND st.clazz_path NOT IN :clazzPaths AND EXTRACT(MONTH FROM NOW()) - EXTRACT(MONTH FROM tl.lock_until) > 1 " +
+                "AND tl.locked_by != 'nobody'",
+        nativeQuery = true
+    )
+    fun eraserUselessTasksByClazzPathNotIn(clazzPaths: List<String>): Int
 }

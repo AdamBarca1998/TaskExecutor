@@ -89,10 +89,10 @@ class TaskGroupService(
     fun restart() = queueTaskGroup.restart()
 
     fun eraserUselessTasks() {
-        scheduleTaskService.deleteAllByClazzPathNotIn(getAllSchedules().stream()
+        scheduleTaskService.eraserUselessTasksByClazzPathNotIn(getAllSchedules().stream()
             .map { it.second }
             .toList())
-        daemonTaskService.deleteAllByClazzPathNotIn(getAllDaemons().stream()
+        daemonTaskService.eraserUselessTasksByClazzPathNotIn(getAllDaemons().stream()
             .map { it.second }
             .toList())
     }

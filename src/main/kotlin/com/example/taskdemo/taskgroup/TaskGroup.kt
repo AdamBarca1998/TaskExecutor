@@ -160,16 +160,18 @@ abstract class TaskGroup(
             } catch (e: CancellationException) {
                 if (taskStruct.cancelState.get() == CancelState.CANCEL) {
                     handleCancel(task, taskLog)
-                    observation.event(Observation.Event.of("cancel"))
+                    observation.event(Observation.Event.of("CancelState.CANCEL"))
                     return
+                } else if (taskStruct.cancelState.get() == CancelState.RUN) {
+                    observation.event(Observation.Event.of("CancelState.RUN"))
+                } else {
+                    observation.error(e)
                 }
-                observation.error(e)
             } finally {
                 taskStruct.taskContext.lastExecution = ZonedDateTime.now()
             }
 
-            val isEnable = isEnable(task)
-            if (!isLocked.get() && isEnable) {
+            if (!isLocked.get() && isEnable(task)) {
                 taskLog = handleRun(task)
                 observation.event(Observation.Event.of("run"))
 

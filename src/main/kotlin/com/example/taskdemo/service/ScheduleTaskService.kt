@@ -30,7 +30,7 @@ class ScheduleTaskService(
         return scheduleTaskRepository.updateContextById(id, context) == 1
     }
 
-    fun deleteAllByClazzPathNotIn(clazzPaths: List<String>): Int {
-        return scheduleTaskRepository.deleteByClazzPathNotIn(clazzPaths)
+    fun eraserUselessTasksByClazzPathNotIn(clazzPaths: List<String>): Int {
+        return scheduleTaskRepository.eraserUselessTasksByClazzPathNotIn(clazzPaths)
     }
 }

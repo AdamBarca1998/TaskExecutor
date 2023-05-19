@@ -54,5 +54,13 @@ interface DaemonTaskRepository : JpaRepository<DaemonTaskEntity, Long> {
 
     @Transactional
     @Modifying
-    fun deleteByClazzPathNotIn(clazzPaths: List<String>): Int
+    @Query(
+        value = "DELETE FROM daemon_task dt " +
+                "USING task_lock tl " +
+                "WHERE dt.task_lock_id = tl.id " +
+                "AND dt.clazz_path NOT IN :clazzPaths AND EXTRACT(MONTH FROM NOW()) - EXTRACT(MONTH FROM tl.lock_until) > 1 " +
+                "AND tl.locked_by != 'nobody'",
+        nativeQuery = true
+    )
+    fun eraserUselessTasksByClazzPathNotIn(clazzPaths: List<String>): Int
 }
