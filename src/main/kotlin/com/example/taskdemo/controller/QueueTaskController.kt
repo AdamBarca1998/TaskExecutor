@@ -2,7 +2,7 @@ package com.example.taskdemo.controller
 
 import com.example.taskdemo.service.TaskGroupService
 import com.example.taskdemo.tasks.queues.EmailTaskExample
-import com.example.taskdemo.tasks.queues.HelloTaskExample
+import com.example.taskdemo.tasks.queues.QueueTaskErrorExample
 import java.util.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,9 +26,9 @@ class QueueTaskController(
         return true
     }
 
-    @PostMapping("/hello-example")
+    @PostMapping("/error-example")
     fun helloExample(@RequestParam("receiver") receiver: String): Boolean {
-        taskGroupService.addQueue(HelloTaskExample(receiver))
+        taskGroupService.addQueue(QueueTaskErrorExample(receiver))
 
         return true
     }

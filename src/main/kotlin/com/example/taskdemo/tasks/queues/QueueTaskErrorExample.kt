@@ -6,7 +6,7 @@ import java.time.Duration
 import kotlinx.serialization.Serializable
 
 @Serializable
-class HelloTaskExample(
+class QueueTaskErrorExample(
     private val receiver: String,
     override var id: Long = -1
 ) : Task {
@@ -14,5 +14,6 @@ class HelloTaskExample(
     override fun run(taskContext: TaskContext) {
         println("Hello to $receiver")
         Thread.sleep(Duration.ofSeconds(5))
+        throw NullPointerException("QueueTaskErrorExample")
     }
 }

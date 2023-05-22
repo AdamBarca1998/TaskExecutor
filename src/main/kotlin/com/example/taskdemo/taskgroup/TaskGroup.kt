@@ -165,8 +165,6 @@ abstract class TaskGroup(
                         return
                     } else if (taskStruct.cancelState.get() == CancelState.RUN) {
                         observation.event(Observation.Event.of("CancelState.RUN"))
-                    } else {
-                        observation.error(e)
                     }
                 } finally {
                     taskStruct.taskContext.lastExecution = ZonedDateTime.now()
@@ -186,6 +184,7 @@ abstract class TaskGroup(
             }
         } catch (e: Exception) {
             handleError(task, taskLog, e)
+            observation.event(Observation.Event.of("error"))
             observation.error(e)
         } finally {
             taskStruct.taskContext.lastCompletion = ZonedDateTime.now()

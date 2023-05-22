@@ -8,13 +8,14 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 @DaemonTask
-class Daemon2TaskExample : Task {
+class DaemonTaskErrorExample : Task {
 
     override var id = -1L
 
     override fun run(taskContext: TaskContext) {
-        println("\"${LocalDateTime.now()}   Daemon2TaskExample running...")
+        println("\"${LocalDateTime.now()}   DaemonTaskErrorExample running...")
         Thread.sleep(Duration.ofMinutes(1))
         taskContext.nextExecution = ZonedDateTime.now().plusMinutes(1)
+        throw NullPointerException("DaemonTaskErrorExample")
     }
 }

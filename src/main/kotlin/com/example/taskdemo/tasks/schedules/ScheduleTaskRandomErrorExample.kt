@@ -12,13 +12,16 @@ import java.time.LocalDateTime
         Schedule(second = "0", minute = "0/5")
     ],
 )
-class ScheduleTaskErrorExample : Task {
+class ScheduleTaskRandomErrorExample : Task {
 
     override var id = -1L
 
     override fun run(taskContext: TaskContext) {
-        println("${LocalDateTime.now()}  ScheduleTaskErrorExample running...")
+        println("${LocalDateTime.now()}  ScheduleTaskRandomErrorExample running...")
         Thread.sleep(Duration.ofMinutes(1))
-        throw NullPointerException("ScheduleTaskErrorExample")
+
+        if ((0..1).shuffled().last() == 1) {
+            throw NullPointerException("ScheduleTaskErrorExample")
+        }
     }
 }
