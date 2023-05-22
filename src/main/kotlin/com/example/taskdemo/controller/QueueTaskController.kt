@@ -2,6 +2,7 @@ package com.example.taskdemo.controller
 
 import com.example.taskdemo.service.TaskGroupService
 import com.example.taskdemo.tasks.queues.EmailTaskExample
+import com.example.taskdemo.tasks.queues.HelloTaskExample
 import java.util.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,6 +22,13 @@ class QueueTaskController(
     @PostMapping("/email-example")
     fun emailExample(@RequestParam("receiver") receiver: String): Boolean {
         taskGroupService.addQueue(EmailTaskExample(receiver))
+
+        return true
+    }
+
+    @PostMapping("/hello-example")
+    fun helloExample(@RequestParam("receiver") receiver: String): Boolean {
+        taskGroupService.addQueue(HelloTaskExample(receiver))
 
         return true
     }

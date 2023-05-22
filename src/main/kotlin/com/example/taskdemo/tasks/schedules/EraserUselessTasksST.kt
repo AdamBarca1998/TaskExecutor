@@ -7,12 +7,12 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.entities.TaskContext
 import com.example.taskdemo.service.TaskGroupService
 
-@ScheduleTask(
-    schedules = [
-        Schedule(second = "0", minute = "0", hour = "0"),
-    ],
-    type = ScheduleTaskType.EVERY
-)
+//@ScheduleTask(
+//    schedules = [
+//        Schedule(second = "0", minute = "0", hour = "0"),
+//    ],
+//    type = ScheduleTaskType.EVERY
+//)
 class EraserUselessTasksST(
     private val taskGroupService: TaskGroupService,
 ) : Task {

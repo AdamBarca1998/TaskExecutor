@@ -147,40 +147,42 @@ abstract class TaskGroup(
 
         // start
         try {
-            try {
-                val waitTime = Duration.between(taskStruct.taskContext.nextExecution, ZonedDateTime.now())
+            observation.openScope().use {
+                try {
+                    val waitTime = Duration.between(taskStruct.taskContext.nextExecution, ZonedDateTime.now())
 
-                if (waitTime < taskStruct.taskConfig.maxWaitDuration) {
-                    delay(waitTime.toMillis() * -1)
-                    observation.event(Observation.Event.of("sleep",))
-                } else {
-                    observation.event(Observation.Event.of("notWait"))
-                    return
+                    if (waitTime < taskStruct.taskConfig.maxWaitDuration) {
+                        delay(waitTime.toMillis() * -1)
+                        observation.event(Observation.Event.of("sleep"))
+                    } else {
+                        observation.event(Observation.Event.of("notWait"))
+                        return
+                    }
+                } catch (e: CancellationException) {
+                    if (taskStruct.cancelState.get() == CancelState.CANCEL) {
+                        handleCancel(task, taskLog)
+                        observation.event(Observation.Event.of("CancelState.CANCEL"))
+                        return
+                    } else if (taskStruct.cancelState.get() == CancelState.RUN) {
+                        observation.event(Observation.Event.of("CancelState.RUN"))
+                    } else {
+                        observation.error(e)
+                    }
+                } finally {
+                    taskStruct.taskContext.lastExecution = ZonedDateTime.now()
                 }
-            } catch (e: CancellationException) {
-                if (taskStruct.cancelState.get() == CancelState.CANCEL) {
-                    handleCancel(task, taskLog)
-                    observation.event(Observation.Event.of("CancelState.CANCEL"))
-                    return
-                } else if (taskStruct.cancelState.get() == CancelState.RUN) {
-                    observation.event(Observation.Event.of("CancelState.RUN"))
+
+                if (!isLocked.get() && isEnable(task)) {
+                    taskLog = handleRun(task)
+                    observation.event(Observation.Event.of("run"))
+
+                    task.run(taskStruct.taskContext)
+
+                    handleFinish(task, taskLog!!)
+                    observation.event(Observation.Event.of("finish"))
                 } else {
-                    observation.error(e)
+                    observation.event(Observation.Event.of("locked"))
                 }
-            } finally {
-                taskStruct.taskContext.lastExecution = ZonedDateTime.now()
-            }
-
-            if (!isLocked.get() && isEnable(task)) {
-                taskLog = handleRun(task)
-                observation.event(Observation.Event.of("run"))
-
-                task.run(taskStruct.taskContext)
-
-                handleFinish(task, taskLog)
-                observation.event(Observation.Event.of("finish"))
-            } else {
-                observation.event(Observation.Event.of("locked"))
             }
         } catch (e: Exception) {
             handleError(task, taskLog, e)

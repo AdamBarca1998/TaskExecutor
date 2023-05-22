@@ -5,6 +5,7 @@ import com.example.taskdemo.model.Task
 import com.example.taskdemo.model.entities.QueueTaskEntity
 import com.example.taskdemo.model.entities.TaskLockEntity
 import com.example.taskdemo.tasks.queues.EmailTaskExample
+import com.example.taskdemo.tasks.queues.HelloTaskExample
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -19,6 +20,7 @@ private val format = Json {
     serializersModule = SerializersModule {
         polymorphic(Task::class) {
             subclass(EmailTaskExample::class)
+            subclass(HelloTaskExample::class)
         }
     }
 }
