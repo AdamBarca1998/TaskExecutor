@@ -137,7 +137,7 @@ abstract class TaskGroup(
 
     protected suspend fun startTask(taskStruct: TaskStruct, runType: RunType = RunType.TASK_GROUP) {
         val task = taskStruct.task
-        val taskName = task.javaClass.name
+        val taskName = task.javaClass.simpleName
         var taskLog: TaskLogEntity? = null
         val observation = Observation.start("tasks", observationRegistry)
             .lowCardinalityKeyValue("class", taskName)

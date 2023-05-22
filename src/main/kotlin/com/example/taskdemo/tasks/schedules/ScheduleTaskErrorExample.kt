@@ -7,17 +7,18 @@ import com.example.taskdemo.model.entities.TaskContext
 import java.time.Duration
 import java.time.LocalDateTime
 
-//@ScheduleTask(
-//    schedules = [
-//        Schedule(second = "0", minute = "0/5")
-//    ],
-//)
-class ScheduleTask1mExample : Task {
+@ScheduleTask(
+    schedules = [
+        Schedule(second = "0", minute = "0/5")
+    ],
+)
+class ScheduleTaskErrorExample : Task {
 
     override var id = -1L
 
     override fun run(taskContext: TaskContext) {
-        println("${LocalDateTime.now()}  ScheduleTask1mExample running...")
+        println("${LocalDateTime.now()}  ScheduleTaskErrorExample running...")
         Thread.sleep(Duration.ofMinutes(1))
+        throw NullPointerException("Error!!!")
     }
 }

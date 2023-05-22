@@ -22,6 +22,6 @@ services:
     container_name: grafana-c
     image: grafana/grafana
     volumes:
-      - ./provisioning:/etc/grafana/provisioning
+      - "./grafana/provisioning/dashboards/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/grafana-dashboard.yml"
     ports:
       - "3000:3000"
