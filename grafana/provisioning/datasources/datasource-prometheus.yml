@@ -5,8 +5,7 @@ datasources:
     type: prometheus
     # Access mode - proxy (server in the UI) or direct (browser in the UI).
     access: proxy
-    # my local IP address
-    url: http://147.251.18.156:9090
+    url: http://prometheus-c:9090
     jsonData:
       httpMethod: POST
       manageAlerts: true

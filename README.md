@@ -4,14 +4,7 @@
    ```
    static_configs:
       # my local IP address
-      - targets: ['147.251.18.156:8080']
-   ```
-
-## datasource-prometheus.yml
-   ```
-   datasources:
-      # my local IP address
-      url: http://147.251.18.156:9090
+      - targets: ['147.251.18.157:8080']
    ```
 
 ## Docker

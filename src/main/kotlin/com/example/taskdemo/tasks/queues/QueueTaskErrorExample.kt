@@ -12,7 +12,7 @@ class QueueTaskErrorExample(
 ) : Task {
 
     override fun run(taskContext: TaskContext) {
-        println("Hello to $receiver")
+        println("Error to $receiver")
         Thread.sleep(Duration.ofSeconds(5))
         throw NullPointerException("QueueTaskErrorExample")
     }

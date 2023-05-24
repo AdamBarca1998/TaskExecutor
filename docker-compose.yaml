@@ -17,11 +17,18 @@ services:
       - "./prometheus.yml:/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
+    networks:
+      - app-network
 
   grafana:
     container_name: grafana-c
     image: grafana/grafana
     volumes:
-      - "./grafana/provisioning/dashboards/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/grafana-dashboard.yml"
+      - "./grafana/provisioning:/etc/grafana/provisioning"
     ports:
       - "3000:3000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
