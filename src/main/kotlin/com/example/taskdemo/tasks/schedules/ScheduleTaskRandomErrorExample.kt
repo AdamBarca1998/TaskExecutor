@@ -20,7 +20,7 @@ class ScheduleTaskRandomErrorExample : Task {
         println("${LocalDateTime.now()}  ScheduleTaskRandomErrorExample running...")
         Thread.sleep(Duration.ofMinutes(1))
 
-        if ((0..1).shuffled().last() == 1) {
+        if ((0..2).shuffled().last() == 1) {
             throw NullPointerException("ScheduleTaskErrorExample")
         }
     }
