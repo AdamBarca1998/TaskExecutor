@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 @ScheduleTask(
     schedules = [
-        Schedule(second = "0", minute = "0/5")
+        Schedule(second = "0", minute = "0/1")
     ],
 )
 class ScheduleTaskRandomErrorExample : Task {
@@ -18,9 +18,9 @@ class ScheduleTaskRandomErrorExample : Task {
 
     override fun run(taskContext: TaskContext) {
         println("${LocalDateTime.now()}  ScheduleTaskRandomErrorExample running...")
-        Thread.sleep(Duration.ofMinutes(1))
+        Thread.sleep(Duration.ofSeconds(30))
 
-        if ((0..2).shuffled().last() == 1) {
+        if ((0..1).shuffled().last() == 1) {
             throw NullPointerException("ScheduleTaskErrorExample")
         }
     }

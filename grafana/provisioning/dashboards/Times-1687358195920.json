@@ -77,32 +77,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "ScheduleTask5mExample"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -131,7 +106,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tasks_run_total{group=\"ScheduleGroup\"} - (tasks_finish_total{group=\"ScheduleGroup\"} or tasks_error_total{group=\"ScheduleGroup\"} or tasks_run_total{group=\"ScheduleGroup\"} * 0)",
+          "expr": "tasks_run_total{group=\"ScheduleGroup\"} - ((tasks_finish_total{group=\"ScheduleGroup\"} or tasks_run_total{group=\"ScheduleGroup\"} * 0) + (tasks_error_total{group=\"ScheduleGroup\"} or tasks_run_total{group=\"ScheduleGroup\"} * 0))",
+          "hide": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -196,32 +172,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "DaemonTaskErrorExample"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -250,7 +201,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tasks_run_total{group=\"DaemonGroup\"} - (tasks_finish_total{group=\"DaemonGroup\"} or tasks_error_total{group=\"DaemonGroup\"} or tasks_run_total{group=\"DaemonGroup\"} * 0)",
+          "expr": "tasks_run_total{group=\"DaemonGroup\"} - ((tasks_finish_total{group=\"DaemonGroup\"} or tasks_run_total{group=\"DaemonGroup\"} * 0) + (tasks_error_total{group=\"DaemonGroup\"} or tasks_run_total{group=\"DaemonGroup\"} * 0))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -344,7 +295,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tasks_run_total{group=\"QueueGroup\"} - (tasks_finish_total{group=\"QueueGroup\"} or tasks_error_total{group=\"QueueGroup\"} or tasks_run_total{group=\"QueueGroup\"} * 0)",
+          "expr": "tasks_run_total{group=\"QueueGroup\"} - ((tasks_finish_total{group=\"QueueGroup\"} or tasks_run_total{group=\"QueueGroup\"} * 0) + (tasks_error_total{group=\"QueueGroup\"} or tasks_run_total{group=\"QueueGroup\"} * 0))",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
