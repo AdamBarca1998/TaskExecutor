@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 
 @ScheduleTask(
     schedules = [
-        Schedule(second = "*/15")
+        Schedule(second = "0", minute = "0/1")
     ],
     startDateTime = "2023-02-09T16:22:00Z",
     type = ScheduleTaskType.HEAVY

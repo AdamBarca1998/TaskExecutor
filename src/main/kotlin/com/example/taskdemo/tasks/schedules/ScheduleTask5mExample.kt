@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 @ScheduleTask(
     schedules = [
-        Schedule(minute = "*/5")
+        Schedule(second = "0", minute = "*/1")
     ]
 )
 class ScheduleTask5mExample : Task {
