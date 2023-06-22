@@ -73,7 +73,7 @@ CREATE TABLE queue_task (
     created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     created_by  VARCHAR(1024) NOT NULL, --
     owned_by    VARCHAR(1024) NOT NULL, --
-    number_of_trials    SMALLINT NOT NULL DEFAULT 2,
+    number_of_trials    SMALLINT NOT NULL DEFAULT 3,
     task_lock_id    BIGINT REFERENCES task_lock(id)
 );
 
