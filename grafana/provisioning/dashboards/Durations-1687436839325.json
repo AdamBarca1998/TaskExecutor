@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 10,
+  "id": 14,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -107,7 +107,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tasks_run_total{group=\"ScheduleGroup\"} - ((tasks_finish_total{group=\"ScheduleGroup\"} offset -1s or tasks_run_total{group=\"ScheduleGroup\"} * 0) + (tasks_error_total{group=\"ScheduleGroup\"} offset -1s or tasks_run_total{group=\"ScheduleGroup\"} * 0))",
+          "expr": "tasks_run_total{group=\"ScheduleGroup\"} - ((tasks_finish_total{group=\"ScheduleGroup\"} offset -1s or tasks_run_total{group=\"ScheduleGroup\"} * 0) + (tasks_error_total{group=\"ScheduleGroup\"} offset -1s or tasks_run_total{group=\"ScheduleGroup\"} * 0)) > 0",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -202,7 +202,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tasks_run_total{group=\"DaemonGroup\"} - ((tasks_finish_total{group=\"DaemonGroup\"} offset -1s or tasks_run_total{group=\"DaemonGroup\"} * 0) + (tasks_error_total{group=\"DaemonGroup\"} offset -1s or tasks_run_total{group=\"DaemonGroup\"} * 0))",
+          "expr": "tasks_run_total{group=\"DaemonGroup\"} - ((tasks_finish_total{group=\"DaemonGroup\"} offset -1s or tasks_run_total{group=\"DaemonGroup\"} * 0) + (tasks_error_total{group=\"DaemonGroup\"} offset -1s or tasks_run_total{group=\"DaemonGroup\"} * 0))  > 0",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -296,7 +296,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "tasks_run_total{group=\"QueueGroup\"} - ((tasks_finish_total{group=\"QueueGroup\"} offset -1s or tasks_run_total{group=\"QueueGroup\"} * 0) + (tasks_error_total{group=\"QueueGroup\"} offset -1s or tasks_run_total{group=\"QueueGroup\"} * 0))",
+          "expr": "tasks_run_total{group=\"QueueGroup\"} - ((tasks_finish_total{group=\"QueueGroup\"} offset -1s or tasks_run_total{group=\"QueueGroup\"} * 0) + (tasks_error_total{group=\"QueueGroup\"} offset -1s or tasks_run_total{group=\"QueueGroup\"} * 0)) > 0",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -320,7 +320,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Times",
+  "title": "Durations",
   "uid": "f37f4d6c-772a-4d7a-bbbb-3e29a09b4104",
   "version": 1,
   "weekStart": ""

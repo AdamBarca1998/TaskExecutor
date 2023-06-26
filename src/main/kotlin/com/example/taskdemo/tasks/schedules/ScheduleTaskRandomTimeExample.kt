@@ -12,12 +12,14 @@ import java.time.LocalDateTime
         Schedule(second = "0", minute = "*/1")
     ]
 )
-class ScheduleTask5mExample : Task {
+class ScheduleTaskRandomTimeExample : Task {
 
     override var id = -1L
 
     override fun run(taskContext: TaskContext) {
-        println("${LocalDateTime.now()}  ScheduleTask5mExample running...")
-        Thread.sleep(Duration.ofSeconds(30))
+        val randomTime = (0L..30).shuffled().last()
+
+        println("${LocalDateTime.now()}  ScheduleTaskRandomTimeExample $randomTime")
+        Thread.sleep(Duration.ofSeconds(randomTime))
     }
 }

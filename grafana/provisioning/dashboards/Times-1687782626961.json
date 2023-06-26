@@ -1,0 +1,304 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 4,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "config": {
+          "displayModeBar": false
+        },
+        "data": "- type: scatter\r\n  mode: lines\r\n  line:\r\n    color: red\r\n- type: scatter\r\n  mode: lines\r\n  line:\r\n    color: blue\r\n",
+        "layout": {
+          "margin": {
+            "b": 40,
+            "l": 20,
+            "r": 20,
+            "t": 5
+          },
+          "paper_bgcolor": "rgba(255,255,255,255)",
+          "plot_bgcolor": "rgba(255,255,255,255)",
+          "xaxis": {
+            "autorange": true,
+            "range": [
+              "2023-06-26 14:15:06.545",
+              "2023-06-26 14:30:58.496"
+            ],
+            "title": {
+              "text": "finish date time"
+            },
+            "type": "date"
+          },
+          "yaxis": {
+            "automargin": true,
+            "autorange": true,
+            "range": [
+              0.6293272214532859,
+              64.38904377854671
+            ],
+            "title": {
+              "text": "seconds"
+            },
+            "type": "linear"
+          }
+        },
+        "onclick": "// console.log(data);\n// window.updateVariables({query:{'var-project':'test'}, partial: true})",
+        "script": "// 0 = class_name\n// 1 = duration_s, \n// 2 = finish_date_time\n\nlet tracies = [];\n\nif (data.series.length > 0) {\n  let fields = data.series[0].fields;\n  const clazzes = fields[0].values.filter((x, i, a) => a.indexOf(x) === i);\n\n  clazzes.forEach(clazz => {\n    const start = fields[0].values.indexOf(clazz);\n    const end = fields[0].values.lastIndexOf(clazz) + 1;\n\n    let trace = {\n      name: clazz,\n      mode: \"lines+markers\",\n      x: fields[2].values.slice(start, end).map(x => new Date(x)),\n      y: fields[1].values.slice(start, end)\n    };\n\n    tracies.push(trace);\n  });\n}\n\ndata = tracies;\n\nreturn {data};",
+        "yaml_mode": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n\tREPLACE(st.clazz_path, 'com.example.taskdemo.tasks.schedules.', '') AS class_name, \r\n\tEXTRACT(epoch FROM (finish_date_time - start_date_time)) AS duration_s,\r\n\tfinish_date_time\r\n\t\r\nFROM task_log tl\r\nJOIN schedule_task st ON st.id = tl.schedule_task_id\r\nWHERE schedule_task_id IS NOT NULL\r\nAND finish_date_time IS NOT NULL AND $__timeFilter(finish_date_time)\r\nORDER BY class_name, finish_date_time;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Time ScheduleGroup",
+      "type": "nline-plotlyjs-panel"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "config": {
+          "displayModeBar": false
+        },
+        "data": "- type: scatter\r\n  mode: lines\r\n  line:\r\n    color: red\r\n- type: scatter\r\n  mode: lines\r\n  line:\r\n    color: blue\r\n",
+        "layout": {
+          "margin": {
+            "b": 40,
+            "l": 20,
+            "r": 20,
+            "t": 5
+          },
+          "paper_bgcolor": "rgba(255,255,255,255)",
+          "plot_bgcolor": "rgba(255,255,255,255)",
+          "xaxis": {
+            "autorange": true,
+            "range": [
+              "2023-06-26 14:14:45.7845",
+              "2023-06-26 14:30:31.1675"
+            ],
+            "title": {
+              "text": "finish date time"
+            },
+            "type": "date"
+          },
+          "yaxis": {
+            "automargin": true,
+            "autorange": true,
+            "range": [
+              0.6253738235294106,
+              64.40921617647058
+            ],
+            "title": {
+              "text": "seconds"
+            },
+            "type": "linear"
+          }
+        },
+        "onclick": "// console.log(data);\n// window.updateVariables({query:{'var-project':'test'}, partial: true})",
+        "script": "// 0 = class_name\n// 1 = duration_s, \n// 2 = finish_date_time\n\nlet tracies = [];\n\nif (data.series.length > 0) {\n  let fields = data.series[0].fields;\n  const clazzes = fields[0].values.filter((x, i, a) => a.indexOf(x) === i);\n\n  clazzes.forEach(clazz => {\n    const start = fields[0].values.indexOf(clazz);\n    const end = fields[0].values.lastIndexOf(clazz) + 1;\n\n    let trace = {\n      name: clazz,\n      mode: \"lines+markers\",\n      x: fields[2].values.slice(start, end).map(x => new Date(x)),\n      y: fields[1].values.slice(start, end)\n    };\n\n    tracies.push(trace);\n  });\n}\n\ndata = tracies;\n\nreturn {data};",
+        "yaml_mode": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n\tREPLACE(dt.clazz_path, 'com.example.taskdemo.tasks.daemons.', '') AS class_name, \r\n\tEXTRACT(epoch FROM (finish_date_time - start_date_time)) AS duration_s,\r\n\tfinish_date_time\r\n\t\r\nFROM task_log tl\r\nJOIN daemon_task dt ON dt.id = tl.daemon_task_id\r\nWHERE daemon_task_id IS NOT NULL\r\nAND finish_date_time IS NOT NULL AND $__timeFilter(finish_date_time)\r\nORDER BY class_name, finish_date_time;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Time DaemonGroup",
+      "type": "nline-plotlyjs-panel"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "P44368ADAD746BC27"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "config": {
+          "displayModeBar": false
+        },
+        "data": "- type: scatter\r\n  mode: lines\r\n  line:\r\n    color: red\r\n- type: scatter\r\n  mode: lines\r\n  line:\r\n    color: blue\r\n",
+        "layout": {
+          "margin": {
+            "b": 40,
+            "l": 20,
+            "r": 20,
+            "t": 5
+          },
+          "paper_bgcolor": "rgba(255,255,255,255)",
+          "plot_bgcolor": "rgba(255,255,255,255)",
+          "xaxis": {
+            "autorange": true,
+            "range": [
+              "2023-06-26 14:17:09.774",
+              "2023-06-26 14:17:09.776"
+            ],
+            "title": {
+              "text": "finish date time"
+            },
+            "type": "date"
+          },
+          "yaxis": {
+            "automargin": true,
+            "autorange": true,
+            "range": [
+              4.008389,
+              6.008389
+            ],
+            "title": {
+              "text": "seconds"
+            },
+            "type": "linear"
+          }
+        },
+        "onclick": "// console.log(data);\n// window.updateVariables({query:{'var-project':'test'}, partial: true})",
+        "script": "// 0 = class_name\n// 1 = duration_s, \n// 2 = finish_date_time\n\nlet tracies = [];\n\nif (data.series.length > 0) {\n  let fields = data.series[0].fields;\n  const clazzes = fields[0].values.filter((x, i, a) => a.indexOf(x) === i);\n\n  clazzes.forEach(clazz => {\n    const start = fields[0].values.indexOf(clazz);\n    const end = fields[0].values.lastIndexOf(clazz) + 1;\n\n    let trace = {\n      name: clazz,\n      mode: \"lines+markers\",\n      x: fields[2].values.slice(start, end).map(x => new Date(x)),\n      y: fields[1].values.slice(start, end)\n    };\n\n    tracies.push(trace);\n  });\n}\n\ndata = tracies;\n\nreturn {data};",
+        "yaml_mode": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "P44368ADAD746BC27"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT \r\n\tREPLACE((qt.clazz::json->'type')::TEXT, 'com.example.taskdemo.tasks.queues.', '') AS class_name,\r\n\tEXTRACT(epoch FROM (finish_date_time - start_date_time)) AS duration_s,\r\n\tfinish_date_time\r\n\t\r\nFROM task_log tl\r\nJOIN queue_task qt ON qt.id = tl.queue_task_id\r\nWHERE queue_task_id IS NOT NULL\r\nAND finish_date_time IS NOT NULL AND $__timeFilter(finish_date_time)\r\nORDER BY clazz, finish_date_time;",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Time QueueGroup",
+      "type": "nline-plotlyjs-panel"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Times",
+  "uid": "bb41b1fc-6d46-41e3-9471-8fbac8dc941c",
+  "version": 14,
+  "weekStart": ""
+}
