@@ -2,35 +2,81 @@ version: '3'
 
 services:
 #  task-demo:
-#    container_name: task-demo-c
+#    container_name: task-demo
 #    build: .
 #    image: task-demo:latest
 #    ports:
 #      - "8080:8080"
 
+  collector:
+    container_name: collector
+    image: otel/opentelemetry-collector:latest
+    hostname: collector
+    depends_on:
+      tempo:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+    command: [ "--config=/etc/collector-config.yaml" ]
+    volumes:
+      - ./configs/collector-config.yaml:/etc/collector-config.yaml
+    ports:
+      - "5555:5555"
+      - "6666:6666"
+
+  tempo:
+    container_name: tempo
+    image: grafana/tempo:1.5.0
+    hostname: tempo
+    command: [ "-search.enabled=true", "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./configs/tempo/tempo-config.yaml:/etc/tempo.yaml
+      - ./configs/tempo/tempo-overrides.yaml:/etc/overrides.yaml
+      - ./configs/tempo/tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "9411:9411" # zipkin
+    healthcheck:
+      interval: 5s
+      retries: 10
+      test: wget --no-verbose --tries=1 --spider http://localhost:3200/status || exit 1
+
   prometheus:
-    container_name: prometheus-c
+    container_name: prometheus
     image: prom/prometheus
+    hostname: prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     volumes:
-      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./configs/prometheus.yml:/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
-    networks:
-      - app-network
+    healthcheck:
+      interval: 5s
+      retries: 10
+      test: wget --no-verbose --tries=1 --spider http://localhost:9090/status || exit 1
 
   grafana:
-    container_name: grafana-c
+    container_name: grafana
     image: grafana/grafana
+    hostname: grafana
+    depends_on:
+      tempo:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
     volumes:
-      - "./grafana/provisioning:/etc/grafana/provisioning"
+      - "./configs/grafana/provisioning:/etc/grafana/provisioning"
     ports:
       - "3000:3000"
-    networks:
-      - app-network
     environment:
       - GF_INSTALL_PLUGINS=nline-plotlyjs-panel
+    healthcheck:
+      interval: 5s
+      retries: 10
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
 
 networks:
-  app-network:
+  default:
+    name: inst-java-apps-using-otel
