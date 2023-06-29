@@ -76,7 +76,3 @@ services:
       interval: 5s
       retries: 10
       test: wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
-
-networks:
-  default:
-    name: inst-java-apps-using-otel

@@ -8,4 +8,4 @@ scrape_configs:
     metrics_path: /actuator/prometheus
     static_configs:
       # my local IP address
-      - targets: ['147.251.18.161:8080']
+      - targets: ['host.docker.internal:8080']

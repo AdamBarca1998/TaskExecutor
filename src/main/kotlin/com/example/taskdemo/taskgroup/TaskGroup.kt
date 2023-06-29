@@ -9,6 +9,7 @@ import com.example.taskdemo.model.entities.TaskLogEntity
 import com.example.taskdemo.service.TaskLogService
 import io.micrometer.observation.Observation
 import io.micrometer.observation.ObservationRegistry
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -135,6 +136,7 @@ abstract class TaskGroup(
         }
     }
 
+    @WithSpan
     protected suspend fun startTask(taskStruct: TaskStruct, runType: RunType = RunType.TASK_GROUP) {
         val task = taskStruct.task
         val taskName = task.javaClass.simpleName

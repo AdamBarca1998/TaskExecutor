@@ -1,12 +1,5 @@
 # Task Framework
 
-## Prometheus.yml
-   ```
-   static_configs:
-      # my local IP address
-      - targets: ['147.251.18.157:8080']
-   ```
-
 ## Docker
 
 1. Check docker version

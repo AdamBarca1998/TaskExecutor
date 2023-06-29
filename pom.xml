@@ -18,6 +18,8 @@
 		<java.version>17</java.version>
 		<kotlin.version>1.7.21</kotlin.version>
 		<serialization.version>1.5.0-RC</serialization.version>
+		<otel.traces.api.version>0.13.1</otel.traces.api.version>
+		<otel.metrics.api.version>1.10.0-alpha-rc.1</otel.metrics.api.version>
 	</properties>
 
 	<dependencies>
@@ -118,6 +120,31 @@
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-exporter-zipkin</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
+			<version>1.26.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-extension-kotlin</artifactId>
+			<version>1.27.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry.instrumentation</groupId>
+			<artifactId>opentelemetry-instrumentation-annotations</artifactId>
+			<version>1.26.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api-trace</artifactId>
+			<version>${otel.traces.api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api-metrics</artifactId>
+			<version>${otel.metrics.api.version}</version>
 		</dependency>
 	</dependencies>
 

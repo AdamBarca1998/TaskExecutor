@@ -7,11 +7,11 @@ import com.example.taskdemo.model.entities.TaskContext
 import java.time.Duration
 import java.time.LocalDateTime
 
-@ScheduleTask(
-    schedules = [
-        Schedule(second = "0", minute = "0/5")
-    ],
-)
+//@ScheduleTask(
+//    schedules = [
+//        Schedule(second = "0", minute = "0/5")
+//    ],
+//)
 class ScheduleTaskErrorExample : Task {
 
     override var id = -1L
